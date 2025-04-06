@@ -755,10 +755,14 @@ def returns_and_cancellations_view(request, slug):
 def shop_dash_view(request, slug):
     shop = get_shop(slug)
     default_addr = Address.objects.filter(shop=shop, user=request.user, is_default=True).first()
-    recent_orders = Delivery.objects.filter(shop=shop, username=request.user, is_deleted=False)
+    orders = Delivery.objects.filter(shop=shop, username=request.user, is_deleted=False)
+    completed_orders = orders.filter(status='completed').count() or 0
+    cancelled_orders = orders.filter(status='cancelled').count() or 0
     context = {
         'address': default_addr,
-        'recent_orders': recent_orders,
+        'recent_orders': orders,
+        'completed_orders': completed_orders,
+        'cancelled_orders': cancelled_orders,
         'the_shop': shop,
     }
     return render(request, 'shop/shop_dash.html', context)

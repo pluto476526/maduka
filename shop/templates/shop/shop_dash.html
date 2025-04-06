@@ -44,7 +44,8 @@
                                 <div class="dash__pad-2">
                                     <h1 class="dash__h1 u-s-m-b-14">Manage My Account</h1>
 
-                                    <span class="dash__text u-s-m-b-30">From your My Account Dashboard you have the ability to view a snapshot of your recent account activity and update your account information. Select a link below to view or edit information.</span>
+                                    <span class="dash__text u-s-m-b-30">From your My Account Dashboard you have the ability to view a snapshot of your recent account activity and update your account information.
+                                        Select a link below to view or edit information.</span>
                                     <div class="row">
                                         <div class="col-lg-4 u-s-m-b-30">
                                             <div class="dash__box dash__box--bg-grey dash__box--shadow-2 u-h-100">
@@ -67,7 +68,7 @@
                                                     <h2 class="dash__h2 u-s-m-b-8">DEFAULT ADDRESS</h2>
                                                     <!--<span class="dash__text-2 u-s-m-b-8">Default Shipping Address</span>-->
                                                     <div class="dash__link dash__link--secondary u-s-m-b-8">
-                                                        <a href="{% url 'shop_addresses' the_shop.name %}">Edit</a>
+                                                        <a href="{% url 'shop_addresses' the_shop.slug %}">Edit</a>
                                                     </div>
                                                     <span class="dash__text">County: {{ address.county|title }}</span>
                                                     <span class="dash__text">Town: {{ address.town|title }}</span>
@@ -80,9 +81,9 @@
                                             <div class="dash__box dash__box--bg-grey dash__box--shadow-2 u-h-100">
                                                 <div class="dash__pad-3">
                                                     <h2 class="dash__h2 u-s-m-b-8">MY STATS</h2>
-                                                    <span class="dash__text">Total Amount Spent: </span>
-                                                    <span class="dash__text">Completed Deliveries: </span>
-                                                    <span class="dash__text">Cancelled Deliveries: </span>
+                                                    <span class="dash__text">Total Amount Spent: <strong>{{ request.user.profile.total_spent|intcomma }}</strong></span>
+                                                    <span class="dash__text">Completed Deliveries: <strong>{{ completed_orders }}</strong></span>
+                                                    <span class="dash__text">Cancelled Deliveries: <strong>{{ cancelled_orders }}</strong></span>
                                                 </div>
                                             </div>
                                         </div>

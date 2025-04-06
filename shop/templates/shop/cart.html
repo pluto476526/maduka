@@ -99,7 +99,7 @@
                                         </td>
                                         <td>
                                             <div class="table-p__del-wrap">
-                                                <a class="far fa-trash-alt table-p__delete-link" href="{% url 'shop_delete' the_shop.name c.model_name c.objects.id %}"></a>
+                                                <a class="far fa-trash-alt table-p__delete-link" href="{% url 'shop_delete' the_shop.slug c.model_name c.objects.id %}"></a>
                                             </div>
                                         </td>
                                     </tr>

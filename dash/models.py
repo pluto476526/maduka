@@ -22,6 +22,7 @@ class Profile(models.Model):
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
+    total_spent = models.PositiveIntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
 
     def __str__(self):

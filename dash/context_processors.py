@@ -61,7 +61,29 @@ def cart_items_count(request):
         cart_items = CartItem.objects.filter(cart=my_cart).count() or 0
         context = {'cart_items_count': cart_items}
         return context
-    except Exception:
+    except Exception as e:
+        logger.debug(e)
+        return {}
+
+
+def shop_sidebar_stats(request):
+    """
+    This function provides context data for a shop sidebar(shop_dash)
+    """
+    try:
+        logger.debug(f'fuck')
+        shop = my_shop(request)
+        orders = Delivery.objects.filter(shop=shop, username=request.user, is_deleted=False)
+        completed_orders = orders.filter(status='completed').count() or 0
+        wishlist = Cart.objects.filter(shop=shop, customer=request.user, status='in_wishes', is_deleted=False).count() or 0
+        context = {
+            'num_orders': orders.count() or 0,
+            'completed_del': completed_orders,
+            'wishlist': wishlist,
+        }
+        return context
+    except Exception as e:
+        logger.debug(e)
         return {}
 
 def get_order(request):
