@@ -1,0 +1,39 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="card-title">Please Confirm.</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="referer" value="{{ referer }}">
+                            Are you sure you want to delete <strong>{{ object }}</strong> from <strong>{{ model_name }}</strong>?
+                            </br></br>
+                            <div class="d-flex">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Yes, Delete!</button>
+                                <a href="javascript:history.back()">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

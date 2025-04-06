@@ -1,0 +1,67 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% load humanize %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="card-title">Transactions</h4>
+                            <p class="card-description">
+                                View and manage all transactions related to your shop.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        {% if transactions %}
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Order ID</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Created on</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in transactions %}
+                                <tr>
+                                    <td>{{ t.user }}</td>
+                                    <td>{{ t.order.order_number }}</td>
+                                    <td>KSH. {{ t.amount|intcomma }}</td>
+                                    <td>{{ t.status|title }}</td>
+                                    <td>{{ t.timestamp }}</td>
+                                    <td class="d-flex justify-content-start" style="gap: 3px;">
+                                        <a href="{% url 'order_details' t.order.order_number %}">
+                                            <span class="badge badge-info">View</span>
+                                        </a>
+                                        <button class="badge badge-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content-wrapper ends -->
+
+
+{% endblock %}

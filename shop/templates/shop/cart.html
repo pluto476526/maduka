@@ -1,0 +1,247 @@
+{% extends 'shop/main.html' %}
+{% load humanize %}
+{% block main %}
+
+
+<!--====== App Content ======-->
+<div class="app-content">
+
+    {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Intro ======-->
+        <div class="section__intro u-s-m-b-60">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h1 class="section__heading u-c-secondary">SHOPPING CART</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Intro ======-->
+
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <form class="row" method="post">
+                    {% csrf_token %}
+                    <div class="col-lg-12 col-md-12 col-sm-12 u-s-m-b-30">
+                        <div class="table-responsive">
+                            <table class="table-p">
+                                <tbody>
+                                    {% for c in cart_items %}
+                                    <!--====== Row ======-->
+                                    <tr>
+                                        <td>
+                                            <div class="table-p__box">
+                                                <div class="table-p__img-wrap">
+                                                    <img class="u-img-fluid" style="height: 100%;" src="{{ c.objects.product.avatar1.url }}" alt="">
+                                                </div>
+                                                <div class="table-p__info">
+                                                    <span class="table-p__name">
+                                                        <a href="{% url 'product_details' the_shop.slug c.objects.product.product_id %}">{{ c.objects.product.product|title }}</a>
+                                                    </span>
+                                                    <span class="table-p__category">
+                                                        <a href="">{{ c.product.category.category|title }}</a>
+                                                    </span>
+                                                    <ul class="table-p__variant-list">
+                                                        <li>
+                                                            <span>KES. {{ c.objects.product.price|intcomma }} per {{ c.objects.product.units.units }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span>Added on: {{ my_cart.timestamp }}</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="table-p__price">{{ c.objects.total|intcomma }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="table-p__input-counter-wrap">
+                                                <!--====== Input Counter ======-->
+                                                <div class="input-counter">
+                                                    <span class="input-counter__minus fas fa-minus"></span>
+                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" name=quantity[] value="{{ c.objects.quantity }}" data-min="1" data-max="1000">
+                                                    <span class="input-counter__plus fas fa-plus"></span>
+                                                </div>
+                                                <!--====== End - Input Counter ======-->
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="table-p__del-wrap">
+                                                <a class="far fa-trash-alt table-p__delete-link" href="{% url 'shop_delete' the_shop.name c.model_name c.objects.id %}"></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <input type="hidden" name="source" value="edit_quantity">
+                                    <input type="hidden" name="cart_pid[]" value="{{ c.objects.product.product_id }}">
+                                    <!--====== End - Row ======-->
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="route-box">
+                            <div class="route-box__g1">
+                                <a class="route-box__link" href="{% url 'products' the_shop.slug %}">
+                                    <i class="fas fa-long-arrow-alt-left"></i>
+                                    <span>CONTINUE SHOPPING</span>
+                                </a>
+                            </div>
+                            {% if cart_items %}
+                            <div class="route-box__g2">
+                                <a class="route-box__link" href="{% url 'clear_cart' the_shop.slug %}">
+                                    <i class="fas fa-trash"></i>
+                                    <span>CLEAR CART</span>
+                                </a>
+                                <button type="submit">
+                                    <span class="route-box__link">
+                                        <i class="fas fa-sync"></i>
+                                        <span>UPDATE CART</span>
+                                    </span>
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+
+    {% if cart_items %}
+    <!--====== Section 3 ======-->
+    <div class="u-s-p-b-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 u-s-m-b-30">
+                        <div class="f-cart">
+                            <div class="row">
+                                <form class="col-lg-4 col-md-6 u-s-m-b-30" method="post">
+                                    {% csrf_token %}
+                                    <div class="f-cart__pad-box">
+                                        <h1 class="gl-h1">ESTIMATE SHIPPING AND TAXES</h1>
+
+                                        <span class="gl-text u-s-m-b-30">Enter your destination to get a shipping estimate.</span>
+                                        <div class="u-s-m-b-30">
+
+                                            <!--====== Select Box ======-->
+
+                                            <label class="gl-label" for="shipping-country">Select County *</label>
+                                                <select class="select-box select-box--primary-style" id="shipping-country" name="county" required>
+                                                    {% for c in counties %}
+                                                    <option value="{{ c.id }}" {% if my_cart.county == c %} selected {% endif %}>{{ c.county|title }} - KES. {{ c.price|intcomma }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            <!--====== End - Select Box ======-->
+                                        </div>
+                                        <input type="hidden" name="source" value="add_county">
+                                        <div class="u-s-m-b-30">
+                                            <button class="btn f-cart__ship-link btn--e-transparent-brand-b-2">CALCULATE SHIPPING</button>
+                                        </div>
+                                        <span class="gl-text">Note: There are some counties where free shipping is available otherwise our flat rate charges or default delivery charges will be applied.</span>
+                                    </div>
+                                </form>
+                                <div class="col-lg-4 col-md-6 u-s-m-b-30">
+                                    <div class="f-cart__pad-box">
+                                        <h1 class="gl-h1">NOTE</h1>
+                                        <span class="gl-text u-s-m-b-30">Add Special Note About Your Product</span>
+                                        <div>
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="source" value="add_note">
+                                                <label for="f-cart-note"></label>
+                                                <textarea name="note" class="text-area text-area--primary-style" id="f-cart-note">{{ my_cart.note|capfirst }}</textarea>
+                                                <br><br>
+                                                <div>
+                                                    <button typr="submit" class="btn f-cart__ship-link btn--e-transparent-brand-b-2">SAVE NOTE</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-6 u-s-m-b-30">
+                                    <div class="f-cart__pad-box">
+                                        <div class="u-s-m-b-30">
+                                            <table class="f-cart__table">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>SUBTOTAL</td>
+                                                        <td>KES. {{ my_cart.original_price|intcomma }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>SHIPPING</td>
+                                                        <td>KES. {{ my_cart.county.price|intcomma }}</td>
+                                                    </tr>
+                                                    {% if my_cart.discount %}
+                                                    <tr>
+                                                        <td>DISCOUNT</td>
+                                                        <td>KES. 274</td>
+                                                    </tr>
+                                                    {% endif %}
+                                                    <tr>
+                                                        <td>GRAND TOTAL</td>
+                                                        <td>KES. {{ my_cart.total_price|intcomma }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div>
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" value="`">
+                                                <input type="hidden" name="source" value="checkout_btn">
+                                                <button class="btn btn--e-brand-b-2" type="submit"> PROCEED TO CHECKOUT</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 3 ======-->
+    {% endif %}
+</div>
+<!--====== End - App Content ======-->
+
+{% endblock %}

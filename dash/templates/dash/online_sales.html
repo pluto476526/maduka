@@ -1,0 +1,58 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                        <div>
+                            <h4 class="card-title">Online Sales</h4>
+                            <p class="card-description">
+                                View the totals and contents of all your shop's checked out carts.
+                            </p>
+                        </div>
+                    <div class="table-responsive">
+                        {% if online_sales %}
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Order #</th>
+                                    <th>Total Amount</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in online_sales %}
+                                <tr>
+                                    <td>{{ s.username|title }}</td>
+                                    <td>{{ s.order_number }}</td>
+                                    <td>KSH. {{ s.total_amount }}</td>
+                                    <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                                    <td>
+                                        <a  href="{% url 'order_details' s.order_number %}">
+                                            <span class="badge badge-info">View</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content-wrapper ends -->
+{% endblock %}

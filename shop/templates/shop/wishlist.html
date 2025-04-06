@@ -1,0 +1,124 @@
+{% extends 'shop/main.html' %}
+{% load humanize %}
+{% block main %}
+
+
+
+<!--====== App Content ======-->
+<div class="app-content">
+
+    {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Intro ======-->
+        <div class="section__intro u-s-m-b-60">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h1 class="section__heading u-c-secondary">Wishlist</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Intro ======-->
+
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        {% for w in wishes %}
+                        <!--====== Wishlist Product ======-->
+                        <div class="w-r u-s-m-b-30">
+                            <div class="w-r__container">
+                                <div class="w-r__wrap-1">
+                                    <div class="w-r__img-wrap">
+                                        <img class="u-img-fluid" style="height: 100%;" src="{{ w.product.avatar1.url }}" alt="">
+                                    </div>
+                                    <div class="w-r__info">
+                                        <span class="w-r__name">
+                                            <a href="{% url 'product_details' the_shop.name w.product.product_id">{{ w.product.product|title }}</a>
+                                        </span>
+                                        <span class="w-r__category">
+                                            <a href="shop-side-version-2.html">{{ w.product.category.category|title }}</a>
+                                        </span>
+                                        <span class="w-r__price">KES. {{ w.product.price|intcomma }}
+                                            {% if w.product.discount and w.product.discount != 0 %}<span class="w-r__discount">KES. {{ w.product.discount|intcomma }}</span>{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="w-r__wrap-2" style="display: flex;">
+                                    <div>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="source" value="add_to_cart">
+                                            <input type="hidden" name="id" value="{{ w.product.product_id }}">
+                                            <button class="btn w-r__link btn--e-brand-b-2" type="submit">ADD TO CART</button>
+                                        </form>
+                                    </div>
+                                    <div>
+                                        <a class="w-r__link btn--e-transparent-platinum-b-2" href="{% url 'product_details' the_shop.name w.product.product_id %}">VIEW</a>
+                                    </div>
+                                    <div>
+                                        <a class="w-r__link btn--e-transparent-platinum-b-2" href="#">REMOVE</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--====== End - Wishlist Product ======-->
+                        {% endfor %}
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="route-box">
+                            <div class="route-box__g">
+                                <a class="route-box__link" href="shop-side-version-2.html">
+                                    <i class="fas fa-long-arrow-alt-left"></i>
+                                    <span>CONTINUE SHOPPING</span>
+                                </a>
+                            </div>
+                            <div class="route-box__g">
+                                <a class="route-box__link" href="wishlist.html">
+                                    <i class="fas fa-trash"></i>
+                                    <span>CLEAR WISHLIST</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+{% endblock %}

@@ -1,0 +1,383 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% load humanize %}
+{% block main %}
+<div class="content-wrapper">
+  <div class="row">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <section class="section">
+      <div class="row">
+        <div class="col-xl-4 mb-3">
+          <div class="card">
+            <div class="card-body pt-4 d-flex flex-column align-items-center">
+              <div>
+                <img src="{{ my_shop.avatar1.url }}" class="image-fluid w-100">
+              </div>
+              <div class="py-5 text-center">
+                <h4>{{ my_shop.name|title }}</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-8">
+          <div class="card">
+            <div class="card-body pt-3">
+              <!-- Bordered Tabs -->
+              <ul class="nav nav-tabs nav-tabs-bordered">
+                <li class="nav-item">
+                  <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-settings">Settings</button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
+                </li>
+              </ul>
+              <div class="tab-content pt-2">
+                <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                  <h5 class="card-title">About</h5>
+                  <p class="small fst-italic pb-4">{{my_shop.bio|capfirst }}</p>
+                  <h5 class="card-title">Profile Details</h5>
+                  <div class="row pb-3">
+                    <div class="col-lg-3 col-md-4 label">Shop Name</div>
+                    <div class="col-lg-9 col-md-8">
+                      {{ my_shop.name|title }}
+                    </div>
+                  </div>
+                  <div class="row py-3">
+                    <div class="col-lg-3 col-md-4 label">Registered Owner</div>
+                    <div class="col-lg-9 col-md-8">
+                      {{ my_shop.owner|title }}
+                    </div>
+                  </div>
+                  {% if my_shop.location %}
+                  <div class="row py-3">
+                    <div class="col-lg-3 col-md-4 label">Location</div>
+                    <div class="col-lg-9 col-md-8">
+                      {{ my_shop.location|title }}
+                    </div>
+                  </div>
+                  {% endif %} {% if my_shop.address %}
+                  <div class="row py-3">
+                    <div class="col-lg-3 col-md-4 label">Address</div>
+                    <div class="col-lg-9 col-md-8">{{ my_shop.address }}</div>
+                  </div>
+                  {% endif %} {% if my_shop.phone %}
+                  <div class="row py-3">
+                    <div class="col-lg-3 col-md-4 label">Phone</div>
+                    <div class="col-lg-9 col-md-8">{{ my_shop.phone }}</div>
+                  </div>
+                  {% endif %} {% if my_shop.email %}
+                  <div class="row py-3">
+                    <div class="col-lg-3 col-md-4 label">Email</div>
+                    <div class="col-lg-9 col-md-8">{{ my_shop.email }}</div>
+                  </div>
+                  {% endif %}
+                </div>
+
+                <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+                  <!-- Profile Edit Form -->
+                  <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                      <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Profile Images</label>
+                      <div class="col-md-8 col-lg-9 d-flex justify-content-center gap-3">
+                        <div class="w-100"
+                          style="background-image: url('{{ my_shop.avatar1.url }}'); background-repeat: no-repeat; background-size: cover; height: 15rem;">
+                          <div class="pt-2">
+                            <label class="btn btn-primary btn-sm" title="Upload new image">Upload
+                              <input type="file" name="avatar1" class="d-none" data-target="fileName1">
+                            </label>
+                            <a href="#" class="btn btn-danger btn-sm" title="Remove image">Delete</a>
+                            <strong id="fileName1" class="ms-2 bg-light"></strong>
+                          </div>
+                        </div>
+                        <div class="w-100"
+                          style="background-image: url('{{ my_shop.avatar2.url }}'); background-repeat: no-repeat; background-size: cover; height: 15rem;">
+                          <div class="pt-2">
+                            <label class="btn btn-primary btn-sm" title="Upload new image">Upload
+                              <input type="file" name="avatar2" class="d-none" data-target="fileName2">
+                            </label>
+                           <a href="#" class="btn btn-danger btn-sm" title="Remove image">Delete</a>
+                            <strong id="fileName2" class="ms-2 bg-light"></strong>
+                          </div>
+                        </div>
+                        <div class="w-100"
+                          style="background-image: url('{{ my_shop.avatar3.url }}'); background-repeat: no-repeat; background-size: cover; height: 15rem;">
+                          <div class="pt-2">
+                             <label class="btn btn-primary btn-sm" title="Upload new image">Upload
+                              <input type="file" name="avatar3" class="d-none" data-target="fileName3">
+                            </label>
+                           <a href="#" class="btn btn-danger btn-sm" title="Remove image">Delete</a>
+                            <strong id="fileName3" class="ms-2 bg-light"></strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row my-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Shop Name</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="name" type="text" class="form-control" value="{{ my_shop.name|title }}" required>
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">About</label>
+                      <div class="col-md-8 col-lg-9">
+                        <textarea name="bio" class="form-control"
+                          style="height: 100px">{{ my_shop.bio|capfirst }}</textarea>
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Location</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="location" type="text" class="form-control" value="{{ my_shop.location|title }}">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Address</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="address" type="text" class="form-control" value="{{ my_shop.address }}">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Email</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="email" type="email" class="form-control" value="{{ my_shop.email }}">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Phone</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="phone" type="text" class="form-control" value="{{ my_shop.phone }}" required>
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">X Profile</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="twitter" type="text" class="form-control" value="{{ my_shop.twitter }}">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Instagram Profile</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="instagram" type="text" class="form-control" value="{{ my_shop.instagram }}">
+                      </div>
+                    </div>
+                    <input type="hidden" name="source" value="update_profile">
+                    <div class="text-center">
+                      <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                  </form>
+                  <!-- End Profile Edit Form -->
+                </div>
+                <div class="tab-pane fade pt-3" id="profile-settings">
+                  <!-- Settings Form -->
+                  <form method="post">
+                  {% csrf_token %}
+                  <div class="row mb-3">
+                    <label class="col-md-4 col-lg-3 col-form-label">Low Stock Threshold</label>
+                      <div class="col-md-8 col-lg-9">
+                        <div class="form-check">
+                          <input class="form-control" type="number" name="ls_threshold" value="{{ threshold.threshold }}">
+                        </div>
+                      </div>
+                    </div>
+                  <div class="row mb-3">
+                    <label class="col-md-4 col-lg-3 col-form-label">Landing Page Titles</label>
+                    <div class="col-md-8 col-lg-9">
+                      <div class="form-check">
+                        <input class="form-control" type="text" name="title1"
+                          placeholder="Short title eg. 100% Fresh Farm Produce! (less than 100 characters)"
+                          {% if my_shop.title1 %} value="{{ my_shop.title1|title|truncatechars:100 }}" {% endif %}>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-control" type="text" name="title2"
+                          placeholder="Short title eg. 100% Fresh Farm Produce! (less than 100 characters)"
+                          {% if my_shop.title2 %} value="{{ my_shop.title2|title|truncatechars:100 }}" {% endif %}>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-control" type="text" name="title3"
+                          placeholder="Short title eg. 100% Fresh Farm Produce! (less than 100 characters)"
+                          {% if my_shop.title3 %} value="{{ my_shop.title3|title|truncatechars:100 }}" {% endif %}>
+                      </div>
+                    </div>
+                  </div>
+                  {% if staff_roles %}
+                    <div class="row mb-3 bg-secondary">
+                      <label class="col-md-4 col-lg-3 col-form-label">Staff Roles</label>
+                      <div class="col-md-8 col-lg-9">
+                        {% for role in staff_roles %}
+                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
+                          <div class="col-6">
+                            <label>{{ role.role_name|title }}</label>
+                          </div>
+                          <div class="col-6">
+                            <button type="submit" title="Remove" class="form-check-input btn-close"></button>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">New Staff Role</label>
+                      <div class="col-md-8 col-lg-9">
+                        <div class="form-check">
+                          <input class="form-control" type="text" name="role_name">
+                        </div>
+                      </div>
+                    </div>
+                    {% if units %}
+                    <div class="row mb-3 bg-secondary">
+                      <label class="col-md-4 col-lg-3 col-form-label">Product Units</label>
+                      <div class="col-md-8 col-lg-9">
+                        {% for u in units %}
+                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
+                          <div class="col-6">
+                            <label>{{ u.units|title }}</label>
+                          </div>
+                          <div class="col-6">
+                            <a href="">
+                              <button type="button" title="Remove" class="form-check-input btn-close"></button>
+                            </a>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    {% endif %}
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">New Units</label>
+                      <div class="col-md-8 col-lg-9">
+                        <div class="form-check">
+                          <input class="form-control" type="text" name="units">
+                        </div>
+                      </div>
+                    </div>
+                    {% if p_methods %}
+                    <div class="row mb-3 bg-secondary">
+                      <label class="col-md-4 col-lg-3 col-form-label">Payment Methods</label>
+                      <div class="col-md-8 col-lg-9">
+                        {% for p in p_methods %}
+                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
+                          <div class="col-6">
+                            <label>{{ p.method|title }}</label>
+                          </div>
+                          <div class="col-6">
+                            <button type="submit" title="Remove" class="form-check-input btn-close"></button>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    {% endif %}
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">New Payment Method</label>
+                      <div class="col-md-8 col-lg-9">
+                        <div class="form-check">
+                          <input class="form-control" type="text" name="p_mthd">
+                        </div>
+                      </div>
+                    </div>
+                    {% if counties %}
+                    <div class="row mb-3 bg-secondary">
+                      <label class="col-md-4 col-lg-3 col-form-label">Counties Shipped</label>
+                      <div class="col-md-8 col-lg-9">
+                        {% for c in counties %}
+                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
+                          <div class="col-4">
+                            <label>{{ c.county|title }}</label>
+                          </div>
+                          <div class="col-4">
+                            <label>KES. {{ c.price|intcomma }}</label>
+                          </div>
+                          <div class="col-4">
+                            <button type="submit" title="Remove" class="form-check-input btn-close"></button>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    {% endif %}
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">New County, Shipping Cost</label>
+                      <div class="col-md-8 col-lg-9">
+                        <div class="form-check">
+                          <input class="form-control" type="text" name="county">
+                        </div>
+                        <div class="form-check">
+                          <input class="form-control" type="number" name="shipping_cost">
+                        </div>
+                      </div>
+                    </div>
+                    <input type="hidden" name="source" value="settings_form">
+                    <div class="text-center">
+                      <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                  </form>
+                  <!-- End settings Form -->
+                </div>
+                <div class="tab-pane fade pt-3" id="profile-change-password">
+                  <!-- Change Password Form -->
+                  <form>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Current Password</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="password" type="password" class="form-control">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">New Password</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="newpassword" type="password" class="form-control">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="renewpassword" type="password" class="form-control">
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <button type="submit" class="btn btn-primary">Change Password</button>
+                    </div>
+                  </form>
+                  <!-- End Change Password Form -->
+                </div>
+              </div>
+              <!-- End Bordered Tabs -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            let fileName = this.files.length > 0 ? this.files[0].name : "No file chosen";
+            let displayElement = document.getElementById(this.getAttribute('data-target'));
+            if (displayElement) {
+                displayElement.textContent = fileName;
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+

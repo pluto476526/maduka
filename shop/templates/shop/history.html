@@ -1,0 +1,123 @@
+{% extends 'shop/main.html' %}
+{% load humanize %}
+{% block main %}
+
+
+
+<!--====== App Content ======-->
+<div class="app-content">
+
+    {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="dash">
+                <div class="container">
+                    <div class="row">
+                        {% include 'shop/shop_sidebar.html' %}
+                        <div class="col-lg-9 col-md-12">
+                            <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
+                                <div class="dash__pad-2">
+                                    <h1 class="dash__h1 u-s-m-b-14">My Orders</h1>
+
+                                    <span class="dash__text u-s-m-b-30">Here you can see all products that have been delivered.</span>
+                                    <form class="m-order u-s-m-b-30">
+                                        <div class="m-order__select-wrapper">
+
+                                            <label class="u-s-m-r-8" for="my-order-sort">Show:</label>
+                                            <select class="select-box select-box--primary-style" id="my-order-sort">
+                                                <option selected>Last 5 orders</option>
+                                                <option>Last 15 days</option>
+                                                <option>Last 30 days</option>
+                                                <option>Last 6 months</option>
+                                                <option>Orders placed in 2018</option>
+                                                <option>All Orders</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                    <div class="m-order__list">
+                                        {% for o in orders %}
+                                        <div class="m-order__get">
+                                            <div class="manage-o__header u-s-m-b-30">
+                                                <div class="dash-l-r">
+                                                    <div>
+                                                        <div class="manage-o__text-2 u-c-secondary">Order #{{ o.order_number }}</div>
+                                                        <div class="manage-o__text u-c-silver">Placed on {{ o.timestamp }}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="dash__link dash__link--brand">
+                                                            <a href="{% url 'order_details' the_shop.slug o.order_number %}">VIEW DETAILS</a>
+                                                        </div>
+                                                        {% if o.status != 'completed' and o.status != 'cancelled' %}
+                                                        <div class="dash__link dash__link--brand">
+                                                            <a href="{% url 'order_details' the_shop.slug o.id %}">CANCEL</a>
+                                                        </div>
+                                                        {% endif %}
+                                                        {% if o.status == 'completed' %}
+                                                        <div class="dash__link dash__link--brand">
+                                                            <a href="{% url 'returns_page' the_shop.slug o.order_number %}">RETURN</a>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="manage-o__description">
+                                                <div class="description__container">
+                                                    <div class="description__img-wrap">
+                                                        <img class="u-img-fluid" src="{{ o.avatar.url }}" style="height: 100%; width: 100%;">
+                                                    </div>
+                                                    <div class="description-title">{{ o.county.county|title }}, {{ o.address.street|title }}, {{ o.address.house|title }}.</div>
+                                                </div>
+                                                <div class="description__info-wrap">
+                                                    <div>
+                                                        <span class="manage-o__badge badge--processing">{{ o.status|title }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="manage-o__text-2 u-c-silver">Total:
+                                                            <span class="manage-o__text-2 u-c-secondary">{{ o.total|intcomma }}</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+{% endblock %}

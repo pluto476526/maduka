@@ -1,0 +1,75 @@
+{% extends 'web/main.html' %}
+{% load static %}
+{% block main %}
+<!-- ======= Header ======= -->
+<header id="header" class="fixed-top d-grid align-items-center">
+  <div class="container d-flex align-items-center justify-content-between">
+      <h1 class="logo"><a href="{% url 'home' %}">ShopSync</a></h1>
+      <nav id="navbar" class="navbar">
+      </nav>
+      <!-- .navbar -->
+  </div>
+</header>
+<!-- End Header -->
+<main>
+<!-- ======= Breadcrumbs ======= -->
+    <section id="breadcrumbs" class="breadcrumbs">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2>{{ selected_shop.name|title }}</h2>
+          <ol>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li>Shop Details</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+    <!-- End Breadcrumbs -->
+
+    <!-- ======= Shop Details Section ======= -->
+    <section id="portfolio-details" class="portfolio-details">
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-8">
+            <div class="portfolio-details-slider swiper">
+              <div class="swiper-wrapper align-items-center">
+                <div class="swiper-slide" style="height: 80vh;">
+                  <img src="{{ selected_shop.avatar1.url }}" alt="" class="img-fluid">
+                </div>
+                <div class="swiper-slide" style="height: 80vh;">
+                  <img src="{{ selected_shop.avatar2.url }}" alt="" class="img-fluid">
+                </div>
+                <div class="swiper-slide" style="height: 80vh;">
+                  <img src="{{ selected_shop.avatar3.url }}" alt="" class="img-fluid">
+                </div>
+              </div>
+              <div class="swiper-pagination"></div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="portfolio-info">
+              <h3>Shop Profile</h3>
+              <ul>
+                <li><strong>Shop Name</strong>: <a href="{% url 'shop' selected_shop.slug %}">{{ selected_shop.name|title }}</a></li>
+                <li><strong>Category</strong>: {{ selected_shop.shop_category|title }}</li>
+                <li><strong>Registered Owner</strong>: @{{ selected_shop.owner.username|title }}</li>
+                <li><strong>Registration Date</strong>: {{ selected_shop.timestamp }}</li>
+                <li><strong>Product Categories</strong>:
+                  {% for cat in Categories %}
+                  <button class="btn btn-sm btn-outline-success">{{ cat.category }}</button>
+                  {% endfor %}
+                </li>
+              </ul>
+            </div>
+            <div class="portfolio-description">
+              <h2>More Info</h2>
+              <p>{{ selected_shop.bio|capfirst }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- End Portfolio Details Section -->
+  </main>
+  <!-- End #main -->
+{% endblock %}

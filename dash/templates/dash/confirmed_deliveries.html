@@ -1,0 +1,223 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% load humanize %}
+{% block main %}
+<div class="content-wrapper">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="home-tab">
+        <div class="d-sm-flex align-items-center justify-content-between border-bottom">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#confirmed" role="tab">Confirmed Requests</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#shipped" role="tab">Shipped Requests</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#completed" role="tab">Completed Requests</a>
+            </li>
+          </ul>
+        </div>
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show mt-2" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="tab-content tab-content-basic">
+          <div class="tab-pane fade show active" id="confirmed" role="tabpanel">
+            <div class="col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-sm-flex justify-content-between align-items-start">
+                    <div>
+                      <h4 class="card-title">Confirmed Requests</h4>
+                      <p class="card-description">View and manage checked out carts and requests made from the dash.<br>Assign drivers or staff to make deliveries.</p>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    {% if confirmed_deliveries %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Username</th>
+                          <th>Placed On</th>
+                          <th>Confirmed On</th>
+                          <th>Total Amount</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for o in confirmed_deliveries %}
+                        <tr>
+                          <td>{{ o.order_number }}</td>
+                          <td>{{ o.username|title }}</td>
+                          <td>{{ o.timestamp }}</td>
+                          <td>{{ o.time_confirmed }}</td>
+                          <td>KSH. {{ o.total|intcomma }}</td>
+                          <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                          <td class="d-flex justify-content-start" style="gap: 3px">
+                            <a href="{% url 'order_details' o.order_number %}">
+                              <span class="badge badge-info">View</span>
+                            </a>
+                            <button class="badge badge-info" type="button" data-bs-toggle="modal" data-bs-target="#assMultModal{{ o.order_number }}">Confirm</button>
+                            <!-- View product Modal -->
+                            <div class="modal fade" id="assMultModal{{ o.order_number }}" tabindex="-1">
+                              <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title">Delivery Request Form</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <!-- Floating Labels Form -->
+                                    <form class="row g-3" method="post">
+                                      {% csrf_token %}
+                                      <div class="col-md-12">
+                                        <div class="form-floating">
+                                          <select name="driver" class="form-select">
+                                            <option selected disabled>------------------------</option>
+                                            {% for driver in my_drivers %}
+                                            <option value="{{ driver.id }}">{{ driver.user.username|title }}</option>
+                                            {% endfor %}
+                                          </select>
+                                          <label>Driver</label>
+                                        </div>
+                                      </div>
+                                      <input type="hidden" name="source" value="assign_driver">
+                                      <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Assign Driver</button>
+                                      </div>
+                                    </form>
+                                    <!-- End floating Labels Form -->
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- Edit Product Modal -->
+                            <button class="badge badge-danger">Delete</button>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade active" id="shipped" role="tabpanel">
+            <div class="col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-sm-flex justify-content-between align-items-start">
+                    <div>
+                      <h4 class="card-title">Shipped Requests</h4>
+                      <p class="card-description">View and manage delivery requests that have been processed and are already in transit.</p>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    {% if shipped_deliveries %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Username</th>
+                          <th>Placed On</th>
+                          <th>Shipped On</th>
+                          <th>Total Amount</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for o in shipped_deliveries %}
+                        <tr>
+                          <td>{{ o.order_number }}</td>
+                          <td>{{ o.username|title }}</td>
+                          <td>{{ o.timestamp }}</td>
+                          <td>{{ o.time_shipped }}</td>
+                          <td>KSH. {{ o.total|title }}</td>
+                          <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                          <td class="d-flex justify-content-start" style="gap: 3px">
+                            <a href="{% url 'order_details' o.order_number %}">
+                              <span class="badge badge-info">View</span>
+                            </a>
+                            <form action="" method="post">
+                              {% csrf_token %}
+                              <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                              <input type="hidden" name="source" value="complete_order">
+                              <button class="badge badge-info" type="submit">Complete</button>
+                            </form>
+                            <button class="badge badge-danger">Delete</button>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade active" id="completed" role="tabpanel">
+            <div class="col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-sm-flex justify-content-between align-items-start">
+                    <div>
+                      <h4 class="card-title">Completed Requests</h4>
+                      <p class="card-description">View all completed delivery requests.</p>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    {% if completed_deliveries %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Username</th>
+                          <th>Placed On</th>
+                          <th>Completed On</th>
+                          <th>Total Amount</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for o in completed_deliveries %}
+                        <tr>
+                          <td>{{ o.order_number }}</td>
+                          <td>{{ o.username|title }}</td>
+                          <td>{{ o.timestamp }}</td>
+                          <td>{{ o.time_completed }}</td>
+                          <td>KSH. {{ o.total|intcomma }}</td>
+                          <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                          <td>
+                            <a href="{% url 'order_details' o.order_number %}">
+                              <span class="badge badge-info">View</span>
+                            </a>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- content-wrapper ends -->
+{% endblock %}

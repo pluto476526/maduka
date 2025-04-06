@@ -1,0 +1,66 @@
+<div class="col-lg-3 col-md-4 col-sm-12">
+    <div class="blog-w-master">
+        <div class="u-s-m-b-60">
+            <div class="blog-w">
+                <span class="blog-w__h">SEARCH</span>
+                <form class="blog-search-form">
+                    <label for="post-search"></label>
+                    <input class="input-text input-text--primary-style" type="text" id="post-search" placeholder="Search">
+                    <button class="btn btn--icon fas fa-search" type="submit"></button>
+                </form>
+            </div>
+        </div>
+        <div class="u-s-m-b-60">
+            <div class="blog-w">
+                <span class="blog-w__h">CATEGORIES</span>
+                <ul class="blog-w__list">
+                    {% for c in categories %}
+                    <li>
+                        <a href="blog-right-sidebar.html">{{ c.category|title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="u-s-m-b-60">
+            <div class="blog-w">
+                <span class="blog-w__h">RECENT POSTS</span>
+                <ul class="blog-w__b-l">
+                    {% for r in recent_posts %}
+                    <li>
+                        <div class="b-l__block">
+                            <div class="b-l__date">
+                                <span>{{ r.timestamp }}</span>
+                            </div>
+                            <span class="b-l__h">
+                                <a href="{% url 'blog_details' the_shop.name r.blogID %}">{{ r.title|title }}</a></span>
+
+                            <span class="b-l__p">{{ r.summary|title }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div>
+            <div class="blog-w">
+                <span class="blog-w__h">TAGS</span>
+                <div class="blog-t-w">
+
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Dresses</a>
+
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Shirts & Tops</a>
+
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Polo Shirts</a>
+
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Sweaters</a>
+
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Blazers</a>
+
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Vests</a>
+
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Jackets</a></div>
+            </div>
+        </div>
+    </div>
+</div>

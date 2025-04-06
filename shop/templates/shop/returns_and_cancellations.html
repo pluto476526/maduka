@@ -1,0 +1,128 @@
+{% extends 'shop/main.html' %}
+{% load humanize %}
+{% block main %}
+
+
+
+<!--====== App Content ======-->
+<div class="app-content">
+
+    {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Intro ======-->
+        <div class="section__intro u-s-m-b-60">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h1 class="section__heading u-c-secondary">Returns and Cancellations</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Intro ======-->
+
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        {% for r in returns %}
+                        <!--====== Wishlist Product ======-->
+                        <div class="w-r u-s-m-b-30">
+                            <div class="w-r__container">
+                                <div class="w-r__wrap-1">
+                                    <div class="w-r__img-wrap">
+                                        <img class="u-img-fluid" style="height: 100%;" src="{{ r.avatar.url }}" alt="">
+                                    </div>
+                                    <div class="w-r__info">
+                                        <span class="w-r__name">
+                                            <a href="">{{ r.order_number }}</a>
+                                        </span>
+                                        <span class="w-r__category">
+                                            <span>{{ r.time_cancelled }}</span>
+                                        </span>
+                                        <span class="w-r__price">KES. {{ r.total|intcomma }}</span>
+                                    </div>
+                                </div>
+                                <div class="w-r__wrap-2" style="display: flex;">
+                                    <div>
+                                        <a href="" class="btn w-r__link btn--e-brand-b-2">SEND FEEDBACK</a>
+                                    </div>
+                                    <div>
+                                        <a class="w-r__link btn--e-transparent-platinum-b-2" href="{% url 'order_details' the_shop.name r.id %}">VIEW</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--====== End - Wishlist Product ======-->
+                        {% endfor %}
+                        {% for i in returned_items %}
+                        <!--====== Wishlist Product ======-->
+                        <div class="w-r u-s-m-b-30">
+                            <div class="w-r__container">
+                                <div class="w-r__wrap-1">
+                                    <div class="w-r__img-wrap">
+                                        <img class="u-img-fluid" style="height: 100%;" src="{{ i.product.avatar1.url }}" alt="">
+                                    </div>
+                                    <div class="w-r__info">
+                                        <span class="w-r__name">
+                                            <a href="">{{ i.product.product }}</a>
+                                        </span>
+                                        <span class="w-r__category">
+                                            <span>{{ i.quantity }} {{ i.product.units|title }}</span>
+                                        </span>
+                                        <span class="w-r__price">KES. {{ i.total|intcomma }}</span>
+                                    </div>
+                                </div>
+                                <div class="w-r__wrap-2" style="display: flex;">
+                                    <div>
+                                        <a href="" class="btn w-r__link btn--e-brand-b-2">SEND FEEDBACK</a>
+                                    </div>
+                                    <div>
+                                        <a class="w-r__link btn--e-transparent-platinum-b-2" href="">VIEW</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--====== End - Wishlist Product ======-->
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+{% endblock %}

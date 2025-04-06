@@ -1,0 +1,201 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="card-title">Staff</h4>
+                            <p class="card-description">
+                                View and manage your staff.
+                            </p>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button"
+                                data-bs-toggle="modal" data-bs-target="#newStaffModal">
+                                <i class="mdi mdi-account-plus"></i>
+                                New Staff
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        {% if staff %}
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Created on</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in staff %}
+                                <tr>
+                                    <td>{{ s.user|title }}</td>
+                                    <td>{{ s.role.role_name|title }}</td>
+                                    <td>{{ s.timestamp }}</td>
+                                    <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                                    <td class="d-flex justify-content-start" style="gap: 3px;">
+                                        <button class="badge badge-info" type="button" data-bs-toggle="modal"
+                                            data-bs-target="#viewStaffModal{{ s.id }}">View</button>
+                                        <!-- View Category Modal -->
+                                        <div class="modal fade" id="viewStaffModal{{ s.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Staff Form</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Floating Labels Form -->
+                                                        <form class="row g-3" method="post"
+                                                            enctype="multipart/form-data">
+                                                            {% csrf_token %}
+                                                            <div class="col-sm-12">
+                                                                <div class="form-floating">
+                                                                    <input type="text" name="category"
+                                                                        class="form-control"
+                                                                        value="{{ category.category|title }}"
+                                                                        required>
+                                                                    <label>Category</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12">
+                                                                <div class="form-floating">
+                                                                    <textarea class="w-100 form-control"
+                                                                        name="description"
+                                                                        rows="10">{{ category.description|capfirst }}</textarea>
+                                                                    <label>Description</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                                <label class="form-check-label">Set Featured</label>
+                                                                <input type="checkbox" name="is_featured" value="True" class="form-check"
+                                                                {% if category.is_featured %} checked {% endif %}>
+                                                            </div>
+                                                            <br><br>
+                                                            <div class="col-sm-12">
+                                                                <label>Display Picture</label>
+                                                                {% if category.avatar %}
+                                                                <p>{{ category.avatar }}</p>
+                                                                {% endif %}
+                                                                <br>
+                                                                <input type="file" name="avatar" class="form-file">
+                                                            </div>
+                                                            
+                                                            <input type="hidden" name="shop_id" value="{{ shop.id }}">
+                                                            <input type="hidden" name="category_id"
+                                                                value="{{ category.id }}">
+                                                            <input type="hidden" name="source" value="edit_category">
+                                                            <div class="modal-footer">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-outline-danger"
+                                                                    data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit"
+                                                                    class="btn btn-sm btn-outline-success">Save
+                                                                    changes</button>
+                                                            </div>
+                                                        </form>
+                                                        <!-- End floating Labels Form -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- New Category Modal -->
+                                        <button class="badge badge-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content-wrapper ends -->
+
+<!-- New Staff Modal -->
+<div class="modal fade" id="newStaffModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Staff Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input type="text" name="username" class="form-control">
+                            <label>Username</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input type="email" name="email" class="form-control">
+                            <label>Email</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input type="password" name="password1" class="form-control">
+                            <label>Password</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input type="password" name="password2" class="form-control">
+                            <label>Confirm Password</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-floating">
+                        <input
+                            type="text"
+                            name="role"
+                            class="form-control"
+                            list="role_list"
+                            autocomplete="off"
+                            required
+                        />
+                        <datalist id="role_list">
+                            {% for r in roles %}
+                            <option value="{{ r.role_name }}">
+                            {% endfor %}
+                        </datalist>
+                        <label>Role</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_staff">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Add Staff</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- New Staff Modal -->
+
+{% endblock %}

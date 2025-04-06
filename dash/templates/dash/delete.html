@@ -1,0 +1,37 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                        <div>
+                            <h4 class="card-title">Delete {{ obj }}</h4>
+                        </div>
+                    <div>
+                        <p>Are you sure you want to delete {{ obj }}?</p>
+                    </div>
+                    <br><br>
+                    <div class="card-footer">
+                        <form method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-success">Cancel</button>
+                            <button class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content-wrapper ends -->
+{% endblock %}

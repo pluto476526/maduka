@@ -1,0 +1,126 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="card-title">Blog Categories</h4>
+                            <p class="card-description">View and manage all blog categories.</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button" data-bs-toggle="modal" data-bs-target="#newCategoryModal">
+                                <i class="mdi mdi-account-plus"></i>
+                                New Category
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        {% if categories %}
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Created on</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in categories %}
+                                <tr>
+                                    <td>{{ c.category|title }}</td>
+                                    <td>{{ c.timestamp }}</td>
+                                    <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                                    <td class="d-flex justify-content-start" style="gap: 3px;">
+                                        <button class="badge badge-info" type="button" data-bs-toggle="modal"
+                                            data-bs-target="#viewCategoryModal{{ c.id }}">View</button>
+                                        <!-- View Category Modal -->
+                                        <div class="modal fade" id="viewCategoryModal{{ c.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Category Form</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Floating Labels Form -->
+                                                        <form class="row g-3" method="post" enctype="multipart/form-data">
+                                                            {% csrf_token %}
+                                                            <div class="col-sm-12">
+                                                                <div class="form-floating">
+                                                                    <input type="text" name="category" class="form-control" value="{{ c.category|title }}" required>
+                                                                    <label>Category</label>
+                                                                </div>
+                                                            </div>
+                                                            <input type="hidden" name="source" value="edit_category">
+                                                            <input type="hidden" name="cat_id" value="{{ c.id }}">
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-sm btn-outline-success">Save Changes</button>
+                                                            </div>
+                                                        </form>
+                                                        <!-- End floating Labels Form -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- New Category Modal -->
+                                        <button class="badge badge-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content-wrapper ends -->
+
+<!-- New Category Modal -->
+<div class="modal fade" id="newCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Category Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input type="text" name="category" class="form-control">
+                            <label>Category</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_category">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Add Category</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- New Category Modal -->
+
+{% endblock %}

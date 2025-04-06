@@ -1,0 +1,540 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% block main %}
+
+  <div class="content-wrapper">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+      {{ message }}
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+    {% endfor %}
+    {% endif %}                   
+  <div class="row flex-grow">
+      <div class="col-md-4 col-lg-4 grid-margin stretch-card">
+        <div class="card card-rounded">
+          <div class="card-body card-rounded">
+            <div class="d-flex align-items-center justify-content-between">
+            <h4 class="card-title  card-title-dash">Discounts</h4>
+            <div class="add-items d-flex mb-0">
+              <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0 pl-12p"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#newDiscountModal"
+              >
+              <i class="mdi mdi-plus"></i>
+            </button>
+            </div>
+            </div>
+            {% for product in in_discounts %}
+            <div class="list align-items-center border-bottom py-2">
+              <div class="wrapper w-100">
+                <p class="mb-2 font-weight-medium">
+                  {{ product.product|title }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class="mdi mdi-calendar text-muted me-1"></i>
+                    <p class="mb-0 text-small text-muted">KSH. {{ product.discount }} discount.</p>
+                  </div>
+                  <div>
+                    <form action="" method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="product" value="{{ product.product_id }}">
+                      <input type="hidden" name="source" value="cancel_discount">
+                      <button type="submit" class="text-danger border-0 bg-white d-flex align-items-center">
+                        <small>Cancel</small>
+                        <i class="mdi mdi-arrow-right ms-2"></i>
+                      </button>
+                    </form>
+                  </div> 
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list align-items-center pt-3">
+              <div class="wrapper w-100">
+                <form action="" method="post">
+                  {% csrf_token %}
+                <p class="mb-0">
+                  <input type="hidden" name="source" value="cancel_all_discounts">
+                  <button type="submit" class="fw-bold text-primary border-0 bg-white d-flex align-items-center">
+                    <small>Cancel all</small>
+                    <i class="mdi mdi-arrow-right ms-2"></i>
+                  </button>
+                </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 col-lg-4 grid-margin stretch-card">
+        <div class="card card-rounded">
+          <div class="card-body card-rounded">
+            <div class="d-flex align-items-center justify-content-between">
+            <h4 class="card-title  card-title-dash">Product Sales</h4>
+            <div class="add-items d-flex mb-0">
+              <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0 pl-12p"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#newPercentageModal"
+              >
+              <i class="mdi mdi-plus"></i>
+            </button>
+            </div>
+            </div>
+            {% for product in in_sales %}
+            <div class="list align-items-center border-bottom py-2">
+              <div class="wrapper w-100">
+                <p class="mb-2 font-weight-medium">
+                  {{ product.product|title }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class="mdi mdi-calendar text-muted me-1"></i>
+                    <p class="mb-0 text-small text-muted">{{ product.percent_off }}% OFF</p>
+                  </div>
+                  <div>
+                    <form action="" method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="product" value="{{ product.product_id }}">
+                      <input type="hidden" name="source" value="cancel_discount">
+                      <button type="submit" class="text-danger border-0 bg-white d-flex align-items-center">
+                        <small>Cancel</small>
+                        <i class="mdi mdi-arrow-right ms-2"></i>
+                      </button>
+                    </form>
+                  </div> 
+                </div>
+              </div>
+            </div>
+            {% endfor %}            
+            <div class="list align-items-center pt-3">
+              <div class="wrapper w-100">
+                <form method="post">
+                  {% csrf_token %}
+                <p class="mb-0">
+                  <input type="hidden" name="source" value="cancel_all_sales">
+                  <button class="fw-bold text-primary border-0 bg-white d-flex align-items-center">
+                    <small>Cancel all</small>
+                    <i class="mdi mdi-arrow-right ms-2"></i>
+                  </button>
+                </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        <div class="col-md-4 col-lg-4 grid-margin stretch-card">
+        <div class="card card-rounded">
+          <div class="card-body card-rounded">
+            <div class="d-flex align-items-center justify-content-between">
+            <h4 class="card-title  card-title-dash">Category Sales</h4>
+            <div class="add-items d-flex mb-0">
+              <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0 pl-12p"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#newCategorySaleModal"
+              >
+              <i class="mdi mdi-plus"></i>
+            </button>
+            </div>
+            </div>
+            {% for category in category_sales %}
+            <div class="list align-items-center border-bottom py-2">
+              <div class="wrapper w-100">
+                <p class="mb-2 font-weight-medium">
+                  {{ category.category|title }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class="mdi mdi-calendar text-muted me-1"></i>
+                    <p class="mb-0 text-small text-muted">{{ category.percent_off }}% OFF</p>
+                  </div>
+                  <div>
+                    <form action="" method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="category" value="{{ category.category }}">
+                      <input type="hidden" name="source" value="cancel_category_sale">
+                      <button type="submit" class="text-danger border-0 bg-white d-flex align-items-center">
+                        <small>Cancel</small>
+                        <i class="mdi mdi-arrow-right ms-2"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list align-items-center pt-3">
+              <div class="wrapper w-100">
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="source" value="cancel_all_category_sales">
+                <p class="mb-0">
+                  <button type="submit" class="fw-bold text-primary border-0 bg-white d-flex align-items-center">
+                    <small>Cancel all</small>
+                    <i class="mdi mdi-arrow-right ms-2"></i>
+                  </button>
+                </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        <div class="col-md-4 col-lg-4 grid-margin stretch-card">
+        <div class="card card-rounded">
+          <div class="card-body card-rounded">
+            <div class="d-flex align-items-center justify-content-between">
+            <h4 class="card-title  card-title-dash">Coupons</h4>
+            <div class="add-items d-flex mb-0">
+              <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0 pl-12p"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#newCouponModal"
+                >
+                <i class="mdi mdi-plus"></i>
+              </button>
+            </div>
+            </div>
+            {% for coupon in coupons %}
+            <div class="list align-items-center border-bottom py-2">
+              <div class="wrapper w-100">
+                <p class="mb-2 font-weight-medium">
+                  #{{ coupon.coupon_id }} - <small>{{ coupon.status|title }}</small>
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class="mdi mdi-calendar text-muted me-1"></i>
+                    <p class="mb-0 text-small text-muted">{{ coupon.percent_off }}% OFF on all shopping</p>
+                  </div>
+                  <div>
+                    {% if coupon.status == 'active' %}
+                    <form action="" method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="coupon_id" value="{{ coupon.coupon_id }}">
+                      <input type="hidden" name="source" value="cancel_coupon">
+                      <button class="text-danger border-0 bg-white d-flex align-items-center">
+                        <small>Deactivate</small>
+                        <i class="mdi mdi-arrow-right ms-2"></i>
+                      </button>
+                    </form>
+                    {% else %}
+                    <form action="" method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="coupon_id" value="{{ coupon.coupon_id }}">
+                      <input type="hidden" name="source" value="delete_coupon">
+                      <button type="submit" class="text-danger border-0 bg-white d-flex align-items-center">
+                        <small>Delete</small>
+                        <i class="mdi mdi-arrow-right ms-2"></i>
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %} 
+            <div class="list align-items-center pt-3">
+              <div class="wrapper w-100">
+                <form action="" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="source" value="cancel_all_coupons">
+                <p class="mb-0">
+                  <button type="submit" class="fw-bold text-primary border-0 bg-white d-flex align-items-center">
+                    <small>Cancel all</small>
+                    <i class="mdi mdi-arrow-right ms-2"></i>
+                  </button>
+                </p>  
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        <div class="col-md-4 col-lg-4 grid-margin stretch-card">
+        <div class="card card-rounded">
+          <div class="card-body card-rounded">
+            <div class="d-flex align-items-center justify-content-between">
+            <h4 class="card-title  card-title-dash">Deal of The Day</h4>
+            <div class="add-items d-flex mb-0">
+              <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0 pl-12p"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#todaysDealModal"
+                >
+                <i class="mdi mdi-plus"></i>
+              </button>
+            </div>
+            </div>
+            {% for deal in todays_deals %}
+            <div class="list align-items-center border-bottom py-2">
+              <div class="wrapper w-100">
+                <p class="mb-2 font-weight-medium">
+                  {{ deal.object.product|title }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class="mdi mdi-calendar text-muted me-1"></i>
+                    <p class="mb-0 text-small text-muted">KSH. <strong>{{ deal.object.discount }}</strong> Discount
+                      &nbsp;
+                      EXPIRES: {{ deal.object.time|date:"d/m/y - H:i:s" }}</p>
+                  </div>
+                  <div>
+                    {% if deal.object.status == 'active' %}
+                  <form action="" method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="deal_id" value="{{ deal.object.id }}">
+                      <input type="hidden" name="source" value="deactivate_todays_deal">
+                      <button type="submit" class="text-danger border-0 bg-white d-flex align-items-center">
+                        <small>Deactivate</small>
+                        <i class="mdi mdi-arrow-right ms-2"></i>
+                      </button>
+                    </form>
+                    {% else %}
+                      <a href="{% url 'dash_delete' app_label=deal.app_label model_name=deal.model_name object_id=deal.object.id %}"
+                        class="text-danger border-0 bg-white d-flex align-items-center">
+                        <small>Delete</small>
+                        <i class="mdi mdi-arrow-right ms-2"></i>
+                      </a>
+                    {% endif %} 
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list align-items-center pt-3">
+              <div class="wrapper w-100">
+                <p class="mb-0">
+                  <a href="#" class="fw-bold text-primary">Cancel all <i class="mdi mdi-arrow-right ms-2"></i></a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+
+</div>
+
+<!-- New % Off Modal -->
+<div class="modal fade" id="newPercentageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sale Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <select name="product" class="form-select" required>
+                              <option value="" disabled selected>----------------------------------------------------------------------</option>
+                              {% for product in products %}
+                              <option value="{{ product.product_id }}">{{ product.product|title }}</option>
+                              {% endfor %}
+                            </select>
+                            <label>Product</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input class="form-control" name="amount" type="number" required>
+                            <label>Percent Off</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_percent_off">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Add Sale</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- New % Off Modal -->
+
+
+<!-- New Discount Modal -->
+<div class="modal fade" id="newDiscountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Discount Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <select name="product" class="form-select" required>
+                              <option value="" disabled selected>----------------------------------------------------------------------</option>
+                              {% for product in products %}
+                              <option value="{{ product.product_id }}">{{ product.product|title }}</option>
+                              {% endfor %}
+                            </select>
+                            <label>Product</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input class="form-control" name="amount" type="number" required>
+                            <label>Amount in KSH</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_discount">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Add Discount</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- New Discount Modal -->
+
+<!-- New Category Sale Modal -->
+<div class="modal fade" id="newCategorySaleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sale Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <select name="category" class="form-select" required>
+                              <option value="" disabled selected>----------------------------------------------------------------------</option>
+                              {% for category in categories %}
+                              <option value="{{ category.category }}">{{ category.category|title }}</option>
+                              {% endfor %}
+                            </select>
+                            <label>Category</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input class="form-control" name="amount" type="number" required>
+                            <label>Percent Off</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_category_sale">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Add Sale</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- New Discount Modal -->
+<!-- New Coupon Modal -->
+<div class="modal fade" id="newCouponModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Coupon Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input class="form-control" name="amount" type="number" required>
+                            <label>Percent Off</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_coupon">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Create Coupon</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- New Coupon Modal -->
+<!-- Todays Deal Modal -->
+<div class="modal fade" id="todaysDealModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Discount Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <select name="product" class="form-select" required>
+                              <option value="" disabled selected>----------------------------------------------------------------------</option>
+                              {% for product in all_products %}
+                              <option value="{{ product.product_id }}">{{ product.product|title }}</option>
+                              {% endfor %}
+                            </select>
+                            <label>Product</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input class="form-control" name="amount" type="number" required>
+                            <label>Discount in KSH.</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <input class="form-control" name="duration" type="number" required>
+                            <label>Duration in HOURS.</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_todays_deal">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Add Discount</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Todays Deal Modal -->
+
+
+{% endblock %}

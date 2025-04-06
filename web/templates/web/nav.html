@@ -1,0 +1,84 @@
+{% load static %}
+
+<!-- ======= Header ======= -->
+<header id="header" class="fixed-top d-grid align-items-center">
+  <div class="container d-flex align-items-center justify-content-between">
+    <h1 class="logo"><a href="{% url 'home' %}">MaDuka</a></h1>
+    <nav id="navbar" class="navbar">
+      <ul>
+        <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
+        <li><a class="nav-link scrollto" href="{% url 'all_shops' %}">Shops</a></li>
+        <li><a class="nav-link scrollto" href="#about">About</a></li>
+        <li><a href="">Blog</a></li>
+        <li><a class="nav-link scrollto" href="#contact">Contact Us</a></li>
+        {% if request.user.is_authenticated %}
+        <li><a href="{% url 'sign_out' %}">Sign Out</a></li>
+        {% else %}
+        <li><a class="getstarted" href="{% url 'sign_in' %}">Sign In</a></li>
+        {% endif %} {% if profile.shop %}
+        <li><a class="getstarted" href="{% url 'dash' %}">{{ profile.shop }}</a></li>
+        {% else %} {% if request.user.is_authenticated %}
+        <li>
+          <a class="getstarted" data-bs-toggle="modal" data-bs-target="#newShopModal" href="#">Register Shop</a>
+        </li>
+        {% endif %} {% endif %}
+      </ul>
+      <i class="bi bi-list mobile-nav-toggle"></i>
+    </nav>
+    <!-- .navbar -->
+  </div>
+  {% if messages %} {% for message in messages %}
+  <div class="alert all-shops alert-dismissible fade show text-center" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %} {% endif %}
+</header>
+<!-- End Header -->
+
+<!-- New Shop Modal -->
+<div class="modal fade" id="newShopModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Register Shop Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Floating Labels Form -->
+        <form class="row g-3" method="post">
+          {% csrf_token %}
+          <div class="col-md-12">
+            <div class="form-floating">
+              <input type="text" name="name" class="form-control">
+              <label>Shop Name</label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-floating">
+              <select name="category" class="form-select">
+                <option selected>-------------------------</option>
+                {% for category in shop_categories %}
+                <option value="{{ category.category }}">{{ category.category|capfirst }}</option>
+                {% endfor %}
+              </select>
+              <label>Category</label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div>
+              <textarea class="w-100 form-control" name="bio" rows="5" placeholder="Short Bio"></textarea>
+            </div>
+          </div>
+          <input type="hidden" name="source" value="new_shop">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">Submit</button>
+          </div>
+        </form>
+        <!-- End floating Labels Form -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- New Shop Modal -->

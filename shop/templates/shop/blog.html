@@ -1,0 +1,151 @@
+{% extends 'shop/main.html' %}
+{% load humanize %}
+{% block main %}
+
+<!--====== App Content ======-->
+<div class="app-content">
+    {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-y-90">
+        <!--====== Section Intro ======-->
+        <div class="section__intro u-s-m-b-60">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h1 class="section__heading u-c-secondary">BLOG POSTS</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Intro ======-->
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9 col-md-8 col-sm-12">
+                    {% for p in posts %}
+                    <div class="bp bp--img u-s-m-b-30">
+                        <div class="bp__wrap">
+                            <div class="bp__thumbnail">
+                                <!--====== Image Code ======-->
+                                <a class="aspect aspect--bg-grey aspect--1366-768 u-d-block" href="blog-detail.html">
+                                    <img class="aspect__img" src="{{ p.avatar.url }}">
+                                </a>
+                                <!--====== End - Image Code ======-->
+                            </div>
+                            <div class="bp__info-wrap">
+                                <div class="bp__stat">
+                                    <span class="bp__stat-wrap">
+                                        <span class="bp__publish-date">
+                                            <a href="blog-right-sidebar.html"><span>{{ p.timestamp }}</span></a>
+                                        </span>
+                                    </span>
+                                    <span class="bp__stat-wrap">
+                                        <span class="bp__author">
+                                            <a href="blog-right-sidebar.html">{{ p.author|title }}</a>
+                                        </span>
+                                    </span>
+                                    <span class="bp__stat-wrap">
+                                        <span class="bp__comment">
+                                            <a href="blog-detail.html">
+                                                <i class="far fa-comments u-s-m-r-4"></i>
+                                                <span>8</span>
+                                            </a>
+                                        </span>
+                                    </span>
+                                    <span class="bp__stat-wrap">
+                                        <span class="bp__category">
+                                            <a href="blog-right-sidebar.html">{{ p.category.category|title }}</a>
+                                        </span>
+                                    </span>
+                                </div>
+                                <span class="bp__h1">
+                                    <a href="{% url 'blog_details' the_shop.name p.blogID %}">{{ p.title|title }}</a>
+                                </span>
+                                <span class="bp__h2">{{ p.summary|capfirst }}</span>
+                                <div class="blog-t-w">
+                                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Travel</a>
+                                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Culture</a>
+                                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Place</a>
+                                </div>
+                                <p class="bp__p">{{ p.content|capfirst|truncatechars:200 }}</p>
+                                <div class="gl-l-r">
+                                    <div>
+                                        <span class="bp__read-more">
+                                            <a href="{% url 'blog_details' the_shop.name p.blogID %}">READ MORE</a>
+                                        </span>
+                                    </div>
+                                    <ul class="bp__social-list">
+                                        <li>
+                                            <a class="s-fb--color" href="#"><i class="fab fa-facebook-f"></i></a>
+                                        </li>
+                                        <li>
+                                            <a class="s-tw--color" href="#"><i class="fab fa-twitter"></i></a>
+                                        </li>
+                                        <li>
+                                            <a class="s-insta--color" href="#"><i class="fab fa-instagram"></i></a>
+                                        </li>
+                                        <li>
+                                            <a class="s-wa--color" href="#"><i class="fab fa-whatsapp"></i></a>
+                                        </li>
+                                        <li>
+                                            <a class="s-gplus--color" href="#"><i class="fab fa-google-plus-g"></i></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <nav class="post-center-wrap u-s-p-y-60">
+                        <!--====== Pagination ======-->
+                        <ul class="blog-pg">
+                            <li class="blog-pg--active">
+                                <a href="blog-right-sidebar.html">1</a>
+                            </li>
+                            <li>
+                                <a href="blog-right-sidebar.html">2</a>
+                            </li>
+                            <li>
+                                <a href="blog-right-sidebar.html">3</a>
+                            </li>
+                            <li>
+                                <a href="blog-right-sidebar.html">4</a>
+                            </li>
+                            <li>
+                                <a class="fas fa-angle-right" href="blog-right-sidebar.html"></a>
+                            </li>
+                        </ul>
+                        <!--====== End - Pagination ======-->
+                    </nav>
+                </div>
+                {% include 'shop/blog_sidebar.html' %}
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section 1 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+{% endblock %}

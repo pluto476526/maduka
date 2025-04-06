@@ -1,0 +1,341 @@
+{% extends 'shop/main.html' %}
+{% load humanize %}
+{% block main %}
+
+
+
+<!--====== App Content ======-->
+<div class="app-content">
+
+   {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+
+    {% if cart_items %}
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div id="checkout-msg-group">
+                            <div class="msg">
+                                <span class="msg__text">Have a coupon?
+                                    <a class="gl-link" href="#have-coupon" data-toggle="collapse">Click Here to enter your code</a>
+                                </span>
+                                <div class="collapse" id="have-coupon" data-parent="#checkout-msg-group">
+                                    <div class="c-f u-s-m-b-16">
+                                        <span class="gl-text u-s-m-b-16">Enter your coupon code if you have one.</span>
+                                        <form class="c-f__form" method="post">
+                                            {% csrf_token %}
+                                            <div class="u-s-m-b-16">
+                                                <div class="u-s-m-b-15">
+                                                    <label for="coupon"></label>
+                                                    <input type="hidden" name="source" value="coupon_form">
+                                                    <input class="input-text input-text--primary-style" type="text" id="coupon" name="coupon" placeholder="Coupon Code">
+                                                </div>
+                                                <div class="u-s-m-b-15">
+                                                    <button class="btn btn--e-transparent-brand-b-2" type="submit">APPLY</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+    {% endif %}
+
+
+    <!--====== Section 3 ======-->
+    <div class="u-s-p-b-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="checkout-f">
+                    <div class="row">
+                        {% if cart_items %}
+                        <div class="col-lg-6">
+                            <h1 class="checkout-f__h1">ORDER SUMMARY</h1>
+                            <!--====== Order Summary ======-->
+                            <div class="o-summary">
+                                <div class="o-summary__section u-s-m-b-30">
+                                    <div class="o-summary__item-wrap gl-scroll">
+                                        {% for c in cart_items %}
+                                        <div class="o-card">
+                                            <div class="o-card__flex">
+                                                <div class="o-card__img-wrap">
+                                                    <img class="u-img-fluid" style="height: 100%;" src="{{ c.objects.product.avatar1.url }}" alt="">
+                                                </div>
+                                                <div class="o-card__info-wrap">
+                                                    <span class="o-card__name">
+                                                        <a href="product-detail.html">{{ c.objects.product.product|title }}</a>
+                                                    </span>
+                                                    <span class="o-card__quantity">{{ c.objects.quantity|intcomma }} {{ c.objects.product.units.units }}</span>
+                                                    <span class="o-card__price">KES. {{ c.objects.total|intcomma }}</span>
+                                                </div>
+                                            </div>
+                                            <a class="o-card__del far fa-trash-alt" href="{% url 'shop_delete' the_shop.name c.model_name c.objects.id %}"></a>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="o-summary__section u-s-m-b-30">
+                                    <div class="o-summary__box">
+                                        <h1 class="checkout-f__h1">SHIPPING ADDRESS</h1>
+                                        <div class="ship-b">
+                                            {% if default_addr and default_addr.county.id == my_cart.county.id %}
+                                            <span class="ship-b__text">Ship to:</span>
+                                            {% endif %}
+                                            <div class="ship-b__box u-s-m-b-10">
+                                                {% if default_addr and default_addr.county.id == my_cart.county.id %}
+                                                <p class="ship-b__p">{{ default_addr.county.county|title }} county,  {{ default_addr.town|title }}, {{ default_addr.street }}</p>
+                                                {% endif %}
+                                                <a class="ship-b__edit btn--e-transparent-platinum-b-2" data-modal="modal" data-modal-id="#edit-ship-address">Edit</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o-summary__section u-s-m-b-30">
+                                    <div class="o-summary__box">
+                                        <table class="o-summary__table">
+                                            <tbody>
+                                                <tr>
+                                                    <td>SUBTOTAL</td>
+                                                    <td>KES. {{ my_cart.original_price|intcomma }}</td>
+                                                </tr>
+                                                {% if my_cart.county %}
+                                                <tr>
+                                                    <td>SHIPPING - {{ my_cart.county.county|title }}</td>
+                                                    <td>+ KES. {{ my_cart.county.price|intcomma }}</td>
+                                                </tr>
+                                                {% endif %}
+                                                {% if my_cart.coupon %}
+                                                <tr>
+                                                    <td>COUPON</td>
+                                                    <td>- {{ my_cart.coupon.percent_off }}%</td>
+                                                </tr>
+                                                {% endif %}
+                                                <tr>
+                                                    <td>GRAND TOTAL</td>
+                                                    <td>KES. {{ my_cart.total_price|intcomma }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="o-summary__section u-s-m-b-30">
+                                    <div class="o-summary__box">
+                                        <h1 class="checkout-f__h1">PAYMENT METHODS</h1>
+                                        <form class="checkout-f__payment" method="post">
+                                            {% csrf_token %}
+                                            {% for p in payment_methods %}
+                                            <div class="u-s-m-b-10">
+                                                <!--====== Radio Box ======-->
+                                                <div class="radio-box">
+                                                    <input type="radio" id="method-{{ p.id }}" name="payment" value="{{ p.id }}" required>
+                                                    <div class="radio-box__state radio-box__state--primary">
+                                                        <label class="radio-box__label" for="method-{{ p.id }}">{{ p.method|title }}</label>
+                                                    </div>
+                                                </div>
+                                                <!--====== End - Radio Box ======-->
+                                            </div>
+                                            {% endfor %}
+                                            <br><br>
+                                            <input type="hidden" name="source" value="place_order">
+                                            <div>
+                                                <button class="btn btn--e-brand-b-2" type="submit">PLACE ORDER</button>
+                                            </div>
+                                        </form>
+                                        <br>
+                                        <form class="checkout-f__payment" method="post">
+                                            <input type="hidden" name="source" value="cancel_order">
+                                            <div>
+                                                <button class="btn btn--e-transparent-platinum-b-2" type="submit">CANCEl ORDER</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--====== End - Order Summary ======-->
+                        </div>
+                        {% endif %}
+                        <div class="col-lg-6 {% if not cart_items %} col-lg-12 {% endif %}">
+                            <h1 class="checkout-f__h1">DELIVERY INFORMATION</h1>
+                            <form class="checkout-f__delivery">
+                                <div class="u-s-m-b-30">
+                                    Here, each model is represented by a class that subclasses django.db.models.Model. Each model has a number of class variables, each of which represents a database field in the model. Each field is represented by an instance of a Field class – e.g., CharField for character fields and DateTimeField for datetimes. This tells Django what type of data each field holds. The name of each Field instance (e.g. question_text or pub_date) is the field’s name, in machine-friendly format.
+                                    <br><br>
+                                    You’ll use this value in your Python code, and your database will use it as the column name. You can use an optional first positional argument to a Field to designate a human-readable name. That’s used in a couple of introspective parts of Django, and it doubles as documentation. If this field isn’t provided, Django will use the machine-readable name. In this example, we’ve only defined a human-readable name for Question.pub_date. For all other fields in this model, the field’s machine-readable name will suffice as its human-readable name.
+                                    <br><br>
+                                    Some Field classes have required arguments. CharField, for example, requires that you give it a max_length. That’s used not only in the database schema, but in validation, as we’ll soon see. A Field can also have various optional arguments; in this case, we’ve set the default value of votes to 0. Finally, note a relationship is defined, using ForeignKey. That tells Django each Choice is related to a single Question. Django supports all the common database relationships: many-to-one, many-to-many, and one-to-one.
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 3 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+<!--====== Modal Section ======-->
+
+
+<!--====== Shipping Address Add Modal ======-->
+<div class="modal fade" id="edit-ship-address">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="checkout-modal2">
+                    <div class="u-s-m-b-30">
+                        <div class="dash-l-r">
+                            <h1 class="gl-modal-h1">Shipping Address</h1>
+                            <div class="dash__link dash__link--brand">
+                                <a data-modal="modal" data-modal-id="#add-ship-address" data-dismiss="modal">Add new Address</a>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="checkout-modal2__form" method="post">
+                        {% csrf_token %}
+                        <div class="dash__table-2-wrap u-s-m-b-30 gl-scroll">
+                            <table class="dash__table-2">
+                                <thead>
+                                    <tr>
+                                        <th>Town</th>
+                                        <th>Street</th>
+                                        <th>House</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in addresses %}
+                                    <tr>
+                                        <td>{{ a.town|title }}</td>
+                                        <td>{{ a.street }}</td>
+                                        <td>{{ a.house }}</td>
+                                        <td>
+                                            <!--====== Radio Box ======-->
+                                            <div class="radio-box">
+                                                <input type="radio" id="address-{{ a.id }}" name="default-address" value="{{ a.id }}" {% if a.id == default_addr.id %} checked {% endif %}>
+                                                <div class="radio-box__state radio-box__state--primary">
+                                                    <label class="radio-box__label" for="address-{{ a.id }}"></label>
+                                                </div>
+                                            </div>
+                                            <!--====== End - Radio Box ======-->
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" name="source" value="edit_default_addr">
+                        <input type="hidden" name="addr_id" id="selected-addr-id">
+                        <div class="gl-modal-btn-group">
+                            <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
+                            <button class="btn btn--e-grey-b-2" type="button" data-dismiss="modal">CANCEL</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Shipping Address Add Modal ======-->
+
+
+
+<!--====== Shipping Address Add Modal ======-->
+<div class="modal fade" id="add-ship-address">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="checkout-modal1">
+                    <form class="checkout-modal1__form" method="post">
+                        {% csrf_token %}
+                        <div class="u-s-m-b-30">
+                            <h1 class="gl-modal-h1">Create Shipping Address</h1>
+                        </div>
+                        <div class="gl-inline">
+                            <div class="u-s-m-b-30">
+                                <!--====== Select Box ======-->
+                                <label class="gl-label">County *</label>
+                                    <select class="select-box select-box--primary-style" name="countyID" required>
+                                        <option>-------------------------</option>
+                                        {% for c in counties %}
+                                        <option value="{{ c.id }}">{{ c.county|title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                <!--====== End - Select Box ======-->
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">Town *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="town" placeholder="Nearest Town" required>
+                            </div>
+                        </div>
+                        <div class="gl-inline">
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">STREET *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="street" placeholder="Street Name" required>
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">HOUSE *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="house" placeholder="House Number Or Name" required>
+                            </div>
+                        </div>
+                        <input type="hidden" name="source" value="new_address">
+                        <div class="gl-modal-btn-group">
+                            <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
+                            <button class="btn btn--e-grey-b-2" type="button" data-dismiss="modal">CANCEL</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Shipping Address Add Modal ======-->
+<!--====== End - Modal Section ======-->
+
+<script>
+    // JavaScript to update the hidden addr_id field based on the selected radio button
+    document.querySelectorAll('input[name="default-address"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            document.getElementById('selected-addr-id').value = this.value;
+        });
+    });
+</script>
+
+{% endblock  %}

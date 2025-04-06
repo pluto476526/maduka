@@ -1,0 +1,113 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="card-title">Help Desk</h4>
+                            <p class="card-description">
+                                Report any issues you have to get a ticket number. You can also ask questions and an admin will respond.
+                            </p>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button"
+                                data-bs-toggle="modal" data-bs-target="#helpModal">
+                                <i class="mdi mdi-account-plus"></i>
+                                Get Ticket
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        {% for ticket in tickets %}
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <div class="card {% if ticket.is_sorted == True %}bg-success{% else %}bg-danger{% endif %} card-rounded">
+                                <div class="card-header">
+                                    <h4 class="card-title text-white my-1">Ticket ID: {{ ticket.help_id }}</h4>
+                                    <button class="btn btn-sm btn-dark my-1" type="button" data-bs-toggle="collapse" data-bs-target="#ticket-{{ ticket.help_id }}">Details</button>
+                                </div>
+                                <div id="ticket-{{ ticket.help_id }}" class="collapse">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-white my-1">Issue: {{ ticket.issue|title }}</h6>
+                                        <p class="text-light my-1 mb-3">{{ ticket.description|capfirst }}</p>
+                                        <p><small class="text-light">Created On: {{ ticket.timestamp }}</small></p>
+                                        <p><small class="text-light">Status: {{ ticket.status|title }}</small></p>
+                                        {% if ticket.admin and ticket.admin != None %}
+                                        <p><small class="text-light">Admin: {{ ticket.admin|title }}</small></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content-wrapper ends -->
+
+
+  <!-- Help Modal -->
+  <div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ticket Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Floating Labels Form -->
+                <form class="row g-3" method="post">
+                    {% csrf_token %}
+                    <div class="col-md-12">
+                        <div class="form-floating">
+                            <input type="text" name="phone" class="form-control">
+                            <label>Phone</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-floating">
+                            <input type="email" name="email" value="{{ request.user.email }}" class="form-control">
+                            <label>Email Address</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-floating">
+                            <input type="text" name="issue" class="form-control">
+                            <label>Issue</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div>
+                            <textarea class="w-100 border p-3" name="description" rows="10" placeholder="Short Description"></textarea>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="new_ticket">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Submit</button>
+                    </div>
+                </form>
+                <!-- End floating Labels Form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Help Modal -->
+
+
+{% endblock %}

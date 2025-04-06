@@ -1,0 +1,204 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% load humanize %}
+{% block main %}
+<style>
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+    }
+
+    small:hover {
+        text-decoration: underline;
+    }
+    
+    .badge {
+        font-size: 0.9rem;
+    }
+</style>
+<div class="content-wrapper">
+    <div class="row">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <!-- Results Section -->
+    {% if tracked_order %}
+    <div class="row justify-content-center">
+        <div class="d-flex justify-content-center">
+            <h2>Search Results:</h2>
+        </div>
+        <div class="col-md-10">
+            <ul class="list-group">
+                <!-- List Group Item Template -->
+                {% for order in tracked_order %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Order #{{ order.order_number }}</div>
+                        {% if order.username %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Customer: </strong> <small>{{ order.username.username|title }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if order.unregistered_user %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Customer: </strong> <small>{{ order.unregistered_user|title }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Phone Number: </strong> <small>{{ order.phone }}</small>
+                            </div>
+                        </div>
+                        {% if order.email %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Email Address: </strong> <small>{{ order.email }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if order.address %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Delivery Address: </strong> <small>{{ order.address.county.county|title }} County, {{ order.address.town|title }} Town, {{ order.address.street }} Street., House {{ order.address.house }}.</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Status: </strong> <small>{{ order.status|title }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Total Amount: </strong> <small>KSH. {{ order.total|intcomma }}</small>
+                            </div>
+                        </div>
+                        {% if order.note %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Instructions: </strong><br>
+                                <small>{{ order.note|capfirst }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Placed on: </strong> <small>{{ order.timestamp }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Confirmed on: </strong>
+                                <small>
+                                    {% if order.time_confirmed %}
+                                    {{ order.time_confirmed }}
+                                    {% else %}
+                                    Not yet confirmed
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Dispatched on: </strong>
+                                <small>
+                                    {% if order.time_in_transit %}
+                                    {{ order.time_in_transit }}
+                                    {% else %}
+                                    Not yet dispatched
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Completed on: </strong>
+                                <small>
+                                    {% if order.time_completed %}
+                                    {{ order.time_completed }}
+                                    {% else %}
+                                    Not yet completed
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        {% if order.driver %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Driver: </strong> <small>{{ order.driver.user|title }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if order.admin %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Admin: </strong> <small>{{ order.admin|title }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if order.discount %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Discount: KSH. </strong> <small>{{ order.discount }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck me-3 text-success fs-4"></i>
+                            <div>
+                                <strong>Source: </strong> <small>{{ order.source|title }}</small>
+                            </div>
+                        </div>
+
+                    </div>
+                    <a href="{% url 'order_details' order.order_number %}"><span class="badge bg-success rounded-pill">View Items</span></a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% else %}
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Search by order number</div>
+                        <small>This page displays results of an order you search</small><br>
+                        <small>Hit the search icon in the nav enter the order number and hit enter</small>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<!-- content-wrapper ends -->
+
+{% endblock %}

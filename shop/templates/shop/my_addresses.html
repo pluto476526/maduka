@@ -1,0 +1,205 @@
+{% extends 'shop/main.html' %}
+{% block main %}
+
+<!--====== App Content ======-->
+<div class="app-content">
+    {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="dash">
+                <div class="container">
+                    <div class="row">
+                       {% include 'shop/shop_sidebar.html' %}
+                        <div class="col-lg-9 col-md-12">
+                            <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
+                                <div class="dash__pad-2">
+                                    <div class="dash__address-header">
+                                        <h1 class="dash__h1">Address Book</h1>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dash__box dash__box--shadow dash__box--bg-white dash__box--radius u-s-m-b-30">
+                                <div class="dash__table-2-wrap gl-scroll">
+                                    <table class="dash__table-2">
+                                        <thead>
+                                            <tr>
+                                                <th>County</th>
+                                                <th>Town</th>
+                                                <th>Street</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for a in addresses %}
+                                            <tr>
+                                                <td>{{ a.county.county|title }}</td>
+                                                <td>{{ a.town|title }}</td>
+                                                <td>{{ a.street }}</td>
+                                                <td><a data-modal="modal" data-modal-id="#edit-ship-address{{ a.id }}" data-dismiss="modal" class="address-book-edit btn--e-transparent-platinum-b-2">View</a></td>
+                                            </tr>
+
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <a data-modal="modal" data-modal-id="#add-ship-address" data-dismiss="modal" class="dash__custom-link btn--e-brand-b-2">
+                                    <i class="fas fa-plus u-s-m-r-8"></i>
+                                    <span>New Address</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+<!--====== Shipping Address Add Modal ======-->
+<div class="modal fade" id="add-ship-address">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="checkout-modal1">
+                    <form class="checkout-modal1__form" method="post">
+                        {% csrf_token %}
+                        <div class="u-s-m-b-30">
+                            <h1 class="gl-modal-h1">Create Shipping Address</h1>
+                        </div>
+                        <div class="gl-inline">
+                            <div class="u-s-m-b-30">
+                                <!--====== Select Box ======-->
+                                <label class="gl-label">County *</label>
+                                    <select class="select-box select-box--primary-style" name="countyID" required>
+                                        <option>-------------------------</option>
+                                        {% for c in counties %}
+                                        <option value="{{ c.id }}">{{ c.county|title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                <!--====== End - Select Box ======-->
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">Town *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="town" placeholder="Nearest Town" required>
+                            </div>
+                        </div>
+                        <div class="gl-inline">
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">STREET *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="street" placeholder="Street Name" required>
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">HOUSE *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="house" placeholder="House Number Or Name" required>
+                            </div>
+                        </div>
+                        <input type="hidden" name="source" value="new_address">
+                        <div class="gl-modal-btn-group">
+                            <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
+                            <button class="btn btn--e-grey-b-2" type="button" data-dismiss="modal">CANCEL</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Shipping Address Add Modal ======-->
+
+<!--====== Edit Shipping Address Modal ======-->
+{% for a in addresses %}
+<div class="modal fade" id="edit-ship-address{{ a.id }}">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="checkout-modal1">
+                    <form class="checkout-modal1__form" method="post">
+                        {% csrf_token %}
+                        <div class="u-s-m-b-30">
+                            <h1 class="gl-modal-h1">Update Shipping Address</h1>
+                        </div>
+                        <div class="gl-inline">
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">County *</label>
+                                <select class="select-box select-box--primary-style" name="countyID" required>
+                                    <option>--------------------------</option>
+                                    {% for c in counties %}
+                                    <option value="{{ c.id }}" {% if c.id == a.county.id %} selected {% endif %}>{{ c.county|title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">Nearest Town *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="town" value="{{ a.town }}" required>
+                            </div>
+                        </div>
+                        <div class="gl-inline">
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">STREET *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="street" value="{{ a.street }}" required>
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label">HOUSE *</label>
+                                <input class="input-text input-text--primary-style" type="text" name="house" value="{{ a.house }}" required>
+                            </div>
+                        </div>
+                        <div class="gl-inline">
+                            <!--====== Check Box ======-->
+                            <div class="check-box u-s-m-b-30">
+                                <input type="checkbox" name="set_default" value="True" {% if a.is_default == True %} checked {% endif %}>
+                                <div class="check-box__state check-box__state--primary">
+                                    <label class="check-box__label">Set as Default</label>
+                                </div>
+                            </div>
+                            <!--====== End - Check Box ======-->
+                        </div>
+                        <input type="hidden" name="addressID" value="{{ a.id }}">
+                        <input type="hidden" name="countyID" value="{{ a.county.id }}">
+                        <input type="hidden" name="source" value="edit_address">
+                        <div class="gl-modal-btn-group">
+                            <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
+                            <button class="btn btn--e-grey-b-2" type="button" data-dismiss="modal">CANCEL</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<!--====== End - Shipping Address Add Modal ======-->
+
+
+{% endblock %}

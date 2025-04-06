@@ -1,0 +1,91 @@
+{% extends 'shop/main.html' %}
+{% load humanize %}
+{% block main %}
+
+
+
+<!--====== App Content ======-->
+<div class="app-content">
+
+    {% if messages %}
+    {% for m in messages %}
+    <!--====== Messages Section ======-->
+    <div class="u-s-p-y-60">
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="is-marked">
+                                <a href="wishlist.html">{{ m }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End Messages Section ======-->
+    {% endfor %}
+    {% endif %}
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Intro ======-->
+        <div class="section__intro u-s-m-b-60">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h1 class="section__heading u-c-secondary">Coupons</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Intro ======-->
+
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <!--====== Section 9 ======-->
+                        <div class="u-s-p-b-60">
+                            <!--====== Section Content ======-->
+                            <div class="section__content">
+                                <div class="container">
+                                    <div class="row">
+                                        {% for c in coupons %}
+                                        <div class="col-lg-4 col-md-6 u-s-m-b-30">
+                                            <div class="service u-h-100">
+                                                <div class="service__icon"><i class="fas fa-truck"></i></div>
+                                                <div class="service__info-wrap">
+                                                    <span class="service__info-text-1">{{ c.coupon_id }}</span>
+                                                    <span class="service__info-text-2">{{ c.percent_off }}% OFF on all orders</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <!--====== End - Section Content ======-->
+                        </div>
+                        <!--====== End - Section 9 ======-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+{% endblock %}

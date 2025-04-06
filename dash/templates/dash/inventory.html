@@ -1,0 +1,249 @@
+{% extends 'dash/main.html' %} {% load humanize %} {% block main %}
+<div class="content-wrapper">
+  <div class="row">
+    {% if messages %} {% for message in messages %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+    {% endfor %} {% endif %}
+    <div class="col-sm-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-sm-flex justify-content-between align-items-start">
+            <div>
+              <h4 class="card-title">Inventory</h4>
+              <p class="card-description">
+                View and manage your shop inventory.
+              </p>
+            </div>
+            <div>
+              <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button" data-bs-toggle="modal" data-bs-target="#newProductModal" >
+                <i class="mdi mdi-account-plus"></i>
+                New Product
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            {% if products %}
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Price Per Unit</th>
+                  <th>Is Featured</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product in products %}
+                <tr>
+                  <td>{{ product.product|title }}</td>
+                  <td>{{ product.category.category|title }}</td>
+                  <td>{{ product.quantity|intcomma }} {{ product.units.units }}</td>
+                  <td>KSH. {{ product.price|intcomma }}</td>
+                  <td>{{ product.is_featured }}</td>
+                  <td>{{ product.status|capfirst }}</td>
+                  <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                  <td class="d-flex justify-content-start" style="gap: 3px">
+                    <button class="badge badge-info" type="button" data-bs-toggle="modal" data-bs-target="#viewproductModal{{ product.id }}">View</button>
+                    <!-- View product Modal -->
+                    <div class="modal fade" id="viewproductModal{{ product.id }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Inventory Form</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <!-- Floating Labels Form -->
+                            <form class="row g-3" method="post" enctype="multipart/form-data">
+                              {% csrf_token %}
+                              <div class="col-md-12">
+                                <div class="form-floating">
+                                  <input type="text" name="product" class="form-control" value="{{ product.product|title }}" required>
+                                  <label>Product</label>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <div class="form-floating">
+                                  <select name="category" class="form-select">
+                                    {% for category in categories %}
+                                    <option value="{{ category.category }}" {% if category.category == product.category.category %} selected {% endif %}>
+                                      {{ category.category|title }}
+                                    </option>
+                                    {% endfor %}
+                                  </select>
+                                  <label>Category</label>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <div class="form-floating">
+                                    <textarea class="w-100 form-control" name="description"
+                                      style="height: 10rem;">{{ product.description|capfirst }}</textarea>
+                                    <label>Description</label>
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-floating">
+                                  <input type="text" name="quantity" value="{{ product.quantity }}" class="form-control">
+                                  <label>Quantity</label>
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-floating">
+                                  <select name="units" class="form-select" required>
+                                    {% for u in units %}
+                                      <option value="{{ u.id }}" {% if product.units.units == u.units %} selected {% endif %}>{{ u.units|title }}</option>
+                                    {% endfor %}
+                                  </select>
+                                  <label>Units</label>
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-floating">
+                                  <input type="text" name="price" class="form-control" value="{{ product.price }}" required>
+                                  <label>Price per Unit</label>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <div class="d-sm-flex align-items-center gap-3">
+                                  <label>Is Featured</label>
+                                  <input type="checkbox" name="is_featured" class="form-check" value="True" {% if product.is_featured %} checked {% endif %}>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <p>{{ product.avatar1 }}</p>
+                                <div class="d-sm-flex align-items-center gap-3">
+                                  <label>Display Picture</label>
+                                  <input type="file" name="avatar" class="form-file">
+                                </div>
+                              </div>
+                              <input type="hidden" name="source" value="edit_product">
+                              <input type="hidden" name="id" value="{{ product.id }}">
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">
+                                  Close
+                                </button>
+                                <button type="submit" class="btn btn-sm btn-outline-success">Save Changes</button>
+                              </div>
+                            </form>
+                            <!-- End floating Labels Form -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Edit Product Modal -->
+                    <a href="" method="post">
+                      <button class="badge badge-danger" type="button">Delete</button>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- content-wrapper ends -->
+
+<!-- New Product Modal -->
+<div class="modal fade" id="newProductModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Inventory Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Floating Labels Form -->
+        <form class="row g-3" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="col-md-12">
+            <div class="form-floating">
+              <input type="text" name="product" class="form-control" required>
+              <label>Product</label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-floating">
+              <select name="category" class="form-select" required>
+                <option value="" selected disabled>
+                  ------------------------------------------------------
+                </option>
+                {% for category in categories %}
+                <option value="{{ category.category }}">{{ category.category|title }}</option>
+                {% endfor %}
+              </select>
+              <label>Category</label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-floating">
+                <textarea class="w-100 form-control" name="description"
+                style="height: 10rem;"></textarea>
+                <label>Short Description</label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              <input type="text" name="quantity" class="form-control" required>
+              <label>Quantity</label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              <select name="units" class="form-select" required>
+                <option value="" selected disabled>
+                  ----------------------------
+                </option>
+                {% for u in units %}
+                  <option value="{{ u.id }}">{{ u.units|title }}</option>
+                {% endfor %}
+              </select>
+              <label>Units</label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              <input type="text" name="price" class="form-control" required>
+              <label>Price per Unit</label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="d-sm-flex align-items-center gap-3">
+              <label>Is Featured</label>
+              <input type="checkbox" name="is_featured" class="form-check" value="True">
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="d-flex align-items-center gap-3">
+              <label>Display Picture</label>
+              <input type="file" name="avatar" class="form-file">
+            </div>
+          </div>
+          <input type="hidden" name="source" value="new_product">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">Add Product</button>
+          </div>
+        </form>
+        <!-- End floating Labels Form -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- New Product Modal -->
+{% endblock %}

@@ -1,0 +1,579 @@
+{% extends 'web/main.html' %}
+{% load static %}
+{% block main %}
+{% include 'web/nav.html' %}
+
+<!-- ======= Hero Section ======= -->
+<section id="hero">
+  <div class="hero-container">
+    <div id="heroCarousel" data-bs-interval="5000" class="carousel slide carousel-fade" data-bs-ride="carousel">
+      <ol class="carousel-indicators" id="hero-carousel-indicators"></ol>
+      <div class="carousel-inner" role="listbox">
+        <!-- Slide 1 -->
+        <div class="carousel-item active"
+          style="background-image: url(/static/web/img/slide/slide-1.jpg)">
+          <div class="carousel-container">
+            <div class="carousel-content">
+              <h2 class="animate__animated animate__fadeInDown">Hello {{ request.user|title }}</h2>
+              <h2 class="animate__animated animate__fadeInDown">Manage, Sell, and Grow</h2>
+              <p class="animate__animated animate__fadeInUp">Whether you're a retailer, wholesaler, or service provider, MaDuka is designed to meet your business needs.</p>
+              <div>
+                <a href="#about" class="btn-get-started animate__animated animate__fadeInUp scrollto">Read More</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="carousel-item"
+          style="background-image: url(/static/web/img/slide/slide-2.jpg)">
+          <div class="carousel-container">
+            <div class="carousel-content">
+              <h2 class="animate__animated animate__fadeInDown">Empower Your Business</h2>
+              <p class="animate__animated animate__fadeInUp">Running a small business comes with its challenges. With MaDuKa, you're never alone.</p>
+              <div>
+                <a href="#about" class="btn-get-started animate__animated animate__fadeInUp scrollto">Read More</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="carousel-item"
+          style="background-image: url(/static/web/img/slide/slide-3.jpg)">
+          <div class="carousel-container">
+            <div class="carousel-content">
+              <h2 class="animate__animated animate__fadeInDown">Simplify Your Business Operations</h2>
+              <p class="animate__animated animate__fadeInUp">Efficiency is key to running a successful business. Spend less time on admin and more time growing your business.</p>
+              <div>
+                <a href="#about" class="btn-get-started animate__animated animate__fadeInUp scrollto">Read More</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a class="carousel-control-prev" href="#heroCarousel" role="button" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
+      </a>
+      <a class="carousel-control-next" href="#heroCarousel" role="button" data-bs-slide="next">
+        <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
+      </a>
+    </div>
+  </div>
+</section>
+<!-- End Hero -->
+<main id="main">
+  <!-- ======= Shop Section ======= -->
+  <section id="portfolio" class="portfolio section-bg">
+    <div class="container">
+      <div class="section-title">
+        <h2>Shop With Us</h2>
+        <p>
+          Welcome to MaDuka, your ultimate shopping destination! Explore a
+          variety of unique and exciting shops registered on our platform.
+          Ready to start shopping? Find the button below and
+          dive into a world of great products, amazing deals, and a seamless
+          shopping experience. Your next favorite shop is just a click away!
+        </p>
+      </div>
+      <div class="row">
+        <div class="col-lg-12 d-flex justify-content-center">
+          <ul id="portfolio-flters">
+            <li data-filter="*" class="filter-active">All</li>
+            {% for cat in shop_categories %}
+            <li data-filter=".{{ cat.categoryID }}">{{ cat.category }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="row portfolio-container">
+        {% for s in available_shops %}
+        <div class="col-lg-4 col-md-6 portfolio-item {{ s.shop_category.categoryID }}">
+          <div class="portfolio-wrap">
+            <img src="{{ s.avatar1.url }}" class="img-fluid w-100" style="height: 20rem">
+            <div class="portfolio-info">
+              <h4>{{ s.name|title }}</h4>
+              <p>{{ s.bio|truncatechars:100|capfirst }}</p>
+              <div class="portfolio-links">
+                <a href="{{ s.avatar1.url }}" data-gallery="portfolioGallery" class="portfolio-lightbox" title="{{ s.name|title }}">
+                  <i class="bx bx-plus"></i>
+                </a>
+                <a href="{% url 'shop_details' s.slug %}" title="More Details">
+                  <i class="bx bx-link"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="row">
+        <div class="col-lg-12 d-flex justify-content-center pt-1 pb-3">
+          <!-- class="btn btn-lg bg-dark text-light" -->
+          <a class="btn btn-lg all-shops" href="{% url 'all_shops' %}">Start Shopping</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Shop Section -->
+
+  <!-- ======= About Section ======= -->
+  <section id="about" class="about">
+    <div class="container">
+      <div class="row no-gutters">
+        <div class="image col-xl-5 d-flex align-items-stretch justify-content-center justify-content-lg-start"></div>
+        <div class="col-xl-7 ps-0 ps-lg-5 pe-lg-1 d-flex align-items-stretch">
+          <div class="content d-flex flex-column justify-content-center">
+            <h3>What we do</h3>
+            <p>
+              We offer a seamless and enjoyable shopping
+              experience, with easy navigation, secure transactions, and a
+              curated selection of shops to explore. Find the perfect products,
+              support your favorite local businesses, and shop with confidence.
+              <br><br>
+              For shop owners, our intuitive dashboard provides all the tools
+              you need to manage and grow your business. You can easily update
+              your shop, track performance, and connect with customers.
+              <br><br>
+              We're dedicated to making shopping easier and
+              empowering businesses to thrive in the digital world.
+            </p>
+            <div class="row">
+              <div class="col-md-6 icon-box">
+                <i class="bx bx-receipt"></i>
+                <h4>Inventory Management</h4>
+                <p>Track and manage stock levels to ensure you never run dry.</p>
+              </div>
+              <div class="col-md-6 icon-box">
+                <i class="bx bx-cube-alt"></i>
+                <h4>Order Processing</h4>
+                <p>Seamlessly handle customer orders from start to finish.</p>
+              </div>
+              <div class="col-md-6 icon-box">
+                <i class="bx bx-images"></i>
+                <h4>Sales Analytics</h4>
+                <p>Use the dashboard to make data-driven decisions.</p>
+              </div>
+              <div class="col-md-6 icon-box">
+                <i class="bx bx-shield"></i>
+                <h4>User Management</h4>
+                <p>Manage roles and permissions for your team members.</p>
+              </div>
+            </div>
+          </div>
+          <!-- End .content-->
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End About Section -->
+
+  <!-- ======= Services Section ======= -->
+  <section id="services" class="services">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 col-md-6 icon-box">
+          <div class="icon"><i class="bi bi-bar-chart"></i></div>
+          <h4 class="title"><a href="">Customer Engagement</a></h4>
+          <p class="description">
+            Chat with customers, respond to inquiries, and
+            manage feedback. You can also send personalized messages and updates
+            to keep your customers coming back.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-6 icon-box">
+          <div class="icon"><i class="bi bi-brightness-high"></i></div>
+          <h4 class="title"><a href="">Customization</a></h4>
+          <p class="description">
+            Make your shop stand out with personalized branding options. You can
+            update the landing page titles, description, and add custom
+            photographs to reflect your brand’s identity.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-6 icon-box">
+          <div class="icon"><i class="bi bi-calendar4-week"></i></div>
+          <h4 class="title"><a href="">Blogging</a></h4>
+          <p class="description">
+            Share updates, product stories, tutorials, and industry insights to
+            engage customers on a deeper level directly from your dashboard. Use
+            the platform to tell your brand’s story.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Services Section -->
+
+  <!-- ======= Why Us Section ======= -->
+  <section id="why-us" class="why-us section-bg">
+    <div class="container">
+      <div class="section-title">
+        <h2>Why Us</h2>
+      </div>
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="box">
+            <span>01</span>
+            <h4>Empowering Shop Owners</h4>
+            <p>
+              MaDuka gives shop owners the tools to succeed. Our powerful
+              dashboard lets you manage your inventory, process orders, engage
+              with customers, and track performance—all in one place. Whether
+              you're just starting out or scaling up, we help you grow your
+              business.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-4 mt-4 mt-lg-0">
+          <div class="box">
+            <span>02</span>
+            <h4>Seamless Shopping Experience</h4>
+            <p>
+              We offer an intuitive, user-friendly platform that makes shopping
+              simple and enjoyable. With a diverse selection of shops, secure
+              payment processing, easy navigation, and fast order fulfillment,
+              your shopping experience is smooth from start to finish.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-4 mt-4 mt-lg-0">
+          <div class="box">
+            <span>03</span>
+            <h4>Support Every Step of the Way</h4>
+            <p>
+              Our dedicated customer support team is here to help. Whether
+              you're a shopper looking for assistance or a shop owner needing
+              guidance, we’re here to ensure your experience on MaDuka is
+              seamless. For any questions, messages, or feedback feel free to
+              reach us
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Why Us Section -->
+
+
+  <!-- ======= Counts Section ======= -->
+  <section id="counts" class="counts">
+    <div class="container">
+      <div class="row no-gutters">
+        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+          <div class="count-box">
+            <i class="bi bi-emoji-smile"></i>
+            <span data-purecounter-start="0" data-purecounter-end="5432" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Registered Shops</strong> available on our platform</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+          <div class="count-box">
+            <i class="bi bi-journal-richtext"></i>
+            <span data-purecounter-start="0" data-purecounter-end="521" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Quality Products</strong> in all shops</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+          <div class="count-box">
+            <i class="bi bi-headset"></i>
+            <span data-purecounter-start="0" data-purecounter-end="1463" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Shop Categories</strong> to choose from</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+          <div class="count-box">
+            <i class="bi bi-people"></i>
+            <span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Completed Deliveries</strong> from registered shops</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Counts Section -->
+
+  <!-- ======= Clients Section ======= -->
+  <section id="clients" class="clients section-bg">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-2 col-md-4 col-6 d-flex align-items-center justify-content-center">
+          <img src="{% static 'web/img/clients/client-1.png' %}" class="img-fluid">
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 d-flex align-items-center justify-content-center">
+          <img src="{% static 'web/img/clients/client-2.png' %}" class="img-fluid">
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 d-flex align-items-center justify-content-center">
+          <img src="{% static 'web/img/clients/client-3.png' %}" class="img-fluid">
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 d-flex align-items-center justify-content-center">
+          <img src="{% static 'web/img/clients/client-4.png' %}" class="img-fluid">
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 d-flex align-items-center justify-content-center">
+          <img src="{% static 'web/img/clients/client-5.png' %}" class="img-fluid">
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 d-flex align-items-center justify-content-center">
+          <img src="{% static 'web/img/clients/client-6.png' %}" class="img-fluid">
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Clients Section -->
+
+
+  <!-- ======= Pricing Section ======= -->
+  <section id="pricing" class="pricing">
+    <div class="container">
+      <div class="section-title">
+        <h2>Pricing</h2>
+        <p>
+          The basic plan is designed for new users and small businesses just
+          getting started. It includes essential features to launch a shop on
+          MaDuka. The professional plan is ideal for growing businesses that
+          need additional features. It includes everything in the Free plan plus
+          some premium services. Enterprice is best for larger businesses that
+          require alot of customization, premium features, and enhanced support.
+          It is made for shops that are scaling up and need the highest level of
+          functionality.
+        </p>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-6">
+          <div class="box">
+            <h3>Free/Basic</h3>
+            <h4><sup>KSH</sup>0<span> / month</span></h4>
+            <ul>
+              <li>Shop registration & setup</li>
+              <li>Basic inventory management</li>
+              <li>Order processing</li>
+              <li>Basic analytics</li>
+              <li class="na">Priority phone and email support</li>
+              <li class="na">Dedicated support engineer</li>
+            </ul>
+            <div class="btn-wrap">
+              <a href="#" class="btn-buy">Sign Up Now</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mt-4 mt-md-0">
+          <div class="box recommended">
+            <h3>Professional</h3>
+            <h4><sup>KSH</sup>1999<span> / month</span></h4>
+            <ul>
+              <li>Everything in the free plan</li>
+              <li>Blogging feature</li>
+              <li>In-depth analytics</li>
+              <li>Priority phone and email support</li>
+              <li class="na">Dedicated support engineer</li>
+              <li class="na">Customization</li>
+            </ul>
+            <div class="btn-wrap">
+              <a href="#" class="btn-buy">Sign Up Now</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mt-4 mt-lg-0">
+          <div class="box">
+            <h3>Enterprise</h3>
+            <h4><sup>KSH</sup>3999<span> / month</span></h4>
+            <ul>
+              <li>Everithing in professional</li>
+              <li>Advanced analytics and reports</li>
+              <li>Dedicated account manager</li>
+              <li>Custom branding</li>
+              <li>Priority support 24/7</li>
+              <li>Custom marketing features</li>
+            </ul>
+            <div class="btn-wrap">
+              <a href="#" class="btn-buy">Sign Up Now</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Pricing Section -->
+
+  <!-- ======= Frequently Asked Questions Section ======= -->
+  <section id="faq" class="faq section-bg">
+    <div class="container">
+      <div class="section-title">
+        <h2>Frequently Asked Questions</h2>
+        <p>
+          Got questions? We’ve got answers! We want your experience to be as
+          smooth and enjoyable as possible. Here are some of the most frequently
+          asked questions to help you navigate our platform. If you don’t see
+          what you're looking for, don’t hesitate to reach out to our support
+          team – we're always here to assist you!
+        </p>
+      </div>
+
+      <div class="faq-list">
+        <ul>
+          <li data-aos="fade-up">
+            <i class="bx bx-help-circle icon-help"></i>
+            <a data-bs-toggle="collapse" class="collapse" data-bs-target="#faq-list-1">
+              How do I register a shop on MaDuka?
+              <i class="bx bx-chevron-down icon-show"></i>
+              <i class="bx bx-chevron-up icon-close"></i>
+            </a>
+            <div id="faq-list-1" class="collapse show" data-bs-parent=".faq-list">
+              <p>
+                You first need to create an account and sign in. To register a
+                shop, simply click on the "Register" button on our
+                homepage, fill in your shop details, and submit the required
+                information. Once your shop is registered, you’ll gain access to
+                the shop dashboard where you can start adding products and
+                manage your store.
+              </p>
+            </div>
+          </li>
+
+          <li data-aos="fade-up" data-aos-delay="100">
+            <i class="bx bx-help-circle icon-help"></i>
+            <a data-bs-toggle="collapse" data-bs-target="#faq-list-2" class="collapsed">
+                How do I make a purchase on MaDuka?
+                <i class="bx bx-chevron-down icon-show"></i>
+                <i class="bx bx-chevron-up icon-close"></i>
+            </a>
+            <div id="faq-list-2" class="collapse" data-bs-parent=".faq-list">
+              <p>
+                Browse through the available shops and products, select the
+                items you want to buy, add them to your cart, and proceed to
+                checkout. You can choose from multiple secure payment
+                options to complete your purchase.
+              </p>
+            </div>
+          </li>
+
+          <li data-aos="fade-up" data-aos-delay="200">
+            <i class="bx bx-help-circle icon-help"></i>
+            <a data-bs-toggle="collapse" data-bs-target="#faq-list-3" class="collapsed">
+              What payment methods do you accept?
+              <i class="bx bx-chevron-down icon-show"></i>
+              <i class="bx bx-chevron-up icon-close"></i>
+            </a>
+            <div id="faq-list-3" class="collapse" data-bs-parent=".faq-list">
+              <p>
+                We accept a variety of secure payment methods, including
+                credit/debit cards, mobile money, and bank transfers. All
+                payments are processed through our secure payment gateway.
+              </p>
+            </div>
+          </li>
+
+          <li data-aos="fade-up" data-aos-delay="300">
+            <i class="bx bx-help-circle icon-help"></i>
+            <a data-bs-toggle="collapse" data-bs-target="#faq-list-4" class="collapsed">
+              How can I track my order?
+              <i class="bx bx-chevron-down icon-show"></i>
+              <i class="bx bx-chevron-up icon-close"></i>
+            </a>
+            <div id="faq-list-4" class="collapse" data-bs-parent=".faq-list">
+              <p>
+                Once your order has been shipped, you’ll receive a tracking
+                number via email or SMS. You can use this number to track the
+                status of your order directly on the courier’s shop.
+              </p>
+            </div>
+          </li>
+
+          <li data-aos="fade-up" data-aos-delay="400">
+            <i class="bx bx-help-circle icon-help"></i>
+            <a data-bs-toggle="collapse" data-bs-target="#faq-list-5" class="collapsed">
+              Can I change my order after I’ve placed it?
+              <i class="bx bx-chevron-down icon-show"></i>
+              <i class="bx bx-chevron-up icon-close"></i>
+            </a>
+            <div id="faq-list-5" class="collapse" data-bs-parent=".faq-list">
+              <p>
+                Once an order is placed, it is processed immediately for
+                efficiency. However, if you need to make changes, please contact
+                the shop helpdesk through their phone or email as soon as possible.
+                They will assist you if possible.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <!-- End Frequently Asked Questions Section -->
+
+  <!-- ======= Contact Section ======= -->
+  <section id="contact" class="contact">
+    <div class="container">
+      <div class="section-title">
+        <h2>Contact</h2>
+        <p>
+          We’d love to hear from you! Whether you have questions, feedback, or
+          just want to connect, there are several ways to reach us. You can
+          always email us for any inquiries or support needs. We strive to
+          respond promptly! Give us a call if you prefer to speak directly with
+          our team. If you’re in the area, feel free to drop by our office. Our
+          team would be happy to meet you in person! If you have a question or
+          want to share your feedback, simply fill out the form below. We'll get
+          back to you as soon as possible. We look forward to hearing from you
+          and assisting in any way we can!
+        </p>
+      </div>
+
+      <div class="row contact-info">
+        <div class="col-md-4">
+          <div class="contact-address">
+            <i class="bi bi-geo-alt"></i>
+            <h3>Address</h3>
+            <address>A108 Adam Street, NY 535022, USA</address>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="contact-phone">
+            <i class="bi bi-phone"></i>
+            <h3>Phone Number</h3>
+            <p><a href="tel:+155895548855">+1 5589 55488 55</a></p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="contact-email">
+            <i class="bi bi-envelope"></i>
+            <h3>Email</h3>
+            <p><a href="mailto:info@example.com">info@example.com</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form">
+        <form action="" method="post">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6 form-group">
+              <input type="text" name="name" class="form-control" id="name" placeholder="Your Name">
+            </div>
+            <div class="col-md-6 form-group mt-3 mt-md-0">
+              <input type="email" class="form-control" name="email" id="email" placeholder="Your Email">
+            </div>
+          </div>
+          <div class="form-group mt-3">
+            <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" required>
+          </div>
+          <div class="form-group mt-3">
+            <textarea
+              class="form-control" name="message" rows="5" placeholder="Message" required></textarea>
+          </div>
+          <input type="hidden" name="source" value="send_message">
+          <div class="text-center mt-3">
+            <button class="btn btn-lg all-shops" type="submit">Send Message</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+  <!-- End Contact Section -->
+</main>
+<!-- End #main -->
+
+{% endblock %}

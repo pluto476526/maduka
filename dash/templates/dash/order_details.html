@@ -1,0 +1,68 @@
+{% extends 'dash/main.html' %}
+{% load static %}
+{% load humanize %}
+{% block main %}
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title">Order ID: {{ order.order_number }}</h5>
+                            <p class="card-description">
+                                A quick summary of the order
+                            </p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Price Per Unit</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if orders %}
+                                {% for product in orders %}
+                                <tr>
+                                    <td>{{ product.product.product|capfirst }}</td>
+                                    <td>{{ product.product.category.category|capfirst }}</td>
+                                    <td>KSH. {{ product.product.price|intcomma }} per {{ product.product.units.units }}</td>
+                                    <td>{{ product.quantity|intcomma }} {{ product.product.units.units }}</td>
+                                    <td>KSH. {{ product.total|intcomma }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    No Data
+                                </div>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if order.source == 'cart' %}
+                    <br><br>
+                    <div>
+                        <h5 class="card-title">Ship to</h5>
+                        <p><strong>County:</strong> {{ order.county.county|title }}</p>
+                        <p><strong>Town:</strong> {{ order.address.town|title }}</p>
+                        <p><strong>Street:</strong> {{ order.address.street|title }}</p>
+                        <br>
+                        {% if order.driver %}
+                        <p><strong>Driver:</strong> {{ order.driver.user|title }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content-wrapper ends -->
+{% endblock %}
