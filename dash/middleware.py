@@ -20,7 +20,6 @@ class HomePageSessionTrackerMiddleware:
         if match:
             shop_slug = match.group('shopname')
             session_flag = f'has_visited_shop_{shop_slug}'
-            logger.debug(f'sesh flag: {session_flag}')
 
             # Check if the user has already visited the shop in this session
             if not request.session.get(session_flag):
