@@ -3,7 +3,7 @@
 from django.contrib import messages
 from django.db.models import Q
 from dash.models import Delivery, Profile, Category
-from shop.models import Shop
+from shop.models import Shop, Cart, CartItem
 import logging
 
 logger = logging.getLogger(__name__)
@@ -39,10 +39,27 @@ def the_shop(request):
 
 
 def get_categories(request):
+    """
+    This function helps display categories on the shop nav bar
+    """
     try:
         shop = my_shop(request)
         sp_categories = Category.objects.filter(shop=shop, is_deleted=False)
         context = {'sp_categories': sp_categories}
+        return context
+    except Exception:
+        return {}
+
+
+def cart_items_count(request):
+    """
+    This function gets the total number of cart items for the logged in user
+    """
+    try:
+        shop = my_shop(request)
+        my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing', is_deleted=False).last()
+        cart_items = CartItem.objects.filter(cart=my_cart).count() or 0
+        context = {'cart_items_count': cart_items}
         return context
     except Exception:
         return {}

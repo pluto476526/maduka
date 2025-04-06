@@ -236,7 +236,7 @@
                                 style="color: white;"
                                 class="btn btn--icon toggle-button toggle-button--white fas fa-shopping-bag toggle-button-shop" type="button">
                             </button>
-                            <span class="total-item-round">2</span>
+                            <span class="total-item-round">{{ cart_items_count }}</span>
                             <!--====== Menu ======-->
                             <div class="ah-lg-mode">
                                 <span class="ah-close">✕ Close</span>
@@ -250,7 +250,7 @@
                                     </li>
                                     <li class="has-dropdown">
                                         <a href="{% url 'cart' the_shop.slug %}" class="mini-cart-shop-link"><i class="fas fa-shopping-bag"></i>
-                                            <span class="total-item-round">2</span></a>
+                                            <span class="total-item-round">{{ cart_items_count }}</span></a>
                                     </li>
                                 </ul>
                                 <!--====== End - List ======-->

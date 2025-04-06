@@ -642,7 +642,7 @@
                     keyboard: false,
                     show: true
                 });
-            }, 5000);
+            }, 60000);
         }
     };
 
