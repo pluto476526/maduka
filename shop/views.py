@@ -65,7 +65,7 @@ def clear_cart_view(request, slug):
             c.status = 'deleted'
             c.save()
         messages.success(request, 'Cart cleared.')
-        return redirect('cart', the_shop)
+        return redirect('cart', the_shop.slug)
     return render(request, 'shop/clear_cart.html', {})
 
 
@@ -85,7 +85,7 @@ def add_to_wishlist(request, shopID, product_no):
     )
 
     # Check if the product is already in the wish list
-    wish_item = CartItem.objects.filter(cart=cart, product=product).first()
+    wish_item = CartItem.objects.filter(cart=cart, product=product, is_deleted=False).last()
     
     if wish_item:
         messages.info(request, f'{product.product} is already in your wish list.')
@@ -126,12 +126,12 @@ def index(request, slug):
     profile = get_object_or_404(Profile, user=request.user)
 
     # Fetch categories
-    categories = Category.objects.filter(shop=shop)
-    top_categories = categories.order_by('total_sales')[:4]
-    f_categories = categories.filter(is_featured=True).order_by('timestamp')[:3]
+    categories = Category.objects.filter(shop=shop, is_deleted=False)
+    top_categories = categories.order_by('-total_sales')[:4]
+    f_categories = categories.filter(is_featured=True).order_by('-timestamp')[:3]
 
     # Fetch products from top categories(tc) excluding those in the user's pending cart
-    my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing').first()
+    my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing', is_deleted=False).last()
     cart_products = CartItem.objects.filter(cart=my_cart, is_deleted=False).values_list('product_id', flat=True)
     
     tc_products = []
@@ -142,7 +142,7 @@ def index(request, slug):
             tc_products.append(p)
 
     # Fetch the 2 most recent deals of the day
-    deals = TodaysDeal.objects.filter(shop=shop).order_by('time')[:2]
+    deals = TodaysDeal.objects.filter(shop=shop).order_by('-time')[:2]
     active_deals = []
     for d in deals:
         if d.time > datetime.now(timezone(timedelta(hours=3))):
@@ -150,13 +150,13 @@ def index(request, slug):
 
     # Fetch latest arrivals
     products = Inventory.objects.filter(shop=shop).exclude(id__in=cart_products)
-    arrivals = products.order_by('timestamp')[:4]
+    arrivals = products.order_by('-timestamp')[:4]
 
     # Fetch 4 featured products
-    f_products = products.filter(is_featured=True).order_by('timestamp')[:4]
+    f_products = products.filter(is_featured=True).order_by('-timestamp')[:4]
 
     # Fetch 3 latest blogposts
-    recent_posts = BlogPost.objects.filter(shop=shop, status='confirmed', is_deleted=False).order_by('timestamp')[:3]
+    recent_posts = BlogPost.objects.filter(shop=shop, status='confirmed', is_deleted=False).order_by('-timestamp')[:3]
    
     # Prepare context for rendering
     context = {
@@ -533,18 +533,30 @@ def order_details_view(request, slug, order_id):
 def wishlist_view(request, slug):
     the_shop = get_shop(slug)
     my_carts = Cart.objects.filter(customer=request.user, shop=the_shop, is_deleted=False)
-    active_cart = my_carts.filter(status='processing').first()
-    cart_items = CartItem.objects.filter(cart=active_cart).values_list('id', flat=True)
-    logger.debug(f'cart items: {cart_items}')
-    wish_cart = my_carts.filter(status='in_wishes').first()
-    wishes = CartItem.objects.filter(cart=wish_cart).exclude(id__in=cart_items)
+    active_cart = my_carts.filter(status='processing').last()
+    cart_items = CartItem.objects.filter(cart=active_cart, is_deleted=False).values_list('id', flat=True)
+    wish_cart = my_carts.filter(status='in_wishes').last()
+    wishes = CartItem.objects.filter(cart=wish_cart, is_deleted=False).exclude(id__in=cart_items)
+    
     if request.method == 'POST':
         wish_item = request.POST.get('id')
+        itemID = request.POST.get('itemID')
         source = request.POST.get('source')
 
+        if itemID:
+            item = get_object_or_404(CartItem, id=itemID)
+
         if source == 'add_to_cart':
-            add_to_cart(request, the_shop, wish_item)
-            return redirect('wishlist', name=the_shop.slug)
+            add_to_cart(request, the_shop.id, wish_item)
+            item.is_deleted = True
+            item.save()
+            return redirect('wishlist', the_shop.slug)
+        
+        if source == 'delete_item':
+            item.is_deleted = True
+            item.save()
+            messages.success(request, f'Item "{item.product.product}" removed from wishlist.')
+            return redirect('wishlist', the_shop.slug)
 
     context = {
         'the_shop': the_shop,

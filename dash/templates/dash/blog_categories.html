@@ -76,7 +76,36 @@
                                             </div>
                                         </div>
                                         <!-- New Category Modal -->
-                                        <button class="badge badge-danger">Delete</button>
+                                        <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal{{ c.id }}">Delete</button>
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ c.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Please Confirm</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Floating Labels Form -->
+                                                        <form class="row g-3" method="post">
+                                                            {% csrf_token %}
+                                                            <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                                <label class="form-check-label">Are you sure you want to delete category "{{ c.category.title }}"? This action cannot be undone.</label>
+                                                                <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                            </div>
+                                                            <input type="hidden" name="cat_id" value="{{ c.id }}">
+                                                            <input type="hidden" name="source" value="delete_item">
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                            </div>
+                                                        </form>
+                                                        <!-- End floating Labels Form -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Delete Modal -->
                                     </td>
                                 </tr>
                                 {% endfor %}

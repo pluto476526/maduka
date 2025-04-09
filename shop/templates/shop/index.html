@@ -19,7 +19,7 @@
                     <div class="breadcrumb__wrap">
                         <ul class="breadcrumb__list">
                             <li class="is-marked">
-                                <a href="wishlist.html">{{ m }}</a>
+                                <a href="">{{ m }}</a>
                             </li>
                         </ul>
                     </div>
@@ -41,9 +41,9 @@
                         <div class="col-12">
                             <div class="slider-content slider-content--animation">
                                 <span class="content-span-1 u-c-white">Shop With Ease</span>
-                                <span class="content-span-2 u-c-white">30% Off On Electronics</span>
-                                <span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>
-                                <a class="shop-now-link btn--e-brand" href="shop-side-version-2.html">SHOP NOW</a>
+                                <span class="content-span-2 u-c-white">{{ the_shop.title1|title|truncatechars:100 }}</span>
+                                <!--<span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>-->
+                                <a class="shop-now-link btn--e-brand" href="{% url 'products' the_shop.slug %}">SHOP NOW</a>
                             </div>
                         </div>
                     </div>
@@ -56,9 +56,9 @@
                         <div class="col-12">
                             <div class="slider-content slider-content--animation">
                                 <span class="content-span-1 u-c-white">Find Top Brands</span>
-                                <span class="content-span-2 u-c-white">10% Off On Electronics</span>
-                                <span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>
-                                <a class="shop-now-link btn--e-brand" href="shop-side-version-2.html">SHOP NOW</a>
+                                <span class="content-span-2 u-c-white">{{ the_shop.title2|title|truncatechars:100 }}</span>
+                                <!--<span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>-->
+                                <a class="shop-now-link btn--e-brand" href="{% url 'products' the_shop.slug %}">SHOP NOW</a>
                             </div>
                         </div>
                     </div>
@@ -71,9 +71,9 @@
                         <div class="col-12">
                             <div class="slider-content slider-content--animation">
                                 <span class="content-span-1 u-c-white">Multiple Sales and Discounts</span>
-                                <span class="content-span-2 u-c-white">10% Off On Electronics</span>
-                                <span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>
-                                <a class="shop-now-link btn--e-brand" href="shop-side-version-2.html">SHOP NOW</a>
+                                <span class="content-span-2 u-c-white">{{ the_shop.title3|title|truncatechars:100 }}</span>
+                                <!--<span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>-->
+                                <a class="shop-now-link btn--e-brand" href="{% url 'products' the_shop.slug %}">SHOP NOW</a>
                             </div>
                         </div>
                     </div>
@@ -155,7 +155,7 @@
                                                 </div>
                                             </div>
                                             <span class="product-o__category">
-                                                <a href="shop-side-version-2.html">{{ tc.category.category|title }}</a>
+                                                <a href="{% url 'products' the_shop.slug %}">{{ tc.category.category|title }}</a>
                                             </span>
                                             <span class="product-o__name">
                                                 <a href="{% url 'product_details' the_shop.slug tc.product_id %}">{{ tc.product|title }}</a>
@@ -168,8 +168,10 @@
                                                 <i class="fas fa-star-half-alt"></i>
                                                 <span class="product-o__review">(23)</span>
                                             </div>
-                                            <span class="product-o__price">$125.00
-                                                <span class="product-o__discount">$160.00</span>
+                                            <span class="product-o__price">KSH. {{ tc.price|intcomma }}
+                                                {% if tc.discount and tc.discount != 0 %}
+                                                <span>   -KSH {{ tc.discount|intcomma }}</span>
+                                                {% endif %}
                                             </span>
                                         </div>
                                     </div>

@@ -4,12 +4,7 @@
     {% if messages %} {% for message in messages %}
     <div class="alert alert-info alert-dismissible fade show" role="alert">
       {{ message }}
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="alert"
-        aria-label="Close"
-      ></button>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %} {% endif %}
     <div class="col-sm-12 grid-margin stretch-card">
@@ -21,12 +16,7 @@
               <p class="card-description">View, manage, or print orders.</p>
             </div>
             <div>
-              <button
-                class="btn btn-primary btn-sm text-white mb-0 me-0"
-                type="button"
-                data-bs-toggle="modal"
-                data-bs-target="#newOrderModal"
-              >
+              <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button" data-bs-toggle="modal" data-bs-target="#newOrderModal">
                 <i class="mdi mdi-account-plus"></i>
                 Order New Product
               </button>
@@ -53,52 +43,26 @@
                   <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
                   <td class="d-flex justify-content-start" style="gap: 3px">
                     <button class="badge badge-success">Print</button>
-                    <button
-                      class="badge badge-info"
-                      type="button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#viewproductModal{{ product.id }}"
-                    >
-                      View
-                    </button>
+                    <button class="badge badge-info"
+                      type="button" data-bs-toggle="modal" data-bs-target="#viewproductModal{{ product.id }}">View</button>
                     <!-- View product Modal -->
-                    <div
-                      class="modal fade"
-                      id="viewproductModal{{ product.id }}"
-                      tabindex="-1"
-                    >
+                    <div class="modal fade" id="viewproductModal{{ product.id }}" tabindex="-1">
                       <div class="modal-dialog">
                         <div class="modal-content">
                           <div class="modal-header">
                             <h5 class="modal-title">Inventory Form</h5>
-                            <button
-                              type="button"
-                              class="btn-close"
-                              data-bs-dismiss="modal"
-                              aria-label="Close"
-                            ></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
                           <div class="modal-body">
                             <!-- Floating Labels Form -->
-                            <form
-                              class="row g-3"
-                              method="post"
-                            >
+                            <form class="row g-3" method="post">
                               {% csrf_token %}
                               <div class="col-md-12">
                                 <div class="form-floating">
-                                  <input
-                                    type="text"
-                                    name="supplier"
-                                    class="form-control"
-                                    list="sup_list"
-                                    autocomplete="off"
-                                    value="{{ product.supplier.name }}"
-                                    required
-                                  />
+                                  <input type="text" name="supplier" class="form-control" list="sup_list" autocomplete="off" value="{{ product.supplier.name|title }}" required>
                                   <datalist id="sup_list">
                                     {% for supplier in suppliers %}
-                                    <option value="{{ supplier.name }}">
+                                    <option value="{{ supplier.name|title }}">
                                     {% endfor %}
                                   </datalist>
 
@@ -107,30 +71,16 @@
                               </div>
                               <div class="col-md-12">
                                 <div class="form-floating">
-                                  <input
-                                    type="text"
-                                    name="product"
-                                    class="form-control"
-                                    value="{{ product.product }}"
-                                    required
-                                  />
+                                  <input type="text" name="product" class="form-control" value="{{ product.product|title }}" required>
                                   <label>Product</label>
                                 </div>
                               </div>
                               <div class="col-md-12">
                                 <div class="form-floating">
-                                  <input
-                                    type="text"
-                                    name="category"
-                                    class="form-control"
-                                    list="category_list"
-                                    autocomplete="off"
-                                    value="{{ product.category.category }}"
-                                    required
-                                  />
+                                  <input type="text" name="category" class="form-control" list="category_list" autocomplete="off" value="{{ product.category.category|title }}" required>
                                   <datalist id="category_list">
                                     {% for category in categories %}
-                                    <option value="{{ category.category }}">
+                                    <option value="{{ category.category|title }}">
                                     {% endfor %}
                                   </datalist>
                                   <label for="Category">Category</label>
@@ -138,30 +88,16 @@
                               </div>
                               <div class="col-md-6">
                                 <div class="form-floating">
-                                  <input
-                                    type="number"
-                                    name="quantity"
-                                    value="{{ product.order_amount }}"
-                                    class="form-control"
-                                    required
-                                  />
+                                  <input type="number" name="quantity" value="{{ product.order_amount }}" class="form-control" required>
                                   <label>Quantity</label>
                                 </div>
                               </div>
                               <div class="col-md-6">
                                 <div class="form-floating">
-                                  <input
-                                    type="text"
-                                    name="units"
-                                    class="form-control"
-                                    list="units_list"
-                                    autocomplete="off"
-                                    value="{{ product.units.units }}"
-                                    required
-                                  />
+                                  <input type="text" name="units" class="form-control" list="units_list" autocomplete="off" value="{{ product.units.units|title }}" required>
                                   <datalist id="units_list">
                                     {% for u in units %}
-                                    <option value="{{ u.units }}">
+                                    <option value="{{ u.units|title }}">
                                     {% endfor %}
                                   </datalist>
                                   <label>Units</label>
@@ -170,34 +106,16 @@
                               {% if product.order_instructions %}
                               <div class="col-md-12">
                                 <div class="form-floating">
-                                  <textarea
-                                    class="w-100 form-control"
-                                    name="instructions"
-                                    style="height: 8rem"
-                                  >{{ product.order_instructions|capfirst }}</textarea>
+                                  <textarea class="w-100 form-control" name="instructions"
+                                    style="height: 8rem">{{ product.order_instructions|capfirst }}</textarea>
                                 </div>
                               </div>
                               {% endif %}
-                              <input
-                                type="hidden"
-                                name="source"
-                                value="edit_order"
-                              />
-                              <input
-                                type="hidden"
-                                name="id"
-                                value="{{ product.id }}"
-                              />
+                              <input type="hidden" name="source" value="edit_order">
+                              <input type="hidden" name="id" value="{{ product.id }}">
                               <div class="modal-footer">
-                                <button
-                                  type="button"
-                                  class="btn btn-sm btn-outline-danger"
-                                  data-bs-dismiss="modal"
-                                >Close</button>
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm btn-outline-success"
-                                >Save Changes</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-sm btn-outline-success">Save Changes</button>
                               </div>
                             </form>
                             <!-- End floating Labels Form -->
@@ -214,14 +132,42 @@
                         Received
                       </button>
                     </form>
-                    <button class="badge badge-danger">Delete</button>
+                    <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">Delete</button>
+                        <!-- Delete Modal -->
+                        <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Please Confirm</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Floating Labels Form -->
+                                        <form class="row g-3" method="post">
+                                            {% csrf_token %}
+                                            <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                <label class="form-check-label">Are you sure you want to delete the order for {{ product.order_amount }}
+                                                  {{ product.units.units }} of {{ product.product|title }}?<br> This action cannot be undone.</label>
+                                                <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                            </div>
+                                            <input type="hidden" name="id" value="{{ product.id }}">
+                                            <input type="hidden" name="source" value="delete_order">
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                            </div>
+                                        </form>
+                                        <!-- End floating Labels Form -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Delete Category Modal -->
                   </td>
                 </tr>
-                {% endfor %} {% else %}
-                <div
-                  class="alert alert-info alert-dismissible fade show"
-                  role="alert"
-                >
+                {% endfor %}
+                {% else %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
                   <i class="bi bi-info-circle me-1"></i>
                   No Data
                 </div>
@@ -238,9 +184,7 @@
           <div class="d-sm-flex justify-content-between align-items-start">
             <div>
               <h4 class="card-title">Low Stock Alerts</h4>
-              <p class="card-description">
-                These products have stock levels below {{ threshold.threshold }}.
-              </p>
+              <p class="card-description">These products have stock levels below {{ threshold.threshold }}.</p>
             </div>
           </div>
           <div class="table-responsive">
@@ -263,30 +207,14 @@
                   <td>{{ product.quantity|intcomma }} {{ product.units.units }}</td>
                   <td>KSH. {{ product.price|intcomma }}</td>
                   <td>
-                    <button
-                      class="badge badge-info"
-                      type="button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#makeOrderModal{{ product.id }}"
-                    >
-                      Make Order
-                    </button>
+                    <button class="badge badge-info" type="button" data-bs-toggle="modal" data-bs-target="#makeOrderModal{{ product.id }}">Make Order</button>
                     <!-- New Order Modal2 -->
-                    <div
-                      class="modal fade"
-                      id="makeOrderModal{{ product.id }}"
-                      tabindex="-1"
-                    >
+                    <div class="modal fade" id="makeOrderModal{{ product.id }}" tabindex="-1">
                       <div class="modal-dialog">
                         <div class="modal-content">
                           <div class="modal-header">
                             <h5 class="modal-title">Order Form</h5>
-                            <button
-                              type="button"
-                              class="btn-close"
-                              data-bs-dismiss="modal"
-                              aria-label="Close"
-                            ></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
                           <div class="modal-body">
                             <!-- Floating Labels Form -->
@@ -294,15 +222,7 @@
                               {% csrf_token %}
                               <div class="col-md-12">
                                 <div class="form-floating">
-                                  <input
-                                    type="text"
-                                    name="supplier"
-                                    class="form-control"
-                                    list="sup_list"
-                                    autocomplete="off"
-                                    required
-                                    value="{{ product.supplier.name }}"
-                                  />
+                                  <input type="text" name="supplier" class="form-control" list="sup_list" autocomplete="off" required value="{{ product.supplier.name }}">
                                   <datalist id="sup_list">
                                     {% for supplier in suppliers %}
                                     <option value="{{ supplier.name }}">
@@ -314,49 +234,22 @@
                               </div>
                               <div class="col-md-12">
                                 <div class="form-floating">
-                                  <input
-                                    type="text"
-                                    name="quantity"
-                                    class="form-control"
-                                    required
-                                  />
+                                  <input type="text" name="quantity" class="form-control" required>
                                   <label>Quantity</label>
                                 </div>
                               </div>
                               <div class="col-md-12">
                                 <div class="form-floating">
-                                  <textarea
-                                    class="w-100 form-control"
-                                    name="instructions"
-                                    style="height: 8rem;"
-                                  >{% if product.order_instructions %}{{ product.order_instructions }}{% endif %}</textarea>
+                                  <textarea class="w-100 form-control" name="instructions"
+                                    style="height: 8rem;">{% if product.order_instructions %}{{ product.order_instructions }}{% endif %}</textarea>
                                   <label>Short Instructions</label>
                                 </div>
                               </div>
-                              <input
-                                type="hidden"
-                                name="product_id"
-                                value="{{ product.product_id }}"
-                              />
-                              <input
-                                type="hidden"
-                                name="source"
-                                value="new_order2"
-                              />
+                              <input type="hidden" name="product_id" value="{{ product.product_id }}">
+                              <input type="hidden" name="source" value="new_order2">
                               <div class="modal-footer">
-                                <button
-                                  type="button"
-                                  class="btn btn-sm btn-outline-danger"
-                                  data-bs-dismiss="modal"
-                                >
-                                  Close
-                                </button>
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm btn-outline-success"
-                                >
-                                  Add Order
-                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-sm btn-outline-success">Add Order</button>
                               </div>
                             </form>
                             <!-- End floating Labels Form -->
@@ -385,12 +278,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Order Form</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <!-- Floating Labels Form -->
@@ -398,17 +286,10 @@
           {% csrf_token %}
           <div class="col-md-12">
             <div class="form-floating">
-              <input
-                type="text"
-                name="supplier"
-                class="form-control"
-                list="sup_list"
-                autocomplete="off"
-                required
-              />
+              <input type="text" name="supplier" class="form-control" list="sup_list" autocomplete="off" required>
               <datalist id="sup_list">
                 {% for supplier in suppliers %}
-                <option value="{{ supplier.name }}">
+                <option value="{{ supplier.name|title }}">
                 {% endfor %}
               </datalist>
 
@@ -417,28 +298,16 @@
           </div>
           <div class="col-md-12">
             <div class="form-floating">
-              <input
-                type="text"
-                name="product"
-                class="form-control"
-                required
-              />
+              <input type="text" name="product" class="form-control" required>
               <label>Product</label>
             </div>
           </div>
           <div class="col-md-12">
             <div class="form-floating">
-              <input
-                type="text"
-                name="category"
-                class="form-control"
-                list="category_list"
-                autocomplete="off"
-                required
-              />
+              <input type="text" name="category" class="form-control" list="category_list" autocomplete="off" required>
               <datalist id="category_list">
                 {% for category in categories %}
-                <option value="{{ category.category }}">
+                <option value="{{ category.category|title }}">
                 {% endfor %}
               </datalist>
               <label>Category</label>
@@ -446,28 +315,16 @@
           </div>
           <div class="col-md-6">
             <div class="form-floating">
-              <input
-                type="number"
-                name="quantity"
-                class="form-control"
-                required
-              />
+              <input type="number" name="quantity" class="form-control" required>
               <label>Quantity</label>
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-floating">
-              <input
-                type="text"
-                name="units"
-                class="form-control"
-                list="units_list"
-                autocomplete="off"
-                required
-              />
+              <input type="text" name="units" class="form-control" list="units_list" autocomplete="off" required>
               <datalist id="units_list">
                 {% for u in units %}
-                <option value="{{ u.units }}">
+                <option value="{{ u.units|title }}">
                 {% endfor %}
               </datalist>
               <label>Units</label>
@@ -475,26 +332,15 @@
           </div>
           <div class="col-md-12">
             <div class="form-floating">
-              <textarea
-                class="w-100 form-control"
-                name="instructions"
-                style="height: 8rem;"
-              ></textarea>
+              <textarea class="w-100 form-control" name="instructions"
+                style="height: 8rem;"></textarea>
               <label>Short Instructions</label>
             </div>
           </div>
-          <input type="hidden" name="source" value="new_order" />
+          <input type="hidden" name="source" value="new_order">
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-danger"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-            <button type="submit" class="btn btn-sm btn-outline-success">
-              Add Order
-            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">Add Order</button>
           </div>
         </form>
         <!-- End floating Labels Form -->

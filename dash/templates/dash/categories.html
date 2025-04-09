@@ -93,16 +93,11 @@
                                                             </div>
                                                             
                                                             <input type="hidden" name="shop_id" value="{{ shop.id }}">
-                                                            <input type="hidden" name="category_id"
-                                                                value="{{ category.id }}">
+                                                            <input type="hidden" name="category_id" value="{{ category.id }}">
                                                             <input type="hidden" name="source" value="edit_category">
                                                             <div class="modal-footer">
-                                                                <button type="button"
-                                                                    class="btn btn-sm btn-outline-danger"
-                                                                    data-bs-dismiss="modal">Close</button>
-                                                                <button type="submit"
-                                                                    class="btn btn-sm btn-outline-success">Save
-                                                                    changes</button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-sm btn-outline-success">Save Changes</button>
                                                             </div>
                                                         </form>
                                                         <!-- End floating Labels Form -->
@@ -111,7 +106,37 @@
                                             </div>
                                         </div>
                                         <!-- New Category Modal -->
-                                        <button class="badge badge-danger">Delete</button>
+
+                                        <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal{{ category.id }}">Delete</button>
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ category.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Please Confirm</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Floating Labels Form -->
+                                                        <form class="row g-3" method="post">
+                                                            {% csrf_token %}
+                                                            <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                                <label class="form-check-label">Are you sure you want to delete {{ category.category|title }}? This action cannot be undone.</label>
+                                                                <input type="checkbox" name="delete_cat" class="form-check" value="True" required>
+                                                            </div>
+                                                            <input type="hidden" name="category_id" value="{{ category.id }}">
+                                                            <input type="hidden" name="source" value="delete_category">
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                            </div>
+                                                        </form>
+                                                        <!-- End floating Labels Form -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Delete Category Modal -->
                                     </td>
                                 </tr>
                                 {% endfor %}

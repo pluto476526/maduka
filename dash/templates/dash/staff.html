@@ -48,16 +48,14 @@
                                     <td>{{ s.timestamp }}</td>
                                     <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
                                     <td class="d-flex justify-content-start" style="gap: 3px;">
-                                        <button class="badge badge-info" type="button" data-bs-toggle="modal"
-                                            data-bs-target="#viewStaffModal{{ s.id }}">View</button>
+                                        <button class="badge badge-info" type="button" data-bs-toggle="modal" data-bs-target="#viewStaffModal{{ s.id }}">View</button>
                                         <!-- View Category Modal -->
                                         <div class="modal fade" id="viewStaffModal{{ s.id }}" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title">Staff Form</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <!-- Floating Labels Form -->
@@ -66,47 +64,36 @@
                                                             {% csrf_token %}
                                                             <div class="col-sm-12">
                                                                 <div class="form-floating">
-                                                                    <input type="text" name="category"
-                                                                        class="form-control"
-                                                                        value="{{ category.category|title }}"
-                                                                        required>
-                                                                    <label>Category</label>
+                                                                    <input type="text" name="name" class="form-control" value="{{ s.user.username|title }}" required>
+                                                                    <label>Username</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-sm-12">
+                                                            <div class="col-md-12">
                                                                 <div class="form-floating">
-                                                                    <textarea class="w-100 form-control"
-                                                                        name="description"
-                                                                        rows="10">{{ category.description|capfirst }}</textarea>
-                                                                    <label>Description</label>
+                                                                    <input type="text" name="role" class="form-control" list="role_list" autocomplete="off" value="{{ s.role.role_name|title }}" required>
+                                                                    <datalist id="role_list">
+                                                                        {% for r in roles %}
+                                                                        <option value="{{ r.role_name }}">
+                                                                        {% endfor %}
+                                                                    </datalist>
+                                                                    <label>Role</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-sm-12 d-flex align-items-center gap-3">
-                                                                <label class="form-check-label">Set Featured</label>
-                                                                <input type="checkbox" name="is_featured" value="True" class="form-check"
-                                                                {% if category.is_featured %} checked {% endif %}>
-                                                            </div>
-                                                            <br><br>
                                                             <div class="col-sm-12">
-                                                                <label>Display Picture</label>
-                                                                {% if category.avatar %}
-                                                                <p>{{ category.avatar }}</p>
+                                                                <label class="btn btn-sm btn-primary">Upload Image
+                                                                    <input type="file" name="avatar" class="d-none">
+                                                                </label>
+                                                                {% if s.avatar %}
+                                                                <p>{{ s.avatar }}</p>
                                                                 {% endif %}
                                                                 <br>
-                                                                <input type="file" name="avatar" class="form-file">
                                                             </div>
                                                             
-                                                            <input type="hidden" name="shop_id" value="{{ shop.id }}">
-                                                            <input type="hidden" name="category_id"
-                                                                value="{{ category.id }}">
-                                                            <input type="hidden" name="source" value="edit_category">
+                                                            <input type="hidden" name="staffID" value="{{ s.id }}">
+                                                            <input type="hidden" name="source" value="edit_staff">
                                                             <div class="modal-footer">
-                                                                <button type="button"
-                                                                    class="btn btn-sm btn-outline-danger"
-                                                                    data-bs-dismiss="modal">Close</button>
-                                                                <button type="submit"
-                                                                    class="btn btn-sm btn-outline-success">Save
-                                                                    changes</button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-sm btn-outline-success">Save Changes</button>
                                                             </div>
                                                         </form>
                                                         <!-- End floating Labels Form -->
@@ -115,7 +102,36 @@
                                             </div>
                                         </div>
                                         <!-- New Category Modal -->
-                                        <button class="badge badge-danger">Delete</button>
+                                        <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal{{ s.id }}">Delete</button>
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ s.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Please Confirm</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Floating Labels Form -->
+                                                        <form class="row g-3" method="post">
+                                                            {% csrf_token %}
+                                                            <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                                <label class="form-check-label">Are you sure you want to delete "{{ s.user.username|title }}"? This action cannot be undone.</label>
+                                                                <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                            </div>
+                                                            <input type="hidden" name="staffID" value="{{ s.id }}">
+                                                            <input type="hidden" name="source" value="delete_item">
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                            </div>
+                                                        </form>
+                                                        <!-- End floating Labels Form -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Delete Category Modal -->
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -144,7 +160,7 @@
                     {% csrf_token %}
                     <div class="col-sm-12">
                         <div class="form-floating">
-                            <input type="text" name="username" class="form-control">
+                            <input type="text" name="name" class="form-control">
                             <label>Username</label>
                         </div>
                     </div>
@@ -168,14 +184,7 @@
                     </div>
                     <div class="col-md-12">
                         <div class="form-floating">
-                        <input
-                            type="text"
-                            name="role"
-                            class="form-control"
-                            list="role_list"
-                            autocomplete="off"
-                            required
-                        />
+                        <input type="text" name="role" class="form-control" list="role_list" autocomplete="off" required>
                         <datalist id="role_list">
                             {% for r in roles %}
                             <option value="{{ r.role_name }}">
@@ -186,8 +195,7 @@
                     </div>
                     <input type="hidden" name="source" value="new_staff">
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-outline-danger"
-                            data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-sm btn-outline-success">Add Staff</button>
                     </div>
                 </form>

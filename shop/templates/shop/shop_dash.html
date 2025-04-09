@@ -97,7 +97,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Order #</th>
-                                                <th>Placed On</th>
+                                                <!--<th>Placed On</th>-->
                                                 <th>Status</th>
                                                 <th>Total</th>
                                             </tr>
@@ -106,7 +106,7 @@
                                             {% for o in recent_orders %}
                                             <tr>
                                                 <td>{{ o.order_number }}</td>
-                                                <td>{{ o.timestamp }}</td>
+                                                <!--td>{{ o.timestamp }}</td>-->
                                                 <td>
                                                     <div class="dash__table-total">
                                                         <span>{{ o.status|title }}</span>

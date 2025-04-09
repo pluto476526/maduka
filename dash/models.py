@@ -177,7 +177,7 @@ class Delivery(models.Model):
 
 class DeliveryItem(models.Model):
     delivery = models.ForeignKey('dash.Delivery', on_delete=models.CASCADE, related_name='items', null=True)
-    product = models.ForeignKey('dash.Inventory', on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey('dash.Inventory', on_delete=models.SET_NULL, related_name='del_product', null=True)
     quantity = models.PositiveIntegerField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
     is_deleted = models.BooleanField(default=False)

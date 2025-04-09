@@ -58,7 +58,20 @@ def index(request):
     my_deliveries = Delivery.objects.filter(shop=shop, status='completed', is_deleted=False)
     inventory_value = my_inventory.aggregate(total=models.Sum(models.F('price') * models.F('quantity')))['total']
     inventory_count = my_inventory.aggregate(total=models.Sum('quantity'))['total']
-    popular_products = my_inventory.order_by('total_sales')[:3]
+    popular_products = (
+        DeliveryItem.objects.filter(
+            delivery__shop=shop
+        ).values(
+            'product__product',
+            'product__price',
+            'product__category__category',
+            'product__price',
+            'product__units__units',
+        ).annotate(
+            total_sold=models.Sum('quantity'),
+            total_sales=models.Sum(models.F('quantity') * models.F('product__price'))
+        ).order_by('-total_sold')[:3]
+    )
     categories = Category.objects.filter(shop=shop, is_deleted=False).count()
     completed_sales = my_deliveries.aggregate(total=models.Sum('total'))['total']
     physical_sales = my_deliveries.filter(source='dash').aggregate(total=models.Sum('total'))['total']
@@ -72,17 +85,17 @@ def index(request):
     monthly_sales = my_deliveries.filter(time_completed__year=current_year, time_completed__month=current_month).aggregate(models.Sum('total')).get('total', 0)
 
     my_profile = get_object_or_404(Profile, user=request.user)
-    logger.debug(my_profile.is_admin)
-    #my_notifications = Notification.objects.filter(shop=shop, is_deleted=False)
-    #notifications = []
-    #if my_profile.is_admin == 'True':
-    #    admin_notifications = my_notifications.filter(target='admin')
-    #    other_notifications = my_notifications.filter(target='everyone')
-    #    notitications.append(admin_notifications)
-    #    notifications.append(other_notifications)
-    #elif my_profile.is_admin == 'False':
-    #    notifications = my_notifications.filter(target='admin')
-    notifications = Notification.objects.all()
+    my_notifications = Notification.objects.filter(shop=shop, is_deleted=False)
+    notifications = []
+    if my_profile.is_admin == 'True':
+        admin_notifications = my_notifications.filter(target='admin')
+        other_notifications = my_notifications.filter(target='everyone')
+        notitications.append(admin_notifications)
+        notifications.append(other_notifications)
+    elif my_profile.is_admin == 'False':
+       notifications = my_notifications.filter(target='admin')
+    
+    # notifications = Notification.objects.all()
     sessions = HomePageSession.objects.filter(shop=shop)
     num_sessions = sessions.count()
     duration = sessions.filter(exit_time__isnull=False)
@@ -95,6 +108,17 @@ def index(request):
         )
     )
     avg_duration_secs = average_duration['avg_duration'].total_seconds() if average_duration['avg_duration'] else 0
+
+
+    # Get today's date (start of the day)
+    today = n().date()
+
+    # Filter transactions for today and sum the amounts
+    total_sales_today = Transaction.objects.filter(
+        timestamp__date = today, 
+        is_deleted = False
+    ).aggregate(total_sales = models.Sum('amount'))['total_sales'] or 0
+
 
     context = {
         'inventory_value': inventory_value,
@@ -112,27 +136,27 @@ def index(request):
         'notifications': notifications,
         'num_sessions': num_sessions,
         'avg_duration': avg_duration_secs,
+        'total_sales_today': total_sales_today,
     }
     return render(request, 'dash/index.html', context)
 
 
 @require_http_methods(["GET", "POST"])
 def categories(request):
-    shop = get_user_shop(request)
-    if not shop:
-        return redirect('error_page')  # Handle case where shop is not found.
+    shop = get_user_shop(request) 
+    my_categories = Category.objects.filter(shop=shop, is_deleted=False)
 
     if request.method == 'POST':
-        category_name = request.POST.get('category', '').strip()
-        description = request.POST.get('description', '').strip()
+        category_name = request.POST.get('category', '').strip().lower()
+        description = request.POST.get('description')
         avatar = request.FILES.get('avatar')
-        source = request.POST.get('source', '').strip()
+        source = request.POST.get('source')
         category_id = request.POST.get('category_id')
-        is_featured = request.POST.get('is_featured', '').lower() == 'true'
+        is_featured = request.POST.get('is_featured')
+        confirm_delete = request.POST.get('delete_cat')
 
-        if not category_name or not source:
-            messages.error(request, "Category name and source are required.")
-            return redirect('categories')
+        if category_id:
+            category = get_object_or_404(Category, id=category_id)
 
         try:
             with transaction.atomic():
@@ -142,23 +166,29 @@ def categories(request):
                         category=category_name,
                         description=description,
                     )
-                    messages.success(request, "Category added successfully.")
+                    messages.success(request, "New Category '{category_name}' added.")
+
                 elif source == 'edit_category':
-                    category = get_object_or_404(Category, id=category_id)
                     category.category = category_name
                     category.description = description
                     if is_featured:
-                        category.is_featured = is_featured
+                        category.is_featured = True
                     if avatar:
                         category.avatar = avatar
                     category.save()
-                    messages.success(request, f"{category_name} updated successfully.")
+                    messages.success(request, f"{category_name} updated.")
+
+                elif source == 'delete_category':
+                    if confirm_delete:
+                        category.is_deleted = True
+                        category.save()
+                        messages.success(request, f'{category.category} deleted.')
+        
         except Exception as e:
             logger.error(f"Error in category operation: {e}")
             messages.error(request, "Failed to process the category.")
         return redirect('categories')
 
-    my_categories = Category.objects.filter(shop=shop)
     return render(request, 'dash/categories.html', {'categories': my_categories})
 
 @require_http_methods(["GET", "POST"])
@@ -179,17 +209,23 @@ def inventory_view(request):
         source = request.POST.get('source')
         product_id = request.POST.get('id')
         avatar = request.FILES.get('avatar')
+        confirm_delete = request.POST.get('delete_item')
 
-        if not product_name or not source:
-            messages.error(request, "Product name and source are required.")
-            return redirect('inventory')
-
+        if not product_id:
+            product = get_object_or_404(Inventory, id=product_id)
+        
         with transaction.atomic():
-            category, _ = Category.objects.get_or_create(category=category_name, shop=shop)
-            unit = get_object_or_404(Unit, id=units)
+
+            if category_name:
+                category, _ = Category.objects.get_or_create(category=category_name, shop=shop)
+            
+            if product_id:
+                product = get_object_or_404(Inventory, id=product_id)
+            
+            if units:
+                unit = get_object_or_404(Unit, id=units)
             
             if source == 'edit_product':
-                product = get_object_or_404(Inventory, id=product_id)
                 product.product = product_name
                 product.category = category
                 product.description = description
@@ -201,23 +237,29 @@ def inventory_view(request):
                 if avatar:
                     product.avatar = avatar
                 product.save()
-                messages.success(request, f"{product_name} updated successfully.")
+                messages.success(request, f"Item '{product_name}' updated.")
+
             elif source == 'new_product':
                 if not is_featured:
                     is_featured = False
                 Inventory.objects.create(
-                    shop=shop,
-                    product=product_name,
-                    category=category,
-                    description=description,
-                    quantity=quantity,
-                    units=unit,
-                    price=price,
-                    is_featured=is_featured,
+                    shop = shop,
+                    product = product_name,
+                    category = category,
+                    description = description,
+                    quantity = quantity,
+                    units = unit,
+                    price = price,
+                    is_featured = is_featured,
                     **({"avatar": avatar} if avatar else {}),
                 )
-                messages.success(request, f"{product_name} added successfully.")
-
+                messages.success(request, f"Item '{product_name}' added to your inventory.")
+            
+            elif source == 'delete_item':
+                if confirm_delete:
+                    product.is_deleted = True
+                    product.save()
+                    messages.success(request, f'Item "{product.product}" deleted.')
         return redirect('inventory')
 
     context = {
@@ -245,16 +287,17 @@ def orders_view(request):
 
 
     if request.method == 'POST':
-        product = request.POST.get('product')
+        product = request.POST.get('product', '').strip().lower()
         product_id = request.POST.get('product_id')
-        category_name = request.POST.get('category')
+        category_name = request.POST.get('category', '').strip().lower()
         instr = request.POST.get('instructions')
         quantity = request.POST.get('quantity')
-        p_units = request.POST.get('units')
+        p_units = request.POST.get('units', '').strip().lower()
         source = request.POST.get('source')
-        supplier_name = request.POST.get('supplier')
+        supplier_name = request.POST.get('supplier', '').strip().lower()
         order_id = request.POST.get('id')
-
+        confirm_delete = request.POST.get('delete_item')
+        
         try:
             if supplier_name:
                 supplier, _ = Supplier.objects.get_or_create(shop=shop, name=supplier_name)
@@ -265,6 +308,9 @@ def orders_view(request):
             if p_units:
                 p_unit, _ = Unit.objects.get_or_create(shop=shop, units=p_units)
             
+            if order_id:
+                order = get_object_or_404(Inventory, id=order_id)
+
             if source == 'new_order':
                 Inventory.objects.create(
                     shop = shop,
@@ -290,7 +336,6 @@ def orders_view(request):
                 messages.success(request, f"Order for {prod_instance.quantity} {prod_instance.product} prepared.")
 
             elif source == 'edit_order':
-                order = get_object_or_404(Inventory, id=order_id)
                 order.supplier = supplier or order.supplier
                 order.product = product
                 order.category = category or order.category
@@ -301,13 +346,18 @@ def orders_view(request):
                 messages.success(request, f"Order for {order.quantity} {order.units.units} of {order.product} edited.")
 
             elif source == 'receive':
-                order = get_object_or_404(Inventory, id=order_id)
                 order.status = 'available'
                 order.quantity += order.order_amount
                 order.order_amount = 0
                 order.in_orders = False
                 order.save()
                 messages.success(request, f"{order.quantity} {order.units.units} of {order.product} added to inventory.")
+            
+            elif source == 'delete_order':
+                if confirm_delete:
+                    order.is_deleted = True
+                    order.save()
+                    messages.success(request, f"Order for {order.order_amount} {order.units.units} of {order.product} deleted.")
 
         except Exception as e:
             logger.error(f"Error processing order: {e}")
@@ -315,7 +365,7 @@ def orders_view(request):
 
         return redirect('orders')
 
-        context = {
+    context = {
         'products': orders,
         'categories': categories,
         'suppliers': suppliers,
@@ -333,32 +383,33 @@ def deliveries_view(request):
     available_products = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
     
     if request.method == 'POST':
-        customer = request.POST.get('username', '').strip()
+        customer = request.POST.get('username')
         quantity = request.POST.get('quantity')
-        source = request.POST.get('source', '').strip()
+        source = request.POST.get('source')
         order_id = request.POST.get('o_id')
-        phone = request.POST.get('phone', '').strip()
+        phone = request.POST.get('phone')
         product_id = request.POST.get('product_id')
-
-
-        if source == 'new_delivery':
-            selected_product = get_object_or_404(Inventory, product_id=product_id)
-
-            if int(quantity) <= selected_product.quantity:
-                Delivery.objects.create(
-                    shop=shop,
-                    unregistered_user=customer,
-                )
-                selected_product.quantity -= int(quantity)
-                selected_product.save()
-                messages.success(request, f"Delivery for {quantity} {selected_product.units} of {selected_product.product} created.")
-                return redirect('deliveries')
-            else:
-                messages.error(request, f"Only {selected_product.quantity} {selected_product.units} available.")
-                return redirect('deliveries')
-        elif source == 'confirm_delivery':
-            with transaction.atomic():
+        confirm_delete = request.POST.get('delete_item')
+        
+        with transaction.atomic():
+            if order_id:
                 delivery = get_object_or_404(Delivery, id=order_id)
+
+            if source == 'new_delivery':
+                selected_product = get_object_or_404(Inventory, product_id=product_id)
+
+                if int(quantity) <= selected_product.quantity:
+                    Delivery.objects.create(
+                        shop=shop,
+                        unregistered_user=customer,
+                    )
+                    selected_product.quantity -= int(quantity)
+                    selected_product.save()
+                    messages.success(request, f"Delivery for {quantity} {selected_product.units} of {selected_product.product} created.")
+                else:
+                    messages.error(request, f"Only {selected_product.quantity} {selected_product.units} available.")
+            
+            elif source == 'confirm_delivery':
                 delivery.status = 'confirmed'
                 delivery.time_confirmed = datetime.now()
                 delivery.admin = request.user
@@ -369,7 +420,14 @@ def deliveries_view(request):
                 shop.total_sales += delivery.total
                 shop.save()
                 messages.success(request, f'Delivery {delivery.order_number} confirmed.')
-                return redirect('deliveries')
+        
+            elif source == 'delete_item':
+                if confirm_delete:
+                    delivery.is_deleted = True
+                    delivery.save()
+                    messages.success(request, f'Order "{delivery.order_number}" deleted.')
+
+        return redirect('deliveries')
     
     context = {
         'available_products': available_products,
@@ -390,30 +448,40 @@ def confirmed_deliveries_view(request):
     my_drivers = Profile.objects.filter(role=role)
 
     if request.method == 'POST':
-        address = request.POST.get('address', '').strip()
-        source = request.POST.get('source', '').strip()
+        address = request.POST.get('address')
+        source = request.POST.get('source')
         order_id = request.POST.get('id')
-        driver_id = request.POST.get('driver', '').strip()
-        order_no = request.POST.get('order_number', '').strip()
+        driver_id = request.POST.get('driver')
+        order_no = request.POST.get('order_number')
+        confirm_delete = request.POST.get('delete_item')
 
         try:
             with transaction.atomic():
+
+                if order_no:
+                    order = get_object_or_404(Delivery, order_number=order_no)
+                
                 if source == 'assign_driver':
                     driver = get_object_or_404(Profile, id=driver_id)
-                    order = get_object_or_404(Delivery, order_number=order_no)
                     order.status = 'shipped'
                     order.time_shipped = datetime.now()
                     order.driver = driver
                     order.admin = request.user
                     order.save()
                     messages.success(request, f"Delivery #{order_no} assigned to {driver.user.username}.")
+                
                 elif source == 'complete_order':
-                    order = get_object_or_404(Delivery, order_number=order_no)
                     order.status = 'completed'
                     order.time_completed = datetime.now()
                     order.admin = request.user
                     order.save()
                     messages.success(request, f"Delivery #{order_no} marked as completed.")
+                
+                elif source == 'delete_item':
+                    order.is_deleted = True
+                    order.save()
+                    messages.success(request, f'Delivery #{order.order_number} deleted.')
+
         except Exception as e:
             logger.error(f"Error processing delivery: {e}")
             messages.error(request, 'Error processing delivery.')
@@ -464,21 +532,25 @@ def physical_sales_view(request):
     p_method = PaymentMethod.objects.filter(shop=shop)
     
     if request.method == 'POST':
-        customer = request.POST.get('username', '').strip()
-        phone = request.POST.get('phone', '').strip()
+        customer = request.POST.get('username')
+        phone = request.POST.get('phone')
         product_no = request.POST.get('product_id')
         quantity = request.POST.get('quantity', 0)
-        order_no = request.POST.get('order_number', '').strip()
-        payment_method = request.POST.get('payment_method', '').strip()
-        source = request.POST.get('source', '').strip()
+        order_no = request.POST.get('order_number')
+        payment_method = request.POST.get('payment_method')
+        source = request.POST.get('source')
+        confirm_delete = request.POST.get('delete_item')
 
         if product_no:
             sel_product = get_object_or_404(Inventory, product_id=product_no)
+       
+        if order_no:
+            delivery = get_object_or_404(Delivery, order_number=order_no)
         
         with transaction.atomic():
             if source == 'new_sale':
                 if int(quantity) > sel_product.quantity:
-                    messages.error(request, f"Insufficient stock for {sel_product.product}.")
+                    messages.error(request, f"Insufficient stock for item '{sel_product.product}'. Only {sel_product.quantity} {sel_product.units.units} are available.")
                     return redirect('physical_sales')
 
                 payments = get_object_or_404(PaymentMethod, shop=shop, method=payment_method)
@@ -495,19 +567,16 @@ def physical_sales_view(request):
                 DeliveryItem.objects.create(delivery=delivery, product=sel_product, quantity=float(quantity))
                 Transaction.objects.create(shop=shop, user=customer, amount=delivery.total, order=delivery)
                 messages.success(request, f"Order {order_no} created. Please confirm payment.")
-                return redirect('physical_sales')
+            
             elif source == 'add_product':
                 if int(quantity) > sel_product.quantity:
                     messages.error(request, f'Insufficient stock for {sel_product}.')
                     return redirect('physical_sales')
                 
-                delivery = get_object_or_404(Delivery, order_number=order_no)
                 DeliveryItem.objects.create(delivery=delivery, product=sel_product, quantity=float(quantity))
-                messages.success(request, f'{sel_product.product} added to order number {order_no}')
-                return redirect('physical_sales')
+                messages.success(request, f'Item "{sel_product.product}" added to order number {order_no}')
                 
             elif source == 'confirm_payment':
-                delivery = get_object_or_404(Delivery, order_number=order_no)
                 delivery.status = 'completed'
                 delivery.time_completed = datetime.now()
                 delivery.admin = request.user
@@ -523,9 +592,15 @@ def physical_sales_view(request):
                 # sale_category.save()
                 # shop.total_sales += totals
                 # shop.save()
-
-                messages.success(request, f"Order {order_no} payment confirmed.")
-                return redirect('physical_sales')
+                
+                messages.success(request, f"Order '{order_no}' payment confirmed.")
+            
+            elif source == 'delete_item':
+                if confirm_delete:
+                    delivery.is_deleted = True
+                    delivery.save()
+                    messages.success(request, f'Order "{delivery.order_number}" deleted.')
+        return redirect('physical_sales')
 
     context = {
         'available_products': available_products,
@@ -566,27 +641,36 @@ def main_helpdesk_view(request):
 
 def shop_helpdesk_view(request):
     shop = get_user_shop(request)
-    if not shop:
-        return redirect('error_page')
-
-    issues = Ticket.objects.filter(shop=shop)
+    issues = Ticket.objects.filter(shop=shop, is_deleted=False)
     pending_issues = issues.filter(is_sorted=False)
     sorted_issues = issues.filter(is_sorted=True)
 
     if request.method == 'POST':
-        status = request.POST.get('status', '').strip()
-        is_sorted = request.POST.get('is_sorted', '').lower() == 'true'
-        source = request.POST.get('source', '').strip()
+        status = request.POST.get('status', '').strip().lower()
+        is_sorted = request.POST.get('is_sorted')
+        source = request.POST.get('source')
         tkt_id = request.POST.get('id')
+        confirm_delete = request.POST.get('delete_item')
 
-        if source == 'change_status':
+        if tkt_id:
             ticket = get_object_or_404(Ticket, id=tkt_id)
-            ticket.status = status
-            ticket.is_sorted = is_sorted
-            ticket.admin = request.user
-            ticket.save()
-            messages.success(request, f"Ticket {ticket.help_id}: {status}")
-            return redirect('shop_helpdesk')
+        
+        with transaction.atomic():
+            if source == 'change_status':
+                if is_sorted:
+                    ticket.is_sorted = True
+                ticket.status = status
+                ticket.admin = request.user
+                ticket.save()
+                messages.success(request, f'Ticket "{ticket.help_id}": {ticket.status}')
+            
+            if source == 'delete_item':
+                if confirm_delete:
+                    ticket.is_deleted = True
+                    ticket.save()
+                    messages.success(request, f'Ticket "{ticket.help_id} deleted."')
+
+        return redirect('shop_helpdesk')
 
     context = {'issues': pending_issues, 'sorted_issues': sorted_issues}
     return render(request, 'dash/shop_helpdesk.html', context)
@@ -904,26 +988,57 @@ def staff_view(request):
     shop = get_user_shop(request)
     staff = Profile.objects.filter(shop=shop, in_staff=True, is_deleted=False)
     roles = Role.objects.filter(shop=shop, is_deleted=False)
-
+    
     if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
+        username = request.POST.get('name')
+        email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
-        role_name = request.POST.get('role', '').strip()
-        source = request.POST.get('source', '').strip()
+        role_name = request.POST.get('role', '').strip().lower()
+        source = request.POST.get('source')
+        staffID = request.POST.get('staffID')
+        avatar = request.FILES.get('avatar')
+        confirm_delete = request.POST.get('delete_item')
 
-        if source == 'new_staff' and password1 == password2:
-            with transaction.atomic():
-                user = User.objects.create_user(username=username, email=email, password=password1)
-                role = get_object_or_404(Role, shop=shop, role_name=role_name)
-                Profile.objects.create(shop=shop, user=user, in_staff=True, role=role)
-                messages.success(request, "New staff member created.")
-                return redirect('dash_staff')
-        else:
-            messages.error(request, "Password mismatch or invalid input.")
+        if staffID:
+            profile = get_object_or_404(Profile, id=staffID)
+            user = get_object_or_404(User, profile=profile)
+        
+        if role_name:
+            role, _ = Role.objects.get_or_create(shop=shop, role_name=role_name)
+
+        with transaction.atomic():
+            match source:
+                case 'new_staff':
+                    if password1 == password2:
+                        user = User.objects.create_user(username=username, email=email, password=password1)
+                        Profile.objects.create(shop=shop, user=user, in_staff=True, role=role)
+                        messages.success(request, "New staff member created.")
+                    
+                    else:
+                        messages.error(request, "Password mismatch or invalid input.")
+                
+                case 'edit_staff':
+                    if avatar:
+                        profile.avatar = avatar
+                    profile.role = role
+                    profile.save()
+                    user.username = username
+                    user.save()
+                    messages.success(request, f'{profile.user.username}`s profile updated.')
+
+                case 'delete_item':
+                    if confirm_delete:
+                        profile.is_deleted = True
+                        profile.save()
+                        messages.success(request, f'"{profile.user.username}" deleted.')
+        
+        return redirect('dash_staff')
     
-    context = {'staff': staff, 'roles': roles}
+    context = {
+        'staff': staff,
+        'roles': roles,
+    }
     return render(request, 'dash/staff.html', context)
 
 
@@ -982,20 +1097,31 @@ def blog_categories_view(request):
     categories = BlogCategory.objects.filter(shop=shop, is_deleted=False)
 
     if request.method == 'POST':
-        category = request.POST.get('category')
+        category = request.POST.get('category','').strip().lower()
         source = request.POST.get('source')
-        cat_id = request.POST.get('cat_id')
+        categoryID = request.POST.get('cat_id')
+        confirm_delete = request.POST.get('delete_item')
 
+        if categoryID:
+            category = get_object_or_404(BlogCategory, id=categoryID)
+        
         if source == 'new_category':
             BlogCategory.objects.create(shop=shop, category=category)
             messages.success(request, f'{category} category added.')
             return redirect('blog_categories')
 
         elif source == 'edit_category':
-            cat = get_object_or_404(BlogCategory, id=cat_id)
             cat.category = category
             cat.save()
+            messages.success(request, f'Category updated.')
             return redirect('blog_categories')
+
+        elif source == 'delete_item':
+            if confirm_delete:
+                category.is_deleted = True
+                category.save()
+                messages.success(request, f'Category "{category.category}" deleted.')
+                return redirect('blog_categories')
 
     context = {
         'categories': categories,
@@ -1017,6 +1143,7 @@ def pending_posts_view(request):
         source = request.POST.get('source')
         avatar = request.FILES.get('avatar')
         post_id = request.POST.get('post_id')
+        confirm_delete = request.POST.get('delete_item')
         
         if not is_featured:
                 is_featured = False
@@ -1045,14 +1172,20 @@ def pending_posts_view(request):
             if is_featured:
                 post.is_featured = is_featured
             post.save()
-            messages.success(request, 'Blog post edited.')
+            messages.success(request, 'BlogPost #{post.blogID} edited.')
             return redirect('pending_posts')
 
         elif source == 'confirm_post':
             post.status = 'confirmed'
             post.save()
-            messages.success(request, 'Blog post confirmed and posted.')
+            messages.success(request, 'BlogPost #{post.blogID} confirmed and posted.')
             return redirect('pending_posts')
+
+        elif source == 'delete_item':
+            if confirm_delete:
+                post.is_deleted = True
+                post.save()
+                messages.success(request, f'BlogPost #{post.blogID} deleted')
 
     context = {
         'pending_posts': pending_posts,
@@ -1064,6 +1197,24 @@ def pending_posts_view(request):
 def confirmed_posts_view(request):
     shop = get_user_shop(request)
     confirmed_posts = BlogPost.objects.filter(shop=shop, status='confirmed', is_deleted=False)
+
+    if request.method == 'POST':
+        postID = request.POST.get('post_id')
+        source = request.POST.get('source')
+        confirm_delete = request.POST.get('delete_item')
+
+        if postID:
+            post = get_object_or_404(BlogPost, id=postID)
+
+        with transaction.atomic():
+            match source:
+                case 'delete_item':
+                    post.is_deleted = True
+                    post.save()
+                    messages.success(request, f'BlogPost #{post.blogID} deleted.')
+
+        return redirect('confirmed_posts')
+        
     context = {
         'confirmed_posts': confirmed_posts,
     }
@@ -1071,5 +1222,9 @@ def confirmed_posts_view(request):
 
 
 def removed_posts_view(request):
-    context = {}
+    shop = get_user_shop(request)
+    deleted_posts = BlogPost.objects.filter(shop=shop, is_deleted=True)
+    context = {
+        'deleted_posts': deleted_posts,
+    }
     return render(request, 'dash/removed_posts.html', context)

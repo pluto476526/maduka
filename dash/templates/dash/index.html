@@ -129,12 +129,12 @@
                         <div class="col-12 col-sm-6 col-md-4">
                             <div class="card bg-success card-rounded">
                                 <div class="card-header">
-                                    <h4 class="card-title my-1">{{ p.product|title }}</h4>
+                                    <h4 class="card-title my-1">{{ p.product__product|title }}</h4>
                                 </div>
                                 <div class="card-body">
-                                  <p><strong>Category:</strong> {{ p.category.category|title }}</p>
-                                  <p><strong>Price:</strong> KSH. {{ p.price|intcomma }} per {{ p.units.units|title }}</p>
-                                  <p><strong>Available Quantity:</strong> {{ p.quantity }} {{ p.units.units|title }}</p>
+                                  <p><strong>Category:</strong> {{ p.product__category__category|title }}</p>
+                                  <p><strong>Price:</strong> KSH. {{ p.product__price|intcomma }} per {{ p.product__units__units|title }}</p>
+                                  <p><strong>Quantity Sold:</strong> {{ p.total_sold }} {{ p.product__units__units|title }}</p>
                                   <p><strong>Total Sales:</strong> KSH. {{ p.total_sales|intcomma }}</p>
                                 </div>
                             </div>
@@ -169,7 +169,7 @@
                         <div class="row">
                           <div class="col-sm-10">
                             <p class="status-summary-ight-white mb-1">Currently at</p>
-                            <h2 class="text-info">KES. 357</h2>
+                            <h2 class="text-info">KES. {{ total_sales_today }}</h2>
                           </div>
                         </div>
                       </div>

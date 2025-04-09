@@ -3,69 +3,33 @@
   <div class="row">
     <div class="col-sm-12">
       <div class="home-tab">
-        <div
-          class="d-sm-flex align-items-center justify-content-between border-bottom"
-        >
+        <div class="d-sm-flex align-items-center justify-content-between border-bottom">
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item">
-              <a
-                class="nav-link active ps-0"
-                id="home-tab"
-                data-bs-toggle="tab"
-                href="#from_dash"
-                role="tab"
-                aria-controls="from_dash"
-                aria-selected="true"
-                >From Dashboard</a
-              >
+              <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#from_dash" role="tab">From Dashboard</a>
             </li>
             <li class="nav-item">
-              <a
-                class="nav-link"
-                id="profile-tab"
-                data-bs-toggle="tab"
-                href="#from_cart"
-                role="tab"
-                aria-selected="false"
-                >From Shop Carts</a
-              >
+              <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#from_cart" role="tab">From Shop Carts</a>
             </li>
           </ul>
         </div>
         {% if messages %}
         {% for message in messages %}
-        <div
-          class="alert alert-info alert-dismissible fade show mt-2"
-          role="alert"
-        >
+        <div class="alert alert-info alert-dismissible fade show mt-2" role="alert">
           {{ message }}
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
         {% endif %}
         <div class="tab-content tab-content-basic">
-          <div
-            class="tab-pane fade show active"
-            id="from_dash"
-            role="tabpanel"
-            aria-labelledby="from_dash"
-          >
+          <div class="tab-pane fade show active" id="from_dash" role="tabpanel">
             <div class="col-sm-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
-                  <div
-                    class="d-sm-flex justify-content-between align-items-start"
-                  >
+                  <div class="d-sm-flex justify-content-between align-items-start">
                     <div>
                       <h4 class="card-title">Pending Delivery Requests</h4>
-                      <p class="card-description">
-                        View and manage requests made from the dashboard.
-                      </p>
+                      <p class="card-description">View and manage requests made from the dashboard.</p>
                     </div>
                   </div>
                   <div class="table-responsive">
@@ -88,8 +52,7 @@
                           <td>{{ o.timestamp }}</td>
                           <td>KSH. {{ o.total|intcomma }}</td>
                           <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
-                          <td class="d-flex justify-content-start"
-                            style="gap: 3px">
+                          <td class="d-flex justify-content-start" style="gap: 3px">
                           <a href="{% url 'order_details' o.order_number %}">
                               <span class="badge badge-info"> View </span>
                           </a>
@@ -97,11 +60,38 @@
                               {% csrf_token %}
                               <input type="hidden" name="o_id" value="{{ o.id }}">
                               <input type="hidden" name="source" value="confirm_delivery">
-                              <button class="badge badge-success" type="submit">
-                                Confirm
-                              </button>
+                              <button class="badge badge-success" type="submit">Confirm</button>
                             </form>
-                            <button class="badge badge-danger">Delete</button>
+                            <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal{{ o.id }}">Delete</button>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ o.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Please Confirm</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Floating Labels Form -->
+                                            <form class="row g-3" method="post">
+                                                {% csrf_token %}
+                                                <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                    <label class="form-check-label">Are you sure you want to cancel and delete order "{{ o.order_number }}"? This action cannot be undone.</label>
+                                                    <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                </div>
+                                                <input type="hidden" name="o_id" value="{{ o.id }}">
+                                                <input type="hidden" name="source" value="delete_item">
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                </div>
+                                            </form>
+                                            <!-- End floating Labels Form -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Category Modal -->
                           </td>
                         </tr>
                         {% endfor %} {% else %}
@@ -117,21 +107,14 @@
               </div>
             </div>
           </div>
-          <div
-            class="tab-pane fade active"
-            id="from_cart"
-            role="tabpanel"
-            aria-labelledby="from_cart"
-          >
+          <div class="tab-pane fade active" id="from_cart" role="tabpanel">
             <div class="col-sm-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
                   <div class="d-sm-flex justify-content-between align-items-start">
                     <div>
                       <h4 class="card-title">Pending Delivery Requests</h4>
-                      <p class="card-description">
-                        View and manage requests from checked out carts.
-                      </p>
+                      <p class="card-description">View and manage requests from checked out carts.</p>
                     </div>
                   </div>
                   <div class="table-responsive">
@@ -154,8 +137,7 @@
                           <td>{{ order.timestamp }}</td>
                           <td>KSH. {{ order.total|intcomma }}</td>
                           <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
-                          <td class="d-flex justify-content-start"
-                            style="gap: 3px">
+                          <td class="d-flex justify-content-start" style="gap: 3px">
                             <a href="{% url 'order_details' order.order_number %}">
                               <span class="badge badge-info"> View </span>
                             </a>
@@ -163,11 +145,38 @@
                               {% csrf_token %}
                               <input type="hidden" name="o_id" value="{{ order.id }}">
                               <input type="hidden" name="source" value="confirm_delivery">
-                              <button class="badge badge-success" type="submit">
-                                Confirm
-                              </button>
+                              <button class="badge badge-success" type="submit">Confirm</button>
                             </form>
-                            <button class="badge badge-danger">Delete</button>
+                            <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal2{{ order.id }}">Delete</button>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal2{{ order.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Please Confirm</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Floating Labels Form -->
+                                            <form class="row g-3" method="post">
+                                                {% csrf_token %}
+                                                <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                    <label class="form-check-label">Are you sure you want to cancel and delete order "{{ order.order_number }}"? This action cannot be undone.</label>
+                                                    <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                </div>
+                                                <input type="hidden" name="o_id" value="{{ order.id }}">
+                                                <input type="hidden" name="source" value="delete_item">
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                </div>
+                                            </form>
+                                            <!-- End floating Labels Form -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Category Modal -->
                           </td>
                         </tr>
                         {% endfor %} {% else %}

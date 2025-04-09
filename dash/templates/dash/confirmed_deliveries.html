@@ -101,7 +101,36 @@
                               </div>
                             </div>
                             <!-- Edit Product Modal -->
-                            <button class="badge badge-danger">Delete</button>
+                            <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal{{ o.id }}">Delete</button>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ o.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Please Confirm</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Floating Labels Form -->
+                                            <form class="row g-3" method="post">
+                                                {% csrf_token %}
+                                                <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                    <label class="form-check-label">Are you sure you want to cancel and delete order "{{ o.order_number }}"? This action cannot be undone.</label>
+                                                    <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                </div>
+                                                <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                                                <input type="hidden" name="source" value="delete_item">
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                </div>
+                                            </form>
+                                            <!-- End floating Labels Form -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Modal -->
                           </td>
                         </tr>
                         {% endfor %}
@@ -155,7 +184,36 @@
                               <input type="hidden" name="source" value="complete_order">
                               <button class="badge badge-info" type="submit">Complete</button>
                             </form>
-                            <button class="badge badge-danger">Delete</button>
+                            <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal2{{ o.id }}">Delete</button>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal2{{ o.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Please Confirm</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Floating Labels Form -->
+                                            <form class="row g-3" method="post">
+                                                {% csrf_token %}
+                                                <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                    <label class="form-check-label">Are you sure you want to cancel and delete order "{{ o.order_number }}"? This action cannot be undone.</label>
+                                                    <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                </div>
+                                                <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                                                <input type="hidden" name="source" value="delete_item">
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                </div>
+                                            </form>
+                                            <!-- End floating Labels Form -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Category Modal -->
                           </td>
                         </tr>
                         {% endfor %}

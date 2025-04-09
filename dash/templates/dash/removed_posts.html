@@ -12,18 +12,12 @@
         <div class="card-body">
           <div class="d-sm-flex justify-content-between align-items-start">
             <div>
-              <h4 class="card-title">Pending Blog Posts</h4>
-              <p class="card-description">View blogs that have not yet been posted on your shop's page.</p>
-            </div>
-            <div>
-              <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button" data-bs-toggle="modal" data-bs-target="#newPostModal">
-                <i class="mdi mdi-account-plus"></i>
-                New Post
-              </button>
+              <h4 class="card-title">Deleted Blog Posts</h4>
+              <p class="card-description">View blogs that have been deleted from your shop's page.</p>
             </div>
           </div>
           <div class="table-responsive">
-            {% if pending_posts %}
+            {% if deleted_posts %}
             <table class="table table-hover">
               <thead>
                 <tr>
@@ -35,7 +29,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% for p in pending_posts %}
+                {% for p in deleted_posts %}
                 <tr>
                   <td>{{ p.title|title|truncatechars:10 }}</td>
                   <td>{{ p.category.category|title }}</td>
@@ -43,13 +37,6 @@
                   <td>{{ p.timestamp }}</td>
                   <td class="d-flex justify-content-start" style="gap: 3px">
                     <button class="badge badge-info" type="button" data-bs-toggle="modal" data-bs-target="#viewPostModal{{ p.id }}">View</button>
-                    <form action="" method="post">
-                      {% csrf_token %}
-                      <input type="hidden" name="post_id" value="{{ p.id }}">
-                      <input type="hidden" name="source" value="confirm_post">
-                      <button class="badge badge-success" type="submit">Confirm</button>
-                    </form>
-                    <button class="badge badge-danger">Delete</button>
                   </td>
                 </tr>
                 {% endfor %}
@@ -64,64 +51,8 @@
 </div>
 <!-- content-wrapper ends -->
 
-<!-- New Blog Post Modal -->
-<div class="modal fade" id="newPostModal" tabindex="-1">
-  <div class="modal-fullscreen modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Blog Posts Form</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <!-- Floating Labels Form -->
-      <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-        <div class="modal-body row g-3">
-          <div class="col-md-12 d-flex justify-content-between g-1">
-            <div class="col-md-6 form-floating">
-              <input type="text" name="title" class="form-control" required>
-              <label>Title</label>
-            </div>&nbsp;
-            <div class="col-md-6 form-floating">
-              <select name="category" class="form-select" required>
-                <option value="" selected disabled>------------------------</option>
-                {% for c in categories %}
-                <option value="{{ c.id }}">{{ c.category|title }}</option>
-                {% endfor %}
-              </select>
-              <label>Category</label>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <textarea name="content" class="form-control" placeholder="Write the body of your post here..." required
-              style="height: 50vh;"></textarea>
-          </div>
-          <div class="col-md-12 d-flex">
-            <label class="btn btn-primary" title="Select Image">Select Image
-              <input type="file" class="d-none" name="avatar">
-            </label>
-            <strong id="fileName"></strong>&nbsp;&nbsp;
-            <div class="d-flex align-items-center gap-3">
-              <label class="form-check-label">Set Featured</label>
-              <input type="checkbox" name="is_featured" value="True" class="form-check">
-            </div>
-          </div>
-        </div>
-        <input type="hidden" name="source" value="new_post">
-        <div class="modal-footer">
-          <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-sm btn-outline-success">
-              Add Request
-            </button>
-        </div>
-      </form>
-      <!-- End floating Labels Form -->
-    </div>
-  </div>
-</div>
-<!-- New Blog Post Modal -->
-
 <!-- Edit Post Modal -->
-{% for p in pending_posts %}
+{% for p in deleted_posts %}
 <div class="modal fade" id="viewPostModal{{ p.id }}" tabindex="-1">
   <div class="modal-fullscreen modal-dialog">
     <div class="modal-content">
@@ -139,7 +70,7 @@
               <label>Blog ID</label>
             </div>&nbsp;
             <div class="col-md-6 form-floating">
-              <input type="text" class="form-control" value="{{ p.user.username|title }}" readonly>
+              <input type="text" class="form-control" value="{{ p.author.username|title }}" readonly>
               <label>Posted By</label>
             </div>
           </div>
@@ -155,40 +86,20 @@
           </div>
           <div class="col-md-12 d-flex justify-content-between g-1">
             <div class="col-md-6 form-floating">
-              <input type="text" name="title" class="form-control" value="{{ p.title|title }}" required>
+              <input type="text" name="title" class="form-control" value="{{ p.title|title }}" readonly>
               <label>Title</label>
             </div>&nbsp;
             <div class="col-md-6 form-floating">
-              <select name="category" class="form-select" required>
-                {% for c in categories %}
-                <option value="{{ c.id }}" {% if p.category == 'c.category' %} selected {% endif %}>{{ c.category|title }}</option>
-                {% endfor %}
-              </select>
+              <input type="text" class="form-control" value="{{ p.category|title }}" readonly>
               <label>Category</label>
             </div>
           </div>
           <div class="col-md-12">
-            <textarea name="content" class="form-control" placeholder="Write the body of your post here..." required
-              style="height: 50vh;">{{ p.content|capfirst }}</textarea>
-          </div>
-          <div class="col-md-12 d-flex">
-            <label class="btn btn-primary" title="Select Image">Select Image
-              <input type="file" class="d-none">
-            </label>
-            <strong id="fileName"></strong>&nbsp;&nbsp;
-            <div class="d-flex align-items-center gap-3">
-              <label class="form-check-label">Set Featured</label>
-              <input type="checkbox" name="is_featured" class="form-check" {% if p.is_featured %} checked {% endif %}>
-            </div>
+            <textarea name="content" class="form-control" readonly style="height: 50vh;">{{ p.content|capfirst }}</textarea>
           </div>
         </div>
-        <input type="hidden" name="post_id" value="{{ p.id }}">
-        <input type="hidden" name="source" value="edit_post">
         <div class="modal-footer">
           <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-sm btn-outline-success">
-              Add Request
-            </button>
         </div>
       </form>
       <!-- End floating Labels Form -->
