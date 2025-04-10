@@ -36,8 +36,8 @@ def the_shop(request):
         shop = my_shop(request)
         if shop:
             return {'the_shop': shop}
-    except Exception:
-        logger.error(f'Error getting shop')
+    except Exception as e:
+        logger.error(e)
     return {}
 
 
@@ -50,8 +50,9 @@ def get_categories(request):
         sp_categories = Category.objects.filter(shop=shop, is_deleted=False)
         context = {'sp_categories': sp_categories}
         return context
-    except Exception:
-        return {}
+    except Exception as e:
+        logger.error(e)
+    return {}
 
 
 def cart_items_count(request):
@@ -74,7 +75,6 @@ def shop_sidebar_stats(request):
     This function provides context data for a shop sidebar(shop_dash)
     """
     try:
-        logger.debug(f'fuck')
         shop = my_shop(request)
         orders = Delivery.objects.filter(shop=shop, username=request.user, is_deleted=False)
         completed_orders = orders.filter(status='completed').count() or 0
@@ -87,7 +87,7 @@ def shop_sidebar_stats(request):
         return context
     except Exception as e:
         logger.debug(e)
-        return {}
+    return {}
 
 def get_order(request):
     """
@@ -115,5 +115,5 @@ def get_order(request):
         return {'tracked_order': orders}
     except Exception as e:
         logger.error(f"Error retrieving orders for query '{query}': {e}")
-        return {}
+    return {}
 
