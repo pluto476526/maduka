@@ -32,10 +32,12 @@ def the_shop(request):
     """
     Add the current user's shop to the context if authenticated.
     """
-    shop = my_shop(request)
-    if shop:
-        return {'the_shop': shop}
-    return {}
+    try:
+        shop = my_shop(request)
+        if shop:
+            return {'the_shop': shop}
+    except Exception:
+        return {}
 
 
 def get_categories(request):
