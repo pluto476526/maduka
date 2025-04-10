@@ -212,7 +212,7 @@ def inventory_view(request):
         avatar = request.FILES.get('avatar')
         confirm_delete = request.POST.get('delete_item')
 
-        if not product_id:
+        if product_id:
             product = get_object_or_404(Inventory, id=product_id)
         
         with transaction.atomic():
