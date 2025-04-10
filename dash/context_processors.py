@@ -16,6 +16,9 @@ def my_shop(request):
     """
     # if not request.user.is_authenticated:
     #     return None
+    if not request.user.is_authenticated:
+        return {}
+
 
     try:
         profile = Profile.objects.get(user=request.user)
@@ -32,14 +35,14 @@ def the_shop(request):
     """
     Add the current user's shop to the context if authenticated.
     """
-    if request.user.is_authenticated:
-        try:
-            shop = my_shop(request)
-            if shop:
-                return {'the_shop': shop}
-        except Exception as e:
-            logger.error(e)
+    if not request.user.is_authenticated:
         return {}
+    try:
+        shop = my_shop(request)
+        if shop:
+            return {'the_shop': shop}
+    except Exception as e:
+        logger.error(e)
     return {}
 
 def get_categories(request):
@@ -47,14 +50,15 @@ def get_categories(request):
     This function helps display categories on the shop nav bar
     """
     if request.user.is_authenticated:
-        try:
-            shop = my_shop(request)
-            sp_categories = Category.objects.filter(shop=shop, is_deleted=False)
-            context = {'sp_categories': sp_categories}
-            return context
-        except Exception as e:
-            logger.error(e)
         return {}
+        
+    try:
+        shop = my_shop(request)
+        sp_categories = Category.objects.filter(shop=shop, is_deleted=False)
+        context = {'sp_categories': sp_categories}
+        return context
+    except Exception as e:
+        logger.error(e)
     return {}
 
 def cart_items_count(request):
@@ -73,7 +77,7 @@ def cart_items_count(request):
         return context
     except Exception as e:
         logger.debug(e)
-        return {}
+    return {}
 
 
 def shop_sidebar_stats(request):
