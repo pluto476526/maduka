@@ -201,10 +201,10 @@ def inventory_view(request):
 
     if request.method == 'POST':
         product_name = request.POST.get('product')
-        category_name = request.POST.get('category')
+        category_name = request.POST.get('category', '').strip().lower()
         description = request.POST.get('description')
         quantity = request.POST.get('quantity')
-        units = request.POST.get('units')
+        units = request.POST.get('units', '').strip().lower()
         price = request.POST.get('price')
         is_featured = request.POST.get('is_featured')
         source = request.POST.get('source')
@@ -224,7 +224,7 @@ def inventory_view(request):
                 product = get_object_or_404(Inventory, id=product_id)
             
             if units:
-                unit = get_object_or_404(Unit, id=units)
+                unit, _ = Unit.objects.get_or_create(shop=shop, units=units)
             
             if source == 'edit_product':
                 product.product = product_name

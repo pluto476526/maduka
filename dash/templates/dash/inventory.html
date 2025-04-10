@@ -123,8 +123,9 @@
                               <div class="col-md-12">
                                 <p>{{ product.avatar1 }}</p>
                                 <div class="d-sm-flex align-items-center gap-3">
-                                  <label>Display Picture</label>
-                                  <input type="file" name="avatar" class="form-file">
+                                  <label class="btn btn-sm btn-primary">Display Picture
+                                    <input type="file" name="avatar" class="d-none">
+                                  </label>
                                 </div>
                               </div>
                               <input type="hidden" name="source" value="edit_product">
@@ -206,14 +207,23 @@
           </div>
           <div class="col-md-12">
             <div class="form-floating">
-              <select name="category" class="form-select" required>
+              <input class="form-control" list="categories" name="category" autocomplete="off">
+              <datalist id="categories">
+              {% for c in categories %}
+              <option value="{{ c.category|title }}">
+              {% endfor %}
+              </datalist>
+
+
+
+              <!--<select name="category" class="form-select" required>
                 <option value="" selected disabled>
                   ------------------------------------------------------
                 </option>
                 {% for category in categories %}
                 <option value="{{ category.category|title }}">{{ category.category|title }}</option>
                 {% endfor %}
-              </select>
+              </select>-->
               <label>Category</label>
             </div>
           </div>
@@ -232,14 +242,20 @@
           </div>
           <div class="col-md-4">
             <div class="form-floating">
-              <select name="units" class="form-select" required>
+              <input class="form-control" list="units" name="units" autocomplete="off">
+              <datalist id="units">
+              {% for u in units %}
+              <option value="{{ u.units|title }}">
+              {% endfor %}
+              </datalist>
+              <!--<select name="units" class="form-select" required>
                 <option value="" selected disabled>
                   ----------------------------
                 </option>
                 {% for u in units %}
                   <option value="{{ u.id }}">{{ u.units|title }}</option>
                 {% endfor %}
-              </select>
+              </select>-->
               <label>Units</label>
             </div>
           </div>
@@ -257,8 +273,9 @@
           </div>
           <div class="col-md-12">
             <div class="d-flex align-items-center gap-3">
-              <label>Display Picture</label>
-              <input type="file" name="avatar" class="form-file">
+              <label class="btn btn-sm btn-primary">Display Picture
+                <input type="file" name="avatar" class="d-none">
+              </label>
             </div>
           </div>
           <input type="hidden" name="source" value="new_product">
