@@ -37,6 +37,7 @@ def the_shop(request):
         if shop:
             return {'the_shop': shop}
     except Exception:
+        logger.error(f'Error getting shop')
     return {}
 
 
