@@ -36,7 +36,7 @@ def the_shop(request):
     Add the current user's shop to the context if authenticated.
     """
     if not request.user.is_authenticated:
-        return {}
+        return {'the_shop': None}
     try:
         shop = my_shop(request)
         if shop:
