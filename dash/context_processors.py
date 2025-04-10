@@ -32,33 +32,39 @@ def the_shop(request):
     """
     Add the current user's shop to the context if authenticated.
     """
-    try:
-        shop = my_shop(request)
-        if shop:
-            return {'the_shop': shop}
-    except Exception as e:
-        logger.error(e)
+    if request.user.is_authenticated:
+        try:
+            shop = my_shop(request)
+            if shop:
+                return {'the_shop': shop}
+        except Exception as e:
+            logger.error(e)
+        return {}
     return {}
-
 
 def get_categories(request):
     """
     This function helps display categories on the shop nav bar
     """
-    try:
-        shop = my_shop(request)
-        sp_categories = Category.objects.filter(shop=shop, is_deleted=False)
-        context = {'sp_categories': sp_categories}
-        return context
-    except Exception as e:
-        logger.error(e)
+    if request.user.is_authenticated:
+        try:
+            shop = my_shop(request)
+            sp_categories = Category.objects.filter(shop=shop, is_deleted=False)
+            context = {'sp_categories': sp_categories}
+            return context
+        except Exception as e:
+            logger.error(e)
+        return {}
     return {}
-
 
 def cart_items_count(request):
     """
     This function gets the total number of cart items for the logged in user
     """
+    
+    if not request.user.is_authenticated:
+        return {}
+
     try:
         shop = my_shop(request)
         my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing', is_deleted=False).last()
@@ -74,6 +80,10 @@ def shop_sidebar_stats(request):
     """
     This function provides context data for a shop sidebar(shop_dash)
     """
+    if not request.user.is_authenticated:
+        return {}
+
+
     try:
         shop = my_shop(request)
         orders = Delivery.objects.filter(shop=shop, username=request.user, is_deleted=False)
