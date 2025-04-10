@@ -299,7 +299,7 @@ def product_details_view(request, slug, pk):
 
                 return redirect('product_details', the_shop.name, product.product_id)
             case 'add_to_cart':
-                add_to_cart(request, the_shop.name, product.product_id, quantity)
+                add_to_cart(request, the_shop.id, product.product_id, quantity)
                 return redirect(referer)
             case _:
                 pass
