@@ -61,24 +61,6 @@ def get_categories(request):
         logger.error(e)
     return {}
 
-def cart_items_count(request):
-    """
-    This function gets the total number of cart items for the logged in user
-    """
-    
-    if not request.user.is_authenticated:
-        return {}
-
-    try:
-        shop = my_shop(request)
-        my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing', is_deleted=False).last()
-        cart_items = CartItem.objects.filter(cart=my_cart).count() or 0
-        context = {'cart_items_count': cart_items}
-        return context
-    except Exception as e:
-        logger.debug(e)
-    return {}
-
 
 def shop_sidebar_stats(request):
     """

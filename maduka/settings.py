@@ -82,7 +82,6 @@ TEMPLATES = [
                 'dash.context_processors.get_order',
                 'dash.context_processors.the_shop',
                 'dash.context_processors.get_categories',
-                'dash.context_processors.cart_items_count',
                 'dash.context_processors.shop_sidebar_stats',
             ],
         },
