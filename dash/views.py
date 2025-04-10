@@ -83,7 +83,7 @@ def index(request):
     current_month = n().month
     current_year = n().year
     monthly_sales = my_deliveries.filter(time_completed__year=current_year, time_completed__month=current_month).aggregate(models.Sum('total')).get('total', 0)
-
+    top_customers = Profile.objects.filter(shop=shop, is_deleted=False).order_by('-total_spent')[:5]
     my_profile = get_object_or_404(Profile, user=request.user)
     my_notifications = Notification.objects.filter(shop=shop, is_deleted=False)
     notifications = []
@@ -137,6 +137,7 @@ def index(request):
         'num_sessions': num_sessions,
         'avg_duration': avg_duration_secs,
         'total_sales_today': total_sales_today,
+        'top_customers': top_customers,
     }
     return render(request, 'dash/index.html', context)
 

@@ -472,6 +472,11 @@ def checkout_view(request, slug):
                     my_cart.checked_out = datetime.now()
                     my_cart.save()
 
+                    # Add the total amount spent
+                    profile = get_object_or_404(Profile, user=request.user)
+                    profile.total_spent += delivery.total
+                    profile.save()
+                    
                 messages.success(request, 'Check out completed.')
                 Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'New order placed by "{request.user.username}".', target='admin')
 
