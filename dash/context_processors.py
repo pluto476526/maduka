@@ -25,7 +25,7 @@ def my_shop(request):
 
     except Exception as e:
         logger.error(f"Error retrieving shop for user {request.user}: {e}")
-        return None
+    return None
 
 
 def the_shop(request):
@@ -37,7 +37,7 @@ def the_shop(request):
         if shop:
             return {'the_shop': shop}
     except Exception:
-        return {}
+    return {}
 
 
 def get_categories(request):
