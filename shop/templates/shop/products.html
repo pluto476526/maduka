@@ -68,88 +68,6 @@
                             <div class="u-s-m-b-30">
                                 <div class="shop-w shop-w--style">
                                     <div class="shop-w__intro-wrap">
-                                        <h1 class="shop-w__h">RATING</h1>
-
-                                        <span class="fas fa-minus shop-w__toggle" data-target="#s-rating" data-toggle="collapse"></span>
-                                    </div>
-                                    <div class="shop-w__wrap collapse show" id="s-rating">
-                                        <ul class="shop-w__list gl-scroll">
-                                            <li>
-                                                <div class="rating__check">
-                                                    <input type="checkbox">
-                                                    <div class="rating__check-star-wrap">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                    </div>
-                                                </div>
-                                                <span class="shop-w__total-text">(2)</span>
-                                            </li>
-                                            <li>
-                                                <div class="rating__check">
-                                                    <input type="checkbox">
-                                                    <div class="rating__check-star-wrap">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <span>& Up</span>
-                                                    </div>
-                                                </div>
-                                                <span class="shop-w__total-text">(8)</span>
-                                            </li>
-                                            <li>
-                                                <div class="rating__check">
-                                                    <input type="checkbox">
-                                                    <div class="rating__check-star-wrap">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <span>& Up</span>
-                                                    </div>
-                                                </div>
-                                                <span class="shop-w__total-text">(10)</span>
-                                            </li>
-                                            <li>
-                                                <div class="rating__check">
-                                                    <input type="checkbox">
-                                                    <div class="rating__check-star-wrap">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <span>& Up</span>
-                                                    </div>
-                                                </div>
-                                                <span class="shop-w__total-text">(12)</span>
-                                            </li>
-                                            <li>
-                                                <div class="rating__check">
-                                                    <input type="checkbox">
-                                                    <div class="rating__check-star-wrap">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                        <span>& Up</span>
-                                                    </div>
-                                                </div>
-                                                <span class="shop-w__total-text">(1)</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="u-s-m-b-30">
-                                <div class="shop-w shop-w--style">
-                                    <div class="shop-w__intro-wrap">
                                         <h1 class="shop-w__h">PRICE</h1>
 
                                         <span class="fas fa-minus shop-w__toggle" data-target="#s-price" data-toggle="collapse"></span>
@@ -234,12 +152,18 @@
                                                 <a href="{% url 'product_details' the_shop.slug p.product_id %}">{{ p.product|title }}</a>
                                             </div>
                                             <div class="product-m__rating gl-rating-style">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star-half-alt"></i>
-                                                <i class="far fa-star"></i>
-                                                <i class="far fa-star"></i>
-                                                <span class="product-m__review">(23)</span>
+                                                {% with rating=p.avg_rating|default:0 %}
+                                                    {% for i in "12345" %}
+                                                        {% if rating >= forloop.counter %}
+                                                            <i class="fas fa-star"></i>  {# full star #}
+                                                        {% elif rating >= forloop.counter0|add:"0.5" %}
+                                                            <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                                        {% else %}
+                                                            <i class="far fa-star"></i>  {# empty star #}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                                <span class="product-m__review">({{ p.review_count|default:0 }})</span>
                                             </div>
                                             <div class="product-m__price">KSH. {{ p.price|intcomma }}</div>
                                             <div class="product-m__hover">

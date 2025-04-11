@@ -86,7 +86,7 @@
 
     {% if tc_products %}
     <!--====== Section 2 ======-->
-    <div class="u-s-p-b-60">
+    <div class="u-s-p-b-12">
 
         <!--====== Section Intro ======-->
         <div class="section__intro u-s-m-b-16">
@@ -158,15 +158,21 @@
                                                 <a href="{% url 'products' the_shop.slug %}">{{ tc.category.category|title }}</a>
                                             </span>
                                             <span class="product-o__name">
-                                                <a href="{% url 'product_details' the_shop.slug tc.product_id %}">{{ tc.product|title }}</a>
+                                                <a href="{% url 'product_details' the_shop.slug tc.product_id %}">{{ tc.product|title|truncatechars:30 }}</a>
                                             </span>
                                             <div class="product-o__rating gl-rating-style">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star-half-alt"></i>
-                                                <span class="product-o__review">(23)</span>
+                                                {% with rating=tc.avg_rating|default:0 %}
+                                                    {% for i in "12345" %}
+                                                        {% if rating >= forloop.counter %}
+                                                            <i class="fas fa-star"></i>  {# full star #}
+                                                        {% elif rating >= forloop.counter0|add:"0.5" %}
+                                                            <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                                        {% else %}
+                                                            <i class="far fa-star"></i>  {# empty star #}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                                <span class="product-o__review">({{ tc.review_count|default:0 }})</span>
                                             </div>
                                             <span class="product-o__price">KSH. {{ tc.price|intcomma }}
                                                 {% if tc.discount and tc.discount != 0 %}
@@ -179,14 +185,14 @@
                                 </div>
                             </div>
                         </div>
-                        <!--
+
                         <div class="col-lg-12">
-                            <a href="">
+                            <a href="{% url 'products' the_shop.slug %}">
                             <div class="load-more">
                                 <button class="btn btn--e-brand" type="button">Start Shopping</button>
                             </div>
                             </a>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -263,12 +269,18 @@
                                 <a href="product-detail.html">{{ d.product|title }}</a>
                             </span>
                             <div class="product-o__rating gl-rating-style">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span class="product-o__review">(2)</span>
+                                {% with rating=d.avg_rating|default:0 %}
+                                    {% for i in "12345" %}
+                                        {% if rating >= forloop.counter %}
+                                            <i class="fas fa-star"></i>  {# full star #}
+                                        {% elif rating >= forloop.counter0|add:"0.5" %}
+                                            <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                        {% else %}
+                                            <i class="far fa-star"></i>  {# empty star #}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                                <span class="product-o__review">({{ d.review_count|default:0 }})</span>
                             </div>
                             <span class="product-o__price">KSH. {{ d.product.price|intcomma }}&nbsp;&nbsp;&nbsp;<span class="product-o__discount">KSH {{ d.discount|intcomma }}</span></span>
                         </div>
@@ -348,12 +360,18 @@
                                     <a href="{% url 'product_details' the_shop.slug a.product_id %}">{{ a.product|title }}</a>
                                 </span>
                                 <div class="product-o__rating gl-rating-style">
-                                    <i class="far fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                    <span class="product-o__review">(0)</span>
+                                    {% with rating=a.avg_rating|default:0 %}
+                                        {% for i in "12345" %}
+                                            {% if rating >= forloop.counter %}
+                                                <i class="fas fa-star"></i>  {# full star #}
+                                            {% elif rating >= forloop.counter0|add:"0.5" %}
+                                                <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                            {% else %}
+                                                <i class="far fa-star"></i>  {# empty star #}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                    <span class="product-o__review">({{ a.review_count|default:0 }})</span>
                                 </div>
                                 <span class="product-o__price">KSH. {{ a.price|intcomma }}
                                     {% if a.discount != 0 %}<span class="product-o__discount">KSH {{ a.discount }}</span>{% endif %}
@@ -435,12 +453,18 @@
                                 <a href="{% url 'product_details' the_shop.slug p.product_id %}">{{ p.product|title }}</a>
                             </span>
                             <div class="product-o__rating gl-rating-style">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span class="product-o__review">(23)</span>
+                                {% with rating=p.avg_rating|default:0 %}
+                                    {% for i in "12345" %}
+                                        {% if rating >= forloop.counter %}
+                                            <i class="fas fa-star"></i>  {# full star #}
+                                        {% elif rating >= forloop.counter0|add:"0.5" %}
+                                            <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                        {% else %}
+                                            <i class="far fa-star"></i>  {# empty star #}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                                <span class="product-o__review">({{ p.review_count|default:0 }})</span>
                             </div>
                             <span class="product-o__price">KSH. {{ p.price|intcomma }}
                                 {% if p.discount != 0 %}<span class="product-o__discount">KSH {{ p.discount|intcomma }}</span>{% endif %}

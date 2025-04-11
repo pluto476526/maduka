@@ -3,7 +3,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
-from django.db.models import Sum, Count, F, Q
+from django.db.models import Sum, Count, F, Q, Avg
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from shop.models import Shop, Cart, CartItem, Ticket, CountyShipped, Address, BlogPost, BlogCategory, BlogComment
@@ -133,23 +133,32 @@ def index(request, slug):
     # Fetch products from top categories(tc) excluding those in the user's pending cart
     my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing', is_deleted=False).last()
     cart_products = CartItem.objects.filter(cart=my_cart, is_deleted=False).values_list('product_id', flat=True)
-    
+    products = Inventory.objects.filter(
+        shop=shop,
+        is_deleted=False,
+        status='available',
+    ).exclude(
+        id__in=cart_products
+    ).annotate(
+        avg_rating=Avg('review__rating'),
+        review_count=Count('review'),
+    )
+
     tc_products = []
     for t in top_categories:
         cat = get_object_or_404(Category, category=t.category)
-        products = Inventory.objects.filter(shop=shop, category=cat, is_deleted=False).exclude(id__in=cart_products)[:3]
-        for p in products:
+        c_products = products.filter(category=cat)[:3]
+        for p in c_products:
             tc_products.append(p)
 
     # Fetch the 2 most recent deals of the day
-    deals = TodaysDeal.objects.filter(shop=shop).order_by('-time')[:2]
+    deals = TodaysDeal.objects.filter(shop=shop, is_deleted=False).order_by('-time')[:2]
     active_deals = []
     for d in deals:
         if d.time > datetime.now(timezone(timedelta(hours=3))):
             active_deals.append(d)
 
     # Fetch latest arrivals
-    products = Inventory.objects.filter(shop=shop).exclude(id__in=cart_products)
     arrivals = products.order_by('-timestamp')[:4]
 
     # Fetch 4 featured products
@@ -196,7 +205,10 @@ def products_view(request, slug):
         is_deleted = False,
         status = 'available',
         shop = the_shop
-    ).exclude(id__in=cart_items)
+    ).exclude(id__in=cart_items).annotate(
+        avg_rating=Avg('review__rating'),
+        review_count=Count('review'),
+    )
 
 
     categories = Category.objects.filter(is_deleted=False, shop=the_shop).annotate(
@@ -222,7 +234,7 @@ def products_view(request, slug):
         case 'best_sellers':
             products = products.order_by('-total_sales')
         case 'top_rated':
-            products = products.order_by('-rating')
+            products = products.order_by('-avg_rating')
         case 'lowest_price':
             products = products.order_by('price')
         case 'highest_price':
@@ -268,9 +280,12 @@ def products_view(request, slug):
 def product_details_view(request, slug, pk):
     sort_reviews = request.GET.get('sort_reviews', 'best_ratings')
     the_shop = get_shop(slug)
-    product = get_object_or_404(Inventory, product_id=pk, shop=the_shop)
-    rel_products = Inventory.objects.filter(is_deleted=False, shop=the_shop, category=product.category).exclude(product_id=product.product_id)[:4]
+    inventory = Inventory.objects.filter(shop=the_shop, is_deleted=False)
+    product = inventory.filter(product_id=pk).annotate(avg_rating=Avg('review__rating'), reviews_count=Count('review')).first()
+    rel_products = inventory.filter(category=product.category).exclude(product_id=product.product_id).annotate(avg_rating=Avg('review__rating'), reviews_count=Count('review'))[:4]
     reviews = Review.objects.filter(productID=product)
+    wish_cart = Cart.objects.filter(shop=the_shop, status='in_wishes', is_deleted=False).first()
+    wish_items = CartItem.objects.filter(cart=wish_cart).count()
 
     match sort_reviews:
         case 'best_ratings':
@@ -294,7 +309,7 @@ def product_details_view(request, slug, pk):
             case 'new_review':
                 if not rating:
                     messages.error(request, 'Please rate the item.')
-                    return redirect('product_details', the_shop.name, product.product_id)
+                    return redirect('product_details', the_shop.slug, product.product_id)
 
                 Review.objects.create(
                     user = request.user,
@@ -307,7 +322,7 @@ def product_details_view(request, slug, pk):
                 messages.success(request, 'New review added.')
                 Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'New review from "{request.user.username}" on item: "{product.product}".', target='admin')
 
-                return redirect('product_details', the_shop.name, product.product_id)
+                return redirect('product_details', the_shop.slug, product.product_id)
             case 'add_to_cart':
                 add_to_cart(request, the_shop.id, product.product_id, quantity)
                 return redirect(referer)
@@ -319,6 +334,7 @@ def product_details_view(request, slug, pk):
         'the_shop': the_shop,
         'rel_products': rel_products,
         'reviews': reviews,
+        'wish_items_count': wish_items,
     }
     return render(request, 'shop/product_details.html', context)
 

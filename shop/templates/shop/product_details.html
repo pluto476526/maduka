@@ -7,7 +7,7 @@
     {% if messages %}
     {% for m in messages %}
     <!--====== Messages Section ======-->
-    <div class="u-s-p-y-60">
+    <div class="u-s-p-y-12">
         <!--====== Section Content ======-->
         <div class="section__content">
             <div class="container">
@@ -15,7 +15,7 @@
                     <div class="breadcrumb__wrap">
                         <ul class="breadcrumb__list">
                             <li class="is-marked">
-                                <a href="wishlist.html">{{ m }}</a>
+                                <a>{{ m }}</a>
                             </li>
                         </ul>
                     </div>
@@ -27,7 +27,7 @@
     {% endfor %}
     {% endif %}
     <!--====== Section 1 ======-->
-    <div class="u-s-p-y-90">
+    <div class="u-s-p-y-30">
         <div class="container">
             <div class="row">
                 <div class="col-lg-5">
@@ -54,19 +54,19 @@
                         <div class="slider-fouc pd-wrap">
                             <div id="pd-o-initiate">
                                 <div class="pd-o-img-wrap" data-src="{{ product.avatar1.url }}">
-                                    <img class="u-img-fluid" src="{{ product.avatar1.url }}" data-zoom-image="{{ product.avatar.url }}" alt="">
+                                    <img class="u-img-fluid" src="{{ product.avatar1.url }}" data-zoom-image="{{ product.avatar.url }}" alt="" style="height: 40rem; object-fit: cover;">
                                 </div>
                                 <div class="pd-o-img-wrap" data-src="{{ product.avatar2.url }}">
-                                    <img class="u-img-fluid" src="{{ product.avatar2.url }}" data-zoom-image="{{ product.avatar2.url }}" alt="">
+                                    <img class="u-img-fluid" src="{{ product.avatar2.url }}" data-zoom-image="{{ product.avatar2.url }}" alt="" style="height: 40rem; object-fit: cover;">
                                 </div>
                                 <div class="pd-o-img-wrap" data-src="{{ product.avatar3.url }}">
-                                    <img class="u-img-fluid" src="{{ product.avatar3.url }}" data-zoom-image="{{ product.avatar3.url }}" alt="">
+                                    <img class="u-img-fluid" src="{{ product.avatar3.url }}" data-zoom-image="{{ product.avatar3.url }}" alt="" style="height: 40rem; object-fit: cover;">
                                 </div>
                                 <div class="pd-o-img-wrap" data-src="{{ product.avatar4.url }}">
-                                    <img class="u-img-fluid" src="{{ product.avatar4.url }}" data-zoom-image="{{ product.avatar4.url }}" alt="">
+                                    <img class="u-img-fluid" src="{{ product.avatar4.url }}" data-zoom-image="{{ product.avatar4.url }}" alt="" style="height: 40rem; object-fit: cover;">
                                 </div>
                                 <div class="pd-o-img-wrap" data-src="{{ product.avatar5.url }}">
-                                    <img class="u-img-fluid" src="{{ product.avatar5.url }}" data-zoom-image="{{ product.avatar5.url }}" alt="">
+                                    <img class="u-img-fluid" src="{{ product.avatar5.url }}" data-zoom-image="{{ product.avatar5.url }}" alt="" style="height: 40rem; object-fit: cover;">
                                 </div>
                             </div>
 
@@ -116,20 +116,26 @@
                         </div>
                         <div class="u-s-m-b-15">
                             <div class="pd-detail__rating gl-rating-style">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
+                                {% with rating=product.avg_rating|default:0 %}
+                                    {% for i in "12345" %}
+                                        {% if rating >= forloop.counter %}
+                                            <i class="fas fa-star"></i>  {# full star #}
+                                        {% elif rating >= forloop.counter0|add:"0.5" %}
+                                            <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                        {% else %}
+                                            <i class="far fa-star"></i>  {# empty star #}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
                                 <span class="pd-detail__review u-s-m-l-4">
-                                    <a data-click-scroll="#view-review">23 Reviews</a>
+                                    <a data-click-scroll="#view-review">{{ product.reviews_count|default:0 }} Reviews</a>
                                 </span>
                             </div>
                         </div>
                         <div class="u-s-m-b-15">
                             <div class="pd-detail__inline">
                                 <span class="pd-detail__stock">{{ product.quantity|intcomma }} {{ product.units.units }} in stock</span>
-                                <span class="pd-detail__left">Only 2 left</span>
+                                <!--<span class="pd-detail__left">Only 2 left</span>-->
                             </div>
                         </div>
                         <div class="u-s-m-b-15">
@@ -139,8 +145,8 @@
                             <div class="pd-detail__inline">
                                 <span class="pd-detail__click-wrap">
                                     <i class="far fa-heart u-s-m-r-6"></i>
-                                    <a href="signin.html">Add to Wishlist</a>
-                                    <span class="pd-detail__click-count">(222)</span>
+                                    <a href="{% url 'add_to_wishlist_view' the_shop.slug product.product_id %}">Add to Wishlist</a>
+                                    <span class="pd-detail__click-count">({{ wish_items_count|default:0 }})</span>
                                 </span>
                             </div>
                         </div>
@@ -227,7 +233,7 @@
     </div>
 
     <!--====== Product Detail Tab ======-->
-    <div class="u-s-p-y-90">
+    <div class="u-s-p-y-15">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
@@ -242,7 +248,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link active" id="view-review" data-toggle="tab" href="#pd-rev">REVIEWS
-                                        <span>(23)</span>
+                                        <span>({{ product.reviews_count|default:0 }})</span>
                                     </a>
                                 </li>
                             </ul>
@@ -299,14 +305,20 @@
                                     <div class="u-s-m-b-30">
                                         <div class="pd-tab__rev-score">
                                             <div class="u-s-m-b-8">
-                                                <h2>23 Reviews - 4.6 (Overall)</h2>
+                                                <h2>{{ product.reviews_count|default:0 }} Reviews - {{ product.avg_rating|default:0|floatformat:1 }} (Overall)</h2>
                                             </div>
                                             <div class="gl-rating-style-2 u-s-m-b-8">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star-half-alt"></i>
+                                                {% with rating=product.avg_rating|default:0 %}
+                                                    {% for i in "12345" %}
+                                                        {% if rating >= forloop.counter %}
+                                                            <i class="fas fa-star"></i>  {# full star #}
+                                                        {% elif rating >= forloop.counter0|add:"0.5" %}
+                                                            <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                                        {% else %}
+                                                            <i class="far fa-star"></i>  {# empty star #}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
                                             </div>
                                             <div class="u-s-m-b-8">
                                                 <h4>We want to hear from you!</h4>
@@ -319,7 +331,7 @@
                                         <form class="pd-tab__rev-f1">
                                             <div class="rev-f1__group">
                                                 <div class="u-s-m-b-15">
-                                                    <h2>23 Review(s) for {{ product.product|title }}</h2>
+                                                    <h2>{{ product.reviews_count|default:0 }} Review(s) for {{ product.product|title }}</h2>
                                                 </div>
                                                 <div class="u-s-m-b-15">
                                                     <label for="sort-review"></label>
@@ -337,11 +349,17 @@
                                                         <span class="review-o__date">{{ r.timestamp }}</span>
                                                     </div>
                                                     <div class="review-o__rating gl-rating-style u-s-m-b-8">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="far fa-star"></i>
+                                                        {% with rating=r.rating|default:0 %}
+                                                            {% for i in "12345" %}
+                                                                {% if rating >= forloop.counter %}
+                                                                    <i class="fas fa-star"></i>  {# full star #}
+                                                                {% elif rating >= forloop.counter0|add:"0.5" %}
+                                                                    <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                                                {% else %}
+                                                                    <i class="far fa-star"></i>  {# empty star #}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endwith %}
                                                         <span>({{ r.rating }})</span>
                                                     </div>
                                                     <p class="review-o__text">{{ r.body|capfirst }}</p>
@@ -370,23 +388,8 @@
                                                                 <th>
                                                                     <div class="gl-rating-style-2">
                                                                         <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star-half-alt"></i>
-                                                                        <span>(1.5)</span>
-                                                                    </div>
-                                                                </th>
-                                                                <th>
-                                                                    <div class="gl-rating-style-2">
-                                                                        <i class="fas fa-star"></i>
                                                                         <i class="fas fa-star"></i>
                                                                         <span>(2)</span>
-                                                                    </div>
-                                                                </th>
-                                                                <th>
-                                                                    <div class="gl-rating-style-2">
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star-half-alt"></i>
-                                                                        <span>(2.5)</span>
                                                                     </div>
                                                                 </th>
                                                                 <th>
@@ -402,27 +405,8 @@
                                                                         <i class="fas fa-star"></i>
                                                                         <i class="fas fa-star"></i>
                                                                         <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star-half-alt"></i>
-                                                                        <span>(3.5)</span>
-                                                                    </div>
-                                                                </th>
-                                                                <th>
-                                                                    <div class="gl-rating-style-2">
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star"></i>
                                                                         <i class="fas fa-star"></i>
                                                                         <span>(4)</span>
-                                                                    </div>
-                                                                </th>
-                                                                <th>
-                                                                    <div class="gl-rating-style-2">
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star"></i>
-                                                                        <i class="fas fa-star-half-alt"></i>
-                                                                        <span>(4.5)</span>
                                                                     </div>
                                                                 </th>
                                                                 <th>
@@ -452,29 +436,9 @@
                                                                 <td>
                                                                     <!--====== Radio Box ======-->
                                                                     <div class="radio-box">
-                                                                        <input type="radio" id="star-1.5" name="rating" value="1.5">
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-1.5"></label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <!--====== End - Radio Box ======-->
-                                                                </td>
-                                                                <td>
-                                                                    <!--====== Radio Box ======-->
-                                                                    <div class="radio-box">
                                                                         <input type="radio" id="star-2" name="rating" value="2">
                                                                         <div class="radio-box__state radio-box__state--primary">
                                                                             <label class="radio-box__label" for="star-2"></label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <!--====== End - Radio Box ======-->
-                                                                </td>
-                                                                <td>
-                                                                    <!--====== Radio Box ======-->
-                                                                    <div class="radio-box">
-                                                                        <input type="radio" id="star-2.5" name="rating" value="2.5">
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-2.5"></label>
                                                                         </div>
                                                                     </div>
                                                                     <!--====== End - Radio Box ======-->
@@ -492,29 +456,9 @@
                                                                 <td>
                                                                     <!--====== Radio Box ======-->
                                                                     <div class="radio-box">
-                                                                        <input type="radio" id="star-3.5" name="rating" value="3.5">
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-3.5"></label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <!--====== End - Radio Box ======-->
-                                                                </td>
-                                                                <td>
-                                                                    <!--====== Radio Box ======-->
-                                                                    <div class="radio-box">
                                                                         <input type="radio" id="star-4" name="rating" value="4">
                                                                         <div class="radio-box__state radio-box__state--primary">
                                                                             <label class="radio-box__label" for="star-4"></label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <!--====== End - Radio Box ======-->
-                                                                </td>
-                                                                <td>
-                                                                    <!--====== Radio Box ======-->
-                                                                    <div class="radio-box">
-                                                                        <input type="radio" id="star-4.5" name="rating" value="4.5">
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-4.5"></label>
                                                                         </div>
                                                                     </div>
                                                                     <!--====== End - Radio Box ======-->
@@ -624,18 +568,24 @@
                                     </div>
                                 </div>
                                 <span class="product-o__category">
-                                    <a href="shop-side-version-2.html">{{ r.category.category|title }}</a>
+                                    <a href="{% url 'products' the_shop.slug %}">{{ r.category.category|title }}</a>
                                 </span>
                                 <span class="product-o__name">
-                                    <a href="{% url 'product_details' the_shop.name r.product_id %}">{{ r.product|title }}</a>
+                                    <a href="{% url 'product_details' the_shop.slug r.product_id %}">{{ r.product|title }}</a>
                                 </span>
                                 <div class="product-o__rating gl-rating-style">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <span class="product-o__review">(20)</span>
+                                    {% with rating=r.avg_rating|default:0 %}
+                                        {% for i in "12345" %}
+                                            {% if rating >= forloop.counter %}
+                                                <i class="fas fa-star"></i>  {# full star #}
+                                            {% elif rating >= forloop.counter0|add:"0.5" %}
+                                                <i class="fas fa-star-half-alt"></i>  {# half star #}
+                                            {% else %}
+                                                <i class="far fa-star"></i>  {# empty star #}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                    <span class="product-o__review">({{ r.reviews_count|default:0 }})</span>
                                 </div>
                                 <span class="product-o__price">KES. {{ r.price|intcomma }}
                                     {% if r.discount > 0 %}
@@ -658,51 +608,6 @@
 
 
 
-<!--====== Add to Cart Modal ======-->
-<div class="modal fade" id="add-to-cart">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-radius modal-shadow">
-
-            <button class="btn dismiss-button fas fa-times" type="button" data-dismiss="modal"></button>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-6 col-md-12">
-                        <div class="success u-s-m-b-30">
-                            <div class="success__text-wrap"><i class="fas fa-check"></i>
-
-                                <span>Item is added successfully!</span></div>
-                            <div class="success__img-wrap">
-
-                                <img class="u-img-fluid" src="images/product/electronic/product1.jpg" alt=""></div>
-                            <div class="success__info-wrap">
-
-                                <span class="success__name">Beats Bomb Wireless Headphone</span>
-
-                                <span class="success__quantity">Quantity: 1</span>
-
-                                <span class="success__price">$170.00</span></div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-12">
-                        <div class="s-option">
-
-                            <span class="s-option__text">1 item (s) in your cart</span>
-                            <div class="s-option__link-box">
-
-                                <a class="s-option__link btn--e-white-brand-shadow" data-dismiss="modal">CONTINUE SHOPPING</a>
-
-                                <a class="s-option__link btn--e-white-brand-shadow" href="cart.html">VIEW CART</a>
-
-                                <a class="s-option__link btn--e-brand-shadow" href="checkout.html">PROCEED TO CHECKOUT</a></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!--====== End - Add to Cart Modal ======-->
-<!--====== End - Modal Section ======-->
 
     <!--====== Google Analytics: change UA-XXXXX-Y to be your site's ID ======-->
     <script>

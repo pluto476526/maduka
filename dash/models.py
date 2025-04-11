@@ -123,7 +123,7 @@ class Review(models.Model):
     productID = models.ForeignKey('dash.Inventory', on_delete=models.CASCADE)
     comment = models.CharField(max_length=100)
     body = models.TextField(blank=True, null=True)
-    rating = models.PositiveIntegerField(default=0)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
 
