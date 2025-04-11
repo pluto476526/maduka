@@ -199,6 +199,7 @@ def inventory_view(request):
     categories = Category.objects.filter(shop=shop, is_deleted=False)
     units = Unit.objects.filter(shop=shop, is_deleted=False)
 
+            
     if request.method == 'POST':
         product_name = request.POST.get('product')
         category_name = request.POST.get('category', '').strip().lower()

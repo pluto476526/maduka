@@ -3,7 +3,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
-from django.db.models import Sum, Count, F
+from django.db.models import Sum, Count, F, Q
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from shop.models import Shop, Cart, CartItem, Ticket, CountyShipped, Address, BlogPost, BlogCategory, BlogComment
@@ -230,7 +230,6 @@ def products_view(request, slug):
         case _:
             products = products.order_by('-timestamp')
 
-    products = products[:show_count] # Limit no. of products to display
 
     if request.method == 'POST':
         prod_id = request.POST.get('id')
@@ -243,7 +242,18 @@ def products_view(request, slug):
             case 'add_to_cart':
                 add_to_cart(request, the_shop.id, prod_id, 1)
                 return redirect('products', the_shop.slug)
+    
+    if request.method == 'GET':
+        q = request.GET.get('search')
 
+        if q:
+            products = products.filter(
+                Q(product__icontains=q) |
+                Q(product_id__icontains=q)
+            )
+
+    products = products[:show_count] # Limit no. of products to display
+    
     context = {
         'the_shop': the_shop,
         'products': products,

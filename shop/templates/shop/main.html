@@ -17,6 +17,8 @@
 
     <!--====== Vendor Css ======-->
     <link rel="stylesheet" href="{% static 'shop/css/vendor.css' %}">
+    <link rel="stylesheet" href="{% static 'dash/vendors/simple-line-icons/css/simple-line-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'dash/vendors/mdi/css/materialdesignicons.min.css' %}">
 
     <!--====== Utility-Spacing ======-->
     <link rel="stylesheet" href="{% static 'shop/css/utility.css' %}">
@@ -34,35 +36,6 @@
 
     <!--====== Main App ======-->
     <div id="app">
-        <!--<div class="fixed-list">
-            <ul class="nav" id="init-scrollspy">
-                <li>
-                    <a class="nav-link" href="#electronic-01" data-click-scroll="#electronic-01">
-                        <i class="fas fa-tv"></i>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" href="#female-02" data-click-scroll="#female-02">
-                        <i class="fas fa-female"></i>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link">
-                        <i class="fas fa-fighter-jet"></i>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link">
-                        <i class="fas fa-cookie-bite"></i>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link">
-                        <i class="fas fa-futbol"></i>
-                    </a>
-                </li>
-            </ul>
-        </div>-->
 
         <!--====== Main Header ======-->
         <header class="header--style-2">
@@ -77,9 +50,9 @@
                         </a>
                         <!--====== End - Main Logo ======-->
                         <!--====== Search Form ======-->
-                        <form class="main-form">
+                        <form class="main-form" method="get" action="{% url 'products' the_shop.slug %}">
                             <label for="main-search"></label>
-                            <input class="input-text input-text--border-radius input-text--style-2" type="text" id="main-search" placeholder="Search">
+                            <input class="input-text input-text--border-radius input-text--style-2" type="text" id="main-search" placeholder="Search Product" name="search">
                             <button class="btn btn--icon fas fa-search main-search-button" type="submit"></button>
                         </form>
                         <!--====== End - Search Form ======-->
@@ -89,7 +62,8 @@
                         <div class="menu-init" id="navigation">
                             <button
                                 style="color: white;"
-                                class="btn btn--icon toggle-button toggle-button--white fas fa-cogs" type="button">
+                                class="btn btn--icon toggle-button toggle-button--white" type="button">
+                                <i class="mdi mdi-phone-outgoing"></i>
                             </button>
                             <!--====== Menu ======-->
                             <div class="ah-lg-mode">
@@ -139,7 +113,7 @@
                                                         {% for c in sp_categories %}
                                                         <li class="">
                                                             <a>
-                                                                <i class="fas fa-tv u-s-m-r-6"></i>
+                                                                <i class="u-s-m-r-6 mdi mdi-library-books"></i>
                                                                 <span>{{ c.category|upper }}</span>
                                                             </a>
                                                             <!--<span class="js-menu-toggle js-toggle-mark"></span>-->
@@ -163,7 +137,8 @@
                         <div class="menu-init" id="navigation2">
                             <button
                                 style="color: white;"
-                                class="btn btn--icon toggle-button toggle-button--white fas fa-cog" type="button">
+                                class="btn btn--icon toggle-button toggle-button--white" type="button">
+                                <i class="mdi mdi-apps"></i>
                             </button>
                             <!--====== Menu ======-->
                             <div class="ah-lg-mode">
