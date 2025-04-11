@@ -206,25 +206,29 @@
 
                     <div class="col-lg-12">
                         <div class="route-box">
-                            <div class="route-box__g1">
+                            <div class="col-lg-6 route-box__g1">
                                 <a class="route-box__link" href="{% url 'products' the_shop.slug %}">
                                     <i class="fas fa-long-arrow-alt-left"></i>
                                     <span>CONTINUE SHOPPING</span>
                                 </a>
                             </div>
                             {% if cart_items %}
-                            <div class="route-box__g2">
+                            <div class="col-lg-6"
+                                style="display: flex; justify-content: space-between; align-items: center;">
                                 <a class="route-box__link" href="{% url 'clear_cart' the_shop.slug %}">
                                     <i class="fas fa-trash"></i>
                                     <span>CLEAR CART</span>
                                 </a>
-                                <button type="submit">
-                                    <span class="route-box__link">
+                                <button type="submit" class="btn btn--e-brand-b-2 route-box__link">
+                                    <span >
                                         <i class="fas fa-sync"></i>
                                         <span>UPDATE CART</span>
                                     </span>
                                 </button>
                             </div>
+
+
+
                             {% endif %}
                         </div>
                     </div>

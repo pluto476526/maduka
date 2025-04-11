@@ -167,7 +167,7 @@ def categories(request):
                         category=category_name,
                         description=description,
                     )
-                    messages.success(request, "New Category '{category_name}' added.")
+                    messages.success(request, f"New Category '{category_name}' added.")
 
                 elif source == 'edit_category':
                     category.category = category_name
@@ -177,7 +177,7 @@ def categories(request):
                     if avatar:
                         category.avatar = avatar
                     category.save()
-                    messages.success(request, f"{category_name} updated.")
+                    messages.success(request, f"{category.category} updated.")
 
                 elif source == 'delete_category':
                     if confirm_delete:
