@@ -39,7 +39,6 @@
                   <th>Quantity</th>
                   <th>Price Per Unit</th>
                   <th>Is Featured</th>
-                  <th>Status</th>
                   <th></th>
                 </tr>
               </thead>
@@ -51,7 +50,6 @@
                   <td>{{ product.quantity|intcomma }} {{ product.units.units }}</td>
                   <td>KSH. {{ product.price|intcomma }}</td>
                   <td>{{ product.is_featured }}</td>
-                  <td>{{ product.status|capfirst }}</td>
                   <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
                   <td class="d-flex justify-content-start" style="gap: 3px">
                     <button class="badge badge-info" type="button" data-bs-toggle="modal" data-bs-target="#viewproductModal{{ product.id }}">View</button>
