@@ -207,7 +207,7 @@
           </div>
           <div class="col-md-12">
             <div class="form-floating">
-              <input class="form-control" list="categories" name="category" autocomplete="off">
+              <input class="form-control" list="categories" name="category" autocomplete="off" required>
               <datalist id="categories">
               {% for c in categories %}
               <option value="{{ c.category|title }}">
@@ -242,20 +242,12 @@
           </div>
           <div class="col-md-4">
             <div class="form-floating">
-              <input class="form-control" list="units" name="units" autocomplete="off">
+              <input class="form-control" list="units" name="units" autocomplete="off" required>
               <datalist id="units">
               {% for u in units %}
               <option value="{{ u.units|title }}">
               {% endfor %}
               </datalist>
-              <!--<select name="units" class="form-select" required>
-                <option value="" selected disabled>
-                  ----------------------------
-                </option>
-                {% for u in units %}
-                  <option value="{{ u.id }}">{{ u.units|title }}</option>
-                {% endfor %}
-              </select>-->
               <label>Units</label>
             </div>
           </div>

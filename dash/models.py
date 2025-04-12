@@ -87,7 +87,7 @@ class Inventory(models.Model):
     product = models.CharField(max_length=50)
     product_id = models.CharField(max_length=10, unique=True)
     category = models.ForeignKey('dash.Category', on_delete=models.SET_NULL, null=True)
-    description = models.CharField(max_length=250, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     price = models.PositiveIntegerField(default=0)
     units = models.ForeignKey('dash.Unit', on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveIntegerField(default=0)
