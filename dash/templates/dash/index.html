@@ -129,13 +129,13 @@
                         <div class="col-12 col-sm-6 col-md-4">
                             <div class="card bg-success card-rounded">
                                 <div class="card-header">
-                                    <h4 class="card-title my-1">{{ p.product.product|title }}</h4>
+                                    <h4 class="card-title my-1">{{ p.product|title }}</h4>
                                 </div>
                                 <div class="card-body">
-                                  <p><strong>Category:</strong> {{ p.product.category.category|title }}</p>
-                                  <p><strong>Price:</strong> KSH. {{ p.product.price|intcomma }} per {{ p.product.units.units|title }}</p>
-                                  <p><strong>Quantity Sold:</strong> {{ p.total_sold }} {{ p.product.units.units|title }}</p>
-                                  <p><strong>Total Sales:</strong> KSH. {{ p.total_sales|intcomma }}</p>
+                                  <p><strong>Category:</strong> {{ p.category.category|title }}</p>
+                                  <p><strong>Price:</strong> KSH. {{ p.price|intcomma }} per {{ p.units.units|title }}</p>
+                                  <p><strong>Quantity Sold:</strong> {{ p.total_sold }} {{ p.units.units|title }}</p>
+                                  <p><strong>Total Sales:</strong> KSH. {{ p.sales|intcomma }}</p>
                                 </div>
                             </div>
                         </div>

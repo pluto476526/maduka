@@ -58,16 +58,18 @@ def index(request):
     my_deliveries = Delivery.objects.filter(shop=shop, status='completed', is_deleted=False)
     inventory_value = my_inventory.aggregate(total=models.Sum(models.F('price') * models.F('quantity')))['total']
     inventory_count = my_inventory.aggregate(total=models.Sum('quantity'))['total']
+
     popular_products = (
-        DeliveryItem.objects
-        .filter(delivery__shop=shop)
-        .select_related('product__category', 'product__units')
+        Inventory.objects
+        .filter(del_product__delivery__shop=shop, del_product__delivery__status='completed')
         .annotate(
-            total_sold=models.Sum('quantity'),
-            total_sales=models.Sum(models.F('quantity') * models.F('product__price'))
+            total_quantity=models.Sum('del_product__quantity'),
+            sales=models.Sum(models.F('del_product__quantity') * models.F('price'))
         )
-        .order_by('-total_sold')[:3]
+        .select_related('units', 'category')
+        .order_by('-sales')[:3]
     )
+
     categories = Category.objects.filter(shop=shop, is_deleted=False).count()
     completed_sales = my_deliveries.aggregate(total=models.Sum('total'))['total']
     physical_sales = my_deliveries.filter(source='dash').aggregate(total=models.Sum('total'))['total']
