@@ -158,7 +158,7 @@
                                                 <a href="{% url 'products' the_shop.slug %}">{{ tc.category.category|title }}</a>
                                             </span>
                                             <span class="product-o__name">
-                                                <a href="{% url 'product_details' the_shop.slug tc.product_id %}">{{ tc.product|title|truncatechars:30 }}</a>
+                                                <a href="{% url 'product_details' the_shop.slug tc.product_id %}">{{ tc.product|title|truncatechars:25 }}</a>
                                             </span>
                                             <div class="product-o__rating gl-rating-style">
                                                 {% with rating=tc.avg_rating|default:0 %}

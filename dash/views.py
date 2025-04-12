@@ -66,10 +66,11 @@ def index(request):
             total_quantity=models.Sum('del_product__quantity'),
             sales=models.Sum(models.F('del_product__quantity') * models.F('price'))
         )
-        .select_related('units', 'category')
+        .select_related('category', 'units')
         .order_by('-sales')[:3]
     )
-
+    for p in popular_products:
+        print(p.units.units)
     categories = Category.objects.filter(shop=shop, is_deleted=False).count()
     completed_sales = my_deliveries.aggregate(total=models.Sum('total'))['total']
     physical_sales = my_deliveries.filter(source='dash').aggregate(total=models.Sum('total'))['total']

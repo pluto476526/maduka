@@ -79,6 +79,7 @@
                                       {% csrf_token %}
                                       <div class="col-md-12">
                                         <div class="form-floating">
+                                          {% if my_drivers %}
                                           <select name="driver" class="form-select">
                                             <option selected disabled>------------------------</option>
                                             {% for driver in my_drivers %}
@@ -86,6 +87,8 @@
                                             {% endfor %}
                                           </select>
                                           <label>Driver</label>
+                                          {% else %}
+                                          <p>Please add a delivery guy to your staff members.</p>
                                         </div>
                                       </div>
                                       <input type="hidden" name="source" value="assign_driver">
