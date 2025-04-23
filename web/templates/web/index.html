@@ -86,14 +86,18 @@
           </ul>
         </div>
       </div>
+
+
+
       <div class="row portfolio-container">
         {% for s in available_shops %}
         <div class="col-lg-4 col-md-6 portfolio-item {{ s.shop_category.categoryID }}">
           <div class="portfolio-wrap">
             <img src="{{ s.avatar1.url }}" class="img-fluid w-100" style="height: 20rem">
-            <div class="portfolio-info">
+
+            <div class="portfolio-info" style="opacity: 1;">
               <h4>{{ s.name|title }}</h4>
-              <p>{{ s.bio|truncatechars:100|capfirst }}</p>
+              <p class="d-none d-sm-block">{{ s.bio|truncatechars:100|capfirst }}</p>
               <div class="portfolio-links">
                 <a href="{{ s.avatar1.url }}" data-gallery="portfolioGallery" class="portfolio-lightbox" title="{{ s.name|title }}">
                   <i class="bx bx-plus"></i>
@@ -525,7 +529,7 @@
           <div class="contact-address">
             <i class="bi bi-geo-alt"></i>
             <h3>Address</h3>
-            <address>A108 Adam Street, NY 535022, USA</address>
+            <address>A108 Kimathi Street, Nyeri Town, Kenya</address>
           </div>
         </div>
 
@@ -533,7 +537,7 @@
           <div class="contact-phone">
             <i class="bi bi-phone"></i>
             <h3>Phone Number</h3>
-            <p><a href="tel:+155895548855">+1 5589 55488 55</a></p>
+            <p><a href="tel:+254746801049">+254 746 801 049</a></p>
           </div>
         </div>
 
@@ -541,7 +545,7 @@
           <div class="contact-email">
             <i class="bi bi-envelope"></i>
             <h3>Email</h3>
-            <p><a href="mailto:info@example.com">info@example.com</a></p>
+            <p><a href="mailto:ngugikibuka99@gmail.com">ngugikibuka99@gmail.com</a></p>
           </div>
         </div>
       </div>

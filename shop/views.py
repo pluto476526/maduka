@@ -123,26 +123,24 @@ def add_to_wishlist_view(request, slug, product_id):
 def index(request, slug):
     # Retrieve the shop and user profile
     shop = get_shop(slug)
-    profile = get_object_or_404(Profile, user=request.user)
 
     # Fetch categories
     categories = Category.objects.filter(shop=shop, is_deleted=False)
     top_categories = categories.order_by('-total_sales')[:4]
     f_categories = categories.filter(is_featured=True).order_by('-timestamp')[:3]
+    products = Inventory.objects.filter(shop=shop, is_deleted=False, status='available')
+    profile = None
 
-    # Fetch products from top categories(tc) excluding those in the user's pending cart
-    my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing', is_deleted=False).last()
-    cart_products = CartItem.objects.filter(cart=my_cart, is_deleted=False).values_list('product_id', flat=True)
-    products = Inventory.objects.filter(
-        shop=shop,
-        is_deleted=False,
-        status='available',
-    ).exclude(
-        id__in=cart_products
-    ).annotate(
-        avg_rating=Avg('review__rating'),
-        review_count=Count('review'),
-    )
+    if request.user.is_authenticated:
+        profile = get_object_or_404(Profile, user=request.user)
+
+        # Fetch products from top categories(tc) excluding those in the user's pending cart
+        my_cart = Cart.objects.filter(shop=shop, customer=request.user, status='processing', is_deleted=False).last()
+        cart_products = CartItem.objects.filter(cart=my_cart, is_deleted=False).values_list('product_id', flat=True)
+        products = products.exclude(id__in=cart_products).annotate(
+            avg_rating=Avg('review__rating'),
+            review_count=Count('review'),
+        )
 
     tc_products = []
     for t in top_categories:
@@ -169,7 +167,7 @@ def index(request, slug):
    
     # Prepare context for rendering
     context = {
-        'profile': profile,
+        'profile': profile if profile else None,
         'top_categories': top_categories,
         'f_categories': f_categories,
         'f_products': f_products,

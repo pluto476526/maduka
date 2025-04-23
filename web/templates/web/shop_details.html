@@ -4,9 +4,8 @@
 <!-- ======= Header ======= -->
 <header id="header" class="fixed-top d-grid align-items-center">
   <div class="container d-flex align-items-center justify-content-between">
-      <h1 class="logo"><a href="{% url 'home' %}">ShopSync</a></h1>
-      <nav id="navbar" class="navbar">
-      </nav>
+      <h1 class="logo"><a href="{% url 'home' %}">MaDuka</a></h1>
+      <nav id="navbar" class="navbar"></nav>
       <!-- .navbar -->
   </div>
 </header>
@@ -31,16 +30,16 @@
       <div class="container">
         <div class="row gy-4">
           <div class="col-lg-8">
-            <div class="portfolio-details-slider swiper">
+            <div class="portfolio-details-slider swiper" style="height: 60vh;">
               <div class="swiper-wrapper align-items-center">
-                <div class="swiper-slide" style="height: 80vh;">
-                  <img src="{{ selected_shop.avatar1.url }}" alt="" class="img-fluid">
+                <div class="swiper-slide">
+                  <img src="{{ selected_shop.avatar1.url }}" class="img-fluid" style="height: 100%;">
                 </div>
-                <div class="swiper-slide" style="height: 80vh;">
-                  <img src="{{ selected_shop.avatar2.url }}" alt="" class="img-fluid">
+                <div class="swiper-slide">
+                  <img src="{{ selected_shop.avatar2.url }}" class="img-fluid" style="height: 100%;">
                 </div>
-                <div class="swiper-slide" style="height: 80vh;">
-                  <img src="{{ selected_shop.avatar3.url }}" alt="" class="img-fluid">
+                <div class="swiper-slide">
+                  <img src="{{ selected_shop.avatar3.url }}" class="img-fluid" style="height: 100%;">
                 </div>
               </div>
               <div class="swiper-pagination"></div>
@@ -61,7 +60,7 @@
                 </li>
               </ul>
             </div>
-            <div class="portfolio-description">
+            <div class="portfolio-description bg-white" style="padding: 2rem;">
               <h2>More Info</h2>
               <p>{{ selected_shop.bio|capfirst }}</p>
             </div>
