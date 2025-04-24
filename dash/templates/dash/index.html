@@ -81,6 +81,69 @@
                 <div class="card">
                   <div class="card-body">
                     <div>
+                      <h4 class="card-title">Popular Products</h4>
+                      <p class="card-description">View the top 3 popular products in your inventory.</p>
+                    </div>
+                    <div class="row g-3">
+                        {% for p in popular_products %}
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <div class="card bg-success card-rounded">
+                                <div class="card-header">
+                                    <h4 class="card-title my-1">{{ p.product|title }}</h4>
+                                </div>
+                                <div class="card-body">
+                                  <p><strong>Category:</strong> {{ p.category.category|title }}</p>
+                                  <p><strong>Price:</strong> KSH. {{ p.price|intcomma }} per {{ p.units.units|title }}</p>
+                                  <p><strong>Quantity Sold:</strong> {{ p.total_quantity }} {{ p.units.units|title }}</p>
+                                  <p><strong>Total Sales:</strong> KSH. {{ p.sales|intcomma }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4 d-flex flex-column">
+                <div class="row flex-grow">
+                  <div class="col-md-6 col-lg-12 grid-margin stretch-card">
+                    <div class="card bg-primary card-rounded">
+                      <div class="card-body pb-0">
+                        <h4 class="card-title card-title-dash text-white mb-4">Todays Sales</h4>
+                        <div class="row">
+                          <div class="col-sm-10">
+                            <p class="status-summary-ight-white mb-1">Currently at</p>
+                            <h2 class="text-info">KES. {{ total_sales_today|default:0 }}</h2>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-8 d-flex flex-column">
+                <div class="row flex-grow">
+                  <div class="col-12 grid-margin stretch-card">
+                    <div class="card card-rounded table-darkBGImg">
+                      <div class="card-body">
+                        <div class="col-sm-8">
+                          <h3 class="text-white upgrade-info mb-0">Introduce promotional <span class="fw-bold"> Sales and Discounts </span> to improve profit margins</h3>
+                          <a href="{% url 'deals_and_promos' %}" class="btn btn-info upgrade-btn">Sales and Discounts</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div>
                       <h4 class="card-title">Recent Transactions</h4>
                       <p class="card-description">View your shop's latest transactions.</p>
                     </div>
@@ -116,68 +179,7 @@
                 </div>
               </div>
             </div>
-            <div class="row">
-              <div class="col-sm-12 grid-margin stretch-card">
-                <div class="card">
-                  <div class="card-body">
-                    <div>
-                      <h4 class="card-title">Popular Products</h4>
-                      <p class="card-description">View the top 3 popular products in your inventory.</p>
-                    </div>
-                    <div class="row g-3">
-                        {% for p in popular_products %}
-                        <div class="col-12 col-sm-6 col-md-4">
-                            <div class="card bg-success card-rounded">
-                                <div class="card-header">
-                                    <h4 class="card-title my-1">{{ p.product|title }}</h4>
-                                </div>
-                                <div class="card-body">
-                                  <p><strong>Category:</strong> {{ p.category.category|title }}</p>
-                                  <p><strong>Price:</strong> KSH. {{ p.price|intcomma }} per {{ p.units.units|title }}</p>
-                                  <p><strong>Quantity Sold:</strong> {{ p.total_quantity }} {{ p.units.units|title }}</p>
-                                  <p><strong>Total Sales:</strong> KSH. {{ p.sales|intcomma }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-lg-8 d-flex flex-column">
-                <div class="row flex-grow">
-                  <div class="col-12 grid-margin stretch-card">
-                    <div class="card card-rounded table-darkBGImg">
-                      <div class="card-body">
-                        <div class="col-sm-8">
-                          <h3 class="text-white upgrade-info mb-0">Enhance your <span class="fw-bold">Campaign</span> for better outreach</h3>
-                          <a href="#" class="btn btn-info upgrade-btn">Upgrade Account!</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 d-flex flex-column">
-                <div class="row flex-grow">
-                  <div class="col-md-6 col-lg-12 grid-margin stretch-card">
-                    <div class="card bg-primary card-rounded">
-                      <div class="card-body pb-0">
-                        <h4 class="card-title card-title-dash text-white mb-4">Todays Sales</h4>
-                        <div class="row">
-                          <div class="col-sm-10">
-                            <p class="status-summary-ight-white mb-1">Currently at</p>
-                            <h2 class="text-info">KES. {{ total_sales_today|default:0 }}</h2>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
 
