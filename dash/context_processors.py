@@ -14,8 +14,6 @@ def my_shop(request):
     Retrieve the shop associated with the authenticated user's profile.
     Returns None if no shop is found.
     """
-    # if not request.user.is_authenticated:
-    #     return None
     if not request.user.is_authenticated:
         return {}
 
@@ -41,22 +39,6 @@ def the_shop(request):
         shop = my_shop(request)
         if shop:
             return {'the_shop': shop}
-    except Exception as e:
-        logger.error(e)
-    return {}
-
-def get_categories(request):
-    """
-    This function helps display categories on the shop nav bar
-    """
-    if request.user.is_authenticated:
-        return {}
-        
-    try:
-        shop = my_shop(request)
-        sp_categories = Category.objects.filter(shop=shop, is_deleted=False)
-        context = {'sp_categories': sp_categories}
-        return context
     except Exception as e:
         logger.error(e)
     return {}

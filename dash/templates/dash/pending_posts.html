@@ -95,14 +95,14 @@
 
 <!-- New Blog Post Modal -->
 <div class="modal fade" id="newPostModal" tabindex="-1">
-  <div class="modal-fullscreen modal-dialog">
+  <div class="modal-dialog modal-fullscreen">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Blog Posts Form</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <!-- Floating Labels Form -->
-      <form method="post" enctype="multipart/form-data">
+      <form method="post" enctype="multipart/form-data" style="flex: 1; overflow-y: auto;">
       {% csrf_token %}
         <div class="modal-body row g-3">
           <div class="col-md-12 d-flex justify-content-between g-1">
@@ -142,9 +142,7 @@
         <input type="hidden" name="source" value="new_post">
         <div class="modal-footer">
           <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-sm btn-outline-success">
-              Add Request
-            </button>
+          <button type="submit" class="btn btn-sm btn-outline-success">Add Request</button>
         </div>
       </form>
       <!-- End floating Labels Form -->
@@ -163,7 +161,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <!-- Floating Labels Form -->
-      <form method="post">
+      <form method="post" enctype="multipart/form-data" style="flex: 1; overflow-y: auto;">
       {% csrf_token %}
         <div class="modal-body row g-3">
           <div class="col-md-12 d-flex justify-content-between g-1">

@@ -24,6 +24,7 @@ def get_shop(slug):
 
 
 # Helper: Add product to cart
+@login_required
 def add_to_cart(request, shopID, product_no, quantity=1):
     # Get the shop
     the_shop = get_object_or_404(Shop, id=shopID)
@@ -55,6 +56,7 @@ def add_to_cart(request, shopID, product_no, quantity=1):
         return
 
 # View: Empty cart
+@login_required
 def clear_cart_view(request, slug):
     the_shop = get_shop(slug)
     my_carts = Cart.objects.filter(shop=the_shop, customer=request.user, status='processing', is_deleted=False)
@@ -70,6 +72,7 @@ def clear_cart_view(request, slug):
 
 
 # HELPER: Add product to wishlist
+@login_required
 def add_to_wishlist(request, shopID, product_no):
     # Get the shop
     the_shop = get_object_or_404(Shop, id=shopID)
@@ -102,6 +105,7 @@ def add_to_wishlist(request, shopID, product_no):
 
 
 # View: Add to cart from the index page
+@login_required
 def add_to_cart_view(request, slug, product_id):
     shop = get_shop(slug)
     add_to_cart(request, shop.id, product_id)
@@ -111,6 +115,7 @@ def add_to_cart_view(request, slug, product_id):
 
 
 # View: Add to wishlist from the index page
+@login_required
 def add_to_wishlist_view(request, slug, product_id):
     shop = get_shop(slug)
     add_to_wishlist(request, shop.id, product_id)
@@ -182,7 +187,6 @@ def index(request, slug):
 
     
 # View: Products list
-@login_required
 def products_view(request, slug):
     sort_by = request.GET.get('sort_by', 'newest')
     show_count = int(request.GET.get('show', 12))
@@ -191,22 +195,20 @@ def products_view(request, slug):
     
     # Get shop object
     the_shop = get_shop(slug)
+    products = Inventory.objects.filter(shop=the_shop, status='available', is_deleted=False)
 
     # Current users cart for this shop
-    my_cart = Cart.objects.filter(shop=the_shop, customer=request.user, status='processing').first()
+    if request.user.is_authenticated:
+        my_cart = Cart.objects.filter(shop=the_shop, customer=request.user, status='processing').last()
 
-    # Get all product IDs in the current user's cart for this shop
-    cart_items = CartItem.objects.filter(cart=my_cart).values_list('product_id', flat=True)
+        # Get all product IDs in the current user's cart for this shop
+        cart_items = CartItem.objects.filter(cart=my_cart).values_list('product_id', flat=True)
 
-    # Get all products excluding the ones already in the user's cart
-    products = Inventory.objects.filter(
-        is_deleted = False,
-        status = 'available',
-        shop = the_shop
-    ).exclude(id__in=cart_items).annotate(
-        avg_rating=Avg('review__rating'),
-        review_count=Count('review'),
-    )
+        # Exclude the products already in the user's cart
+        products = products.exclude(id__in=cart_items).annotate(
+            avg_rating=Avg('review__rating'),
+            review_count=Count('review'),
+        )
 
 
     categories = Category.objects.filter(is_deleted=False, shop=the_shop).annotate(
@@ -274,7 +276,6 @@ def products_view(request, slug):
     return render(request, 'shop/products.html', context)
 
 # View: Product details
-@login_required
 def product_details_view(request, slug, pk):
     sort_reviews = request.GET.get('sort_reviews', 'best_ratings')
     the_shop = get_shop(slug)
@@ -282,8 +283,12 @@ def product_details_view(request, slug, pk):
     product = inventory.filter(product_id=pk).annotate(avg_rating=Avg('review__rating'), reviews_count=Count('review')).first()
     rel_products = inventory.filter(category=product.category).exclude(product_id=product.product_id).annotate(avg_rating=Avg('review__rating'), reviews_count=Count('review'))[:4]
     reviews = Review.objects.filter(productID=product)
-    wish_cart = Cart.objects.filter(shop=the_shop, status='in_wishes', is_deleted=False).first()
-    wish_items = CartItem.objects.filter(cart=wish_cart).count()
+
+    if request.user.is_authenticated:
+        wish_cart = Cart.objects.filter(shop=the_shop, customer=request.user, status='in_wishes', is_deleted=False).first()
+        wish_items = CartItem.objects.filter(cart=wish_cart).count()
+    else:
+        wish_items = 0
 
     match sort_reviews:
         case 'best_ratings':
@@ -301,29 +306,32 @@ def product_details_view(request, slug, pk):
         rating = request.POST.get('rating')
         source = request.POST.get('source')
         referer = request.META.get('HTTP_REFERER')
-        logger.debug(rating)
         
         match source:
             case 'new_review':
-                if not rating:
-                    messages.error(request, 'Please rate the item.')
+                if request.user.is_authenticated:
+                    if not rating:
+                        messages.error(request, 'Please rate the item.')
+                        return redirect('product_details', the_shop.slug, product.product_id)
+ 
+                    Review.objects.create(
+                        user = request.user,
+                        productID = product,
+                        email = email or request.user.email,
+                        comment = comment,
+                        body = body,
+                        rating = rating,
+                    )
+                    messages.success(request, 'New review added.')
+                    Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'New review from "{request.user.username}" on item: "{product.product}".', target='admin')
+
                     return redirect('product_details', the_shop.slug, product.product_id)
-
-                Review.objects.create(
-                    user = request.user,
-                    productID = product,
-                    email = email or request.user.email,
-                    comment = comment,
-                    body = body,
-                    rating = rating,
-                )
-                messages.success(request, 'New review added.')
-                Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'New review from "{request.user.username}" on item: "{product.product}".', target='admin')
-
-                return redirect('product_details', the_shop.slug, product.product_id)
+                return redirect('sign_in')
             case 'add_to_cart':
-                add_to_cart(request, the_shop.id, product.product_id, quantity)
-                return redirect(referer)
+                if request.user.is_authenticated:
+                    add_to_cart(request, the_shop.id, product.product_id, quantity)
+                    return redirect(referer)
+                return redirect('sign_in')
             case _:
                 pass
 
@@ -638,7 +646,6 @@ def helpdesk_view(request, slug):
     return render(request, 'shop/contact_us.html', context)
 
 
-@login_required
 def about_view(request, slug):
     the_shop = get_shop(slug)
     staff = Profile.objects.filter(shop=the_shop, in_staff=True, is_deleted=True)
@@ -746,6 +753,7 @@ def my_addresses_view(request, slug):
 
 
 # View: return single items page
+@login_required
 def returns_view(request, slug, order_id):
     shop = get_shop(slug)
     delivery = get_object_or_404(Delivery, order_number=order_id)
@@ -779,6 +787,7 @@ def returns_view(request, slug, order_id):
 
 
 # View: Returns and cancellations
+@login_required
 def returns_and_cancellations_view(request, slug):
     shop = get_shop(slug)
     my_deliveries = Delivery.objects.filter(shop=shop, username=request.user)
@@ -793,6 +802,7 @@ def returns_and_cancellations_view(request, slug):
 
 
 # View: Shop mini dashboard -> userstats
+@login_required
 def shop_dash_view(request, slug):
     shop = get_shop(slug)
     default_addr = Address.objects.filter(shop=shop, user=request.user, is_default=True).first()
@@ -834,11 +844,14 @@ def blog_details_view(request, slug, postID):
         email = request.POST.get('email')
         source = request.POST.get('source')
 
-        if source == 'new_comment':
+        if source == 'new_comment' and request.user.is_authenticated:
             BlogComment.objects.create(shop=shop, author=request.user, post=post, comment=comment, phone=phone, email=email)
             Notification.objects.create(shop=shop, origin=request.user, n_type='alert', message=f'New comment from "{request.user.username}": "{comment}".', target='admin')
             messages.success(request, 'Comment posted.')
             return redirect('blog_details', shop.slug, postID)
+        
+        messages.error(request, 'You must be logged in to comment on a post.')
+        return redirect('blog_details', shop.slug, postID)
     context = {
         'the_shop': shop,
         'post': post,
@@ -847,6 +860,7 @@ def blog_details_view(request, slug, postID):
     return render(request, 'shop/blog_details.html', context)
 
 
+@login_required
 def coupons_view(request, slug):
     shop = get_shop(slug)
     coupons = Coupon.objects.filter(shop=shop, is_active=True, is_deleted=False)
@@ -858,5 +872,9 @@ def coupons_view(request, slug):
 
 
 def faqs_view(request, slug):
-    context = {}
+    shop = get_shop(slug)
+
+    context = {
+        'the_shop': shop,
+    }
     return render(request, 'shop/faqs.html', context)

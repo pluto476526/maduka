@@ -33,13 +33,13 @@
             <div class="portfolio-details-slider swiper" style="height: 60vh;">
               <div class="swiper-wrapper align-items-center">
                 <div class="swiper-slide">
-                  <img src="{{ selected_shop.avatar1.url }}" class="img-fluid" style="height: 100%;">
+                  <img src="{{ selected_shop.avatar1.url }}" class="img-fluid" style="height: 100%; object-fit: cover;">
                 </div>
                 <div class="swiper-slide">
-                  <img src="{{ selected_shop.avatar2.url }}" class="img-fluid" style="height: 100%;">
+                  <img src="{{ selected_shop.avatar2.url }}" class="img-fluid" style="height: 100%; object-fit: cover;">
                 </div>
                 <div class="swiper-slide">
-                  <img src="{{ selected_shop.avatar3.url }}" class="img-fluid" style="height: 100%;">
+                  <img src="{{ selected_shop.avatar3.url }}" class="img-fluid" style="height: 100%; object-fit: cover;">
                 </div>
               </div>
               <div class="swiper-pagination"></div>
@@ -54,8 +54,8 @@
                 <li><strong>Registered Owner</strong>: @{{ selected_shop.owner.username|title }}</li>
                 <li><strong>Registration Date</strong>: {{ selected_shop.timestamp }}</li>
                 <li><strong>Product Categories</strong>:
-                  {% for cat in Categories %}
-                  <button class="btn btn-sm btn-outline-success">{{ cat.category }}</button>
+                  {% for cat in categories %}
+                  <button class="btn btn-sm btn-success">{{ cat.category|title }}</button>
                   {% endfor %}
                 </li>
               </ul>

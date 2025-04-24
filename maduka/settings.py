@@ -81,7 +81,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'dash.context_processors.get_order',
                 'dash.context_processors.the_shop',
-                'dash.context_processors.get_categories',
                 'dash.context_processors.shop_sidebar_stats',
             ],
         },
@@ -150,7 +149,7 @@ STATICFILES_DIRS = [
 
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATUC_FILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATIC_FILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # User uploads
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -166,6 +165,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Change Crispy template
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
+LOGIN_URL = '/sign_in/'
 
 # Implement custom logger
 

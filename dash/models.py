@@ -118,7 +118,7 @@ class Inventory(models.Model):
 
 
 class Review(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField(blank=True, null=True)
     productID = models.ForeignKey('dash.Inventory', on_delete=models.CASCADE)
     comment = models.CharField(max_length=100)

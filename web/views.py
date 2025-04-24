@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db.models import Q
 from shop.models import Shop, ShopCategory
-from dash.models import Profile, Category
+from dash.models import Profile, Category, Inventory, Delivery
 from web.models import Message
 from web.forms import UserRegistrationForm
 import logging
@@ -17,6 +17,11 @@ def home(request):
         profile = get_object_or_404(Profile, user=request.user)
     except TypeError:
         profile = None
+    
+    shops = Shop.objects.all()
+    shop_categories = ShopCategory.objects.all()
+    inventory_count = Inventory.objects.filter(is_deleted=False, status='available').count()
+    comp_deliveries = Delivery.objects.filter(status='completed').count()
 
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -40,11 +45,9 @@ def home(request):
                     profile.shop = shop
                     profile.save()
                     messages.success(request, f'{name} successfully registered.')
-                except ShopCategory.DoesNotExist:
-                    messages.error(request, 'Selected category does not exist.')
                 except Exception as e:
                     logger.error(f"Error creating shop: {e}")
-                    messages.error(request, 'An error occurred while creating the shop.')
+                    messages.error(request, 'Please try again later.')
                 return redirect('home')
             
             elif source == 'send_message':
@@ -53,13 +56,16 @@ def home(request):
                 return redirect('home')
         else:
             messages.warning(request, "Please log in to your account.")
+            return redirect('home')
     
-    shops = Shop.objects.all()
-    shop_categories = ShopCategory.objects.all()
     context = {
         'available_shops': shops,
         'shop_categories': shop_categories,
         'profile': profile,
+        'shops_count': shops.count(),
+        'categories_count': shop_categories.count(),
+        'inventory_count': inventory_count,
+        'comp_deliveries': comp_deliveries,
     }
     return render(request, 'web/index.html', context)
 
@@ -125,6 +131,9 @@ def all_shops_view(request):
 def shop_details_view(request, slug):
     selected_shop = get_object_or_404(Shop, slug=slug)
     categories = Category.objects.filter(shop=selected_shop)
-    context = {'selected_shop': selected_shop, 'categories': categories}
+    context = {
+        'selected_shop': selected_shop,
+        'categories': categories,
+    }
     return render(request, 'web/shop_details.html', context)
 

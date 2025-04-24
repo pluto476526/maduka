@@ -1,5 +1,6 @@
 {% extends 'web/main.html' %}
 {% load static %}
+{% load humanize %}
 {% block main %}
 {% include 'web/nav.html' %}
 
@@ -30,7 +31,7 @@
           <div class="carousel-container">
             <div class="carousel-content">
               <h2 class="animate__animated animate__fadeInDown">Where Shopping Meets Convenience</h2>
-              <p class="animate__animated animate__fadeInUp">Join thousands of users who trust MaDuka to buy smarter and sell better. Simple tools. Real results.</p>
+              <p class="animate__animated animate__fadeInUp">Join thousands of users who trust MaDuka to buy smarter and sell better.<br>Simple tools, Real results.</p>
               <div>
                 <a href="#about" class="btn-get-started animate__animated animate__fadeInUp scrollto">Read More</a>
               </div>
@@ -92,12 +93,12 @@
       <div class="row portfolio-container">
         {% for s in available_shops %}
         <div class="col-lg-4 col-md-6 portfolio-item {{ s.shop_category.categoryID }}">
-          <div class="portfolio-wrap">
-            <img src="{{ s.avatar1.url }}" class="img-fluid w-100" style="height: 20rem">
-
-            <div class="portfolio-info" style="opacity: 1;">
+          <div class="portfolio-wrap" style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5))">
+            <img src="{{ s.avatar1.url }}" class="img-fluid w-100" style="height: 20rem; object-fit: cover;">
+            <div class="overlay position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0, 0, 0, 0.5); z-index: 1;"></div>
+            <div class="portfolio-info" style="opacity: 1; z-index: 2;">
               <h4>{{ s.name|title }}</h4>
-              <p class="d-none d-sm-block">{{ s.bio|truncatechars:100|capfirst }}</p>
+              <p class="d-none d-sm-block">{{ s.bio|truncatechars:50|capfirst }}</p>
               <div class="portfolio-links">
                 <a href="{{ s.avatar1.url }}" data-gallery="portfolioGallery" class="portfolio-lightbox" title="{{ s.name|title }}">
                   <i class="bx bx-plus"></i>
@@ -266,29 +267,29 @@
         <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
           <div class="count-box">
             <i class="bi bi-emoji-smile"></i>
-            <span data-purecounter-start="0" data-purecounter-end="5432" data-purecounter-duration="1" class="purecounter"></span>
-            <p><strong>Registered Shops</strong> available on our platform</p>
+            <span data-purecounter-start="0" data-purecounter-end="{{ shops_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Registered Shops</strong></p>
           </div>
         </div>
         <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
           <div class="count-box">
             <i class="bi bi-journal-richtext"></i>
-            <span data-purecounter-start="0" data-purecounter-end="521" data-purecounter-duration="1" class="purecounter"></span>
-            <p><strong>Quality Products</strong> in all shops</p>
+            <span data-purecounter-start="0" data-purecounter-end="{{ inventory_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Quality Products</strong></p>
           </div>
         </div>
         <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
           <div class="count-box">
             <i class="bi bi-headset"></i>
-            <span data-purecounter-start="0" data-purecounter-end="1463" data-purecounter-duration="1" class="purecounter"></span>
-            <p><strong>Shop Categories</strong> to choose from</p>
+            <span data-purecounter-start="0" data-purecounter-end="{{ categories_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Shop Categories</strong></p>
           </div>
         </div>
         <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
           <div class="count-box">
             <i class="bi bi-people"></i>
-            <span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="1" class="purecounter"></span>
-            <p><strong>Completed Deliveries</strong> from registered shops</p>
+            <span data-purecounter-start="0" data-purecounter-end="{{ comp_deliveries|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Completed Deliveries</strong></p>
           </div>
         </div>
       </div>
@@ -545,7 +546,7 @@
           <div class="contact-email">
             <i class="bi bi-envelope"></i>
             <h3>Email</h3>
-            <p><a href="mailto:ngugikibuka99@gmail.com">ngugikibuka99@gmail.com</a></p>
+            <p><a href="mailto:ngugikibuka99@gmail.com">peterkibuka58@gmail.com</a></p>
           </div>
         </div>
       </div>

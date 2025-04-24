@@ -52,6 +52,7 @@ def percent_off(price, sale):
         return 0
 
 
+@login_required
 def index(request):
     shop = get_user_shop(request)
     my_inventory = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
@@ -59,18 +60,14 @@ def index(request):
     inventory_value = my_inventory.aggregate(total=models.Sum(models.F('price') * models.F('quantity')))['total']
     inventory_count = my_inventory.aggregate(total=models.Sum('quantity'))['total']
 
-    popular_products = (
-        Inventory.objects
-        .filter(del_product__delivery__shop=shop, del_product__delivery__status='completed')
-        .annotate(
-            total_quantity=models.Sum('del_product__quantity'),
-            sales=models.Sum(models.F('del_product__quantity') * models.F('price'))
-        )
-        .select_related('category', 'units')
-        .order_by('-sales')[:3]
-    )
-    for p in popular_products:
-        print(p.units.units)
+    popular_products = Inventory.objects.filter(
+        del_product__delivery__shop=shop,
+        del_product__delivery__status='completed'
+    ).annotate(
+        total_quantity=models.Sum('del_product__quantity'),
+        sales=models.Sum(models.F('del_product__quantity') * models.F('price'))
+    ).order_by('-sales')[:3]
+    
     categories = Category.objects.filter(shop=shop, is_deleted=False).count()
     completed_sales = my_deliveries.aggregate(total=models.Sum('total'))['total']
     physical_sales = my_deliveries.filter(source='dash').aggregate(total=models.Sum('total'))['total']
@@ -94,7 +91,6 @@ def index(request):
     elif my_profile.is_admin == 'False':
        notifications = my_notifications.filter(target='admin')
     
-    # notifications = Notification.objects.all()
     sessions = HomePageSession.objects.filter(shop=shop)
     num_sessions = sessions.count()
     duration = sessions.filter(exit_time__isnull=False)
@@ -141,7 +137,8 @@ def index(request):
     return render(request, 'dash/index.html', context)
 
 
-@require_http_methods(["GET", "POST"])
+
+@login_required
 def categories(request):
     shop = get_user_shop(request) 
     my_categories = Category.objects.filter(shop=shop, is_deleted=False)
@@ -191,7 +188,8 @@ def categories(request):
 
     return render(request, 'dash/categories.html', {'categories': my_categories})
 
-@require_http_methods(["GET", "POST"])
+
+@login_required
 def inventory_view(request):
     shop = get_user_shop(request)
     products = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
@@ -271,7 +269,7 @@ def inventory_view(request):
     return render(request, 'dash/inventory.html', context)
 
 
-@transaction.atomic
+@login_required
 def orders_view(request):
     shop = get_user_shop(request)
     try:
@@ -375,7 +373,8 @@ def orders_view(request):
     }
     return render(request, 'dash/orders.html', context)
 
-@transaction.atomic
+
+@login_required
 def deliveries_view(request):
     shop = get_user_shop(request)
     requests = Delivery.objects.filter(shop=shop, status='processing', is_deleted=False, is_delivery=True)
@@ -438,6 +437,7 @@ def deliveries_view(request):
     return render(request, 'dash/deliveries.html', context)
 
 
+@login_required
 @transaction.atomic
 def confirmed_deliveries_view(request):
     shop = get_user_shop(request)
@@ -497,10 +497,12 @@ def confirmed_deliveries_view(request):
     return render(request, 'dash/confirmed_deliveries.html', context)
 
 
+@login_required
 def track_order_view(request):
     return render(request, 'dash/track_order.html', {})
 
 
+@login_required
 def order_details_view(request, order_id):
     order = get_object_or_404(Delivery, order_number=order_id)
     orders = DeliveryItem.objects.filter(delivery=order)
@@ -514,6 +516,7 @@ def order_details_view(request, order_id):
     return render(request, 'dash/order_details.html', context)
 
 
+@login_required
 def online_sales_view(request):
     shop = get_user_shop(request)
     online_sales = Delivery.objects.filter(shop=shop, source='cart', status='completed', is_deleted=False, is_delivery=True)
@@ -523,6 +526,7 @@ def online_sales_view(request):
     return render(request, 'dash/online_sales.html', context)
 
 
+@login_required
 @transaction.atomic
 def physical_sales_view(request):
     shop = get_user_shop(request)
@@ -611,6 +615,8 @@ def physical_sales_view(request):
     }
     return render(request, 'dash/physical_sales.html', context)
 
+
+@login_required
 def main_helpdesk_view(request):
     shop = get_user_shop(request)
     if not shop:
@@ -640,6 +646,7 @@ def main_helpdesk_view(request):
     return render(request, 'dash/main_helpdesk.html', {'tickets': tickets})
 
 
+@login_required
 def shop_helpdesk_view(request):
     shop = get_user_shop(request)
     issues = Ticket.objects.filter(shop=shop, is_deleted=False)
@@ -676,6 +683,8 @@ def shop_helpdesk_view(request):
     context = {'issues': pending_issues, 'sorted_issues': sorted_issues}
     return render(request, 'dash/shop_helpdesk.html', context)
 
+
+@login_required
 @transaction.atomic
 def shop_profile_view(request):
     shop = get_user_shop(request)
@@ -778,6 +787,7 @@ def shop_profile_view(request):
     return render(request, 'dash/shop_profile.html', context)
 
 
+@login_required
 def deals_and_promos_view(request):
     shop = get_user_shop(request)
     all_products = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
@@ -984,6 +994,7 @@ def deals_and_promos_view(request):
     return render(request, 'dash/deals_and_promos.html', context)
 
 
+@login_required
 @transaction.atomic
 def staff_view(request):
     shop = get_user_shop(request)
@@ -1084,6 +1095,7 @@ def delete_view(request, app_label, model_name, object_id):
         return redirect(referer) # Adjust redirection as needed
 
 
+@login_required
 def transactions_view(request):
     shop = get_user_shop(request)
     transactions = Transaction.objects.filter(shop=shop, is_deleted=False)
@@ -1093,6 +1105,7 @@ def transactions_view(request):
     return render(request, 'dash/transactions.html', context)
 
 
+@login_required
 def blog_categories_view(request):
     shop = get_user_shop(request)
     categories = BlogCategory.objects.filter(shop=shop, is_deleted=False)
@@ -1130,6 +1143,7 @@ def blog_categories_view(request):
     return render(request, 'dash/blog_categories.html', context)
 
 
+@login_required
 def pending_posts_view(request):
     shop = get_user_shop(request)
     pending_posts = BlogPost.objects.filter(shop=shop, status='pending', is_deleted=False)
@@ -1195,6 +1209,7 @@ def pending_posts_view(request):
     return render(request, 'dash/pending_posts.html', context)
 
 
+@login_required
 def confirmed_posts_view(request):
     shop = get_user_shop(request)
     confirmed_posts = BlogPost.objects.filter(shop=shop, status='confirmed', is_deleted=False)
@@ -1222,6 +1237,7 @@ def confirmed_posts_view(request):
     return render(request, 'dash/confirmed_posts.html', context)
 
 
+@login_required
 def removed_posts_view(request):
     shop = get_user_shop(request)
     deleted_posts = BlogPost.objects.filter(shop=shop, is_deleted=True)
@@ -1229,3 +1245,4 @@ def removed_posts_view(request):
         'deleted_posts': deleted_posts,
     }
     return render(request, 'dash/removed_posts.html', context)
+
