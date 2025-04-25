@@ -12,7 +12,7 @@
       <div class="carousel-inner" role="listbox">
         <!-- Slide 1 -->
         <div class="carousel-item active"
-          style="background-image: url(/static/web/img/slide/slide-1.jpg)">
+          style="background-image: url(/static/web/img/slide/slide-12.jpg)">
           <div class="carousel-container">
             <div class="carousel-content">
               <h2 class="animate__animated animate__fadeInDown">Hello {{ request.user|title }}</h2>
@@ -27,7 +27,7 @@
 
         <!-- Slide 2 -->
         <div class="carousel-item"
-          style="background-image: url(/static/web/img/slide/slide-2.jpg)">
+          style="background-image: url(/static/web/img/slide/slide-13.jpg)">
           <div class="carousel-container">
             <div class="carousel-content">
               <h2 class="animate__animated animate__fadeInDown">Where Shopping Meets Convenience</h2>
@@ -41,7 +41,7 @@
 
         <!-- Slide 3 -->
         <div class="carousel-item"
-          style="background-image: url(/static/web/img/slide/slide-3.jpg)">
+          style="background-image: url(/static/web/img/slide/slide-14.jpg)">
           <div class="carousel-container">
             <div class="carousel-content">
               <h2 class="animate__animated animate__fadeInDown">Simplify Your Business Operations</h2>
@@ -147,22 +147,22 @@
               <div class="col-md-6 icon-box">
                 <i class="bx bx-receipt"></i>
                 <h4>Inventory Management</h4>
-                <p>Track and manage stock levels to ensure you never run dry.</p>
+                <p>Track and manage stock levels so you never run dry.</p>
               </div>
               <div class="col-md-6 icon-box">
-                <i class="bx bx-cube-alt"></i>
+                <i class="bx bx-list-check"></i>
                 <h4>Order Processing</h4>
                 <p>Seamlessly handle customer orders from start to finish.</p>
               </div>
               <div class="col-md-6 icon-box">
-                <i class="bx bx-images"></i>
+                <i class="bx bx-line-chart"></i>
                 <h4>Sales Analytics</h4>
                 <p>Use the dashboard to make data-driven decisions.</p>
               </div>
               <div class="col-md-6 icon-box">
-                <i class="bx bx-shield"></i>
-                <h4>User Management</h4>
-                <p>Manage roles and permissions for your team members.</p>
+                <i class="bx bx-devices"></i>
+                <h4>Mobile-Friendly Access</h4>
+                <p>Stay connected wherever you are.</p>
               </div>
             </div>
           </div>
@@ -178,30 +178,30 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-4 col-md-6 icon-box">
-          <div class="icon"><i class="bi bi-bar-chart"></i></div>
-          <h4 class="title"><a href="">Customer Engagement</a></h4>
+          <div class="icon"><i class="bi bi-arrow-clockwise"></i></div>
+          <h4 class="title"><a href="">Always Evolving</a></h4>
           <p class="description">
-            Chat with customers, respond to inquiries, and
-            manage feedback. You can also send personalized messages and updates
-            to keep your customers coming back.
+            We listen to our users. New features, better tools, and regular updates
+            ensure the platform keeps improving to serve the needs of both shoppers
+            and sellers alike.
           </p>
         </div>
         <div class="col-lg-4 col-md-6 icon-box">
           <div class="icon"><i class="bi bi-brightness-high"></i></div>
-          <h4 class="title"><a href="">Customization</a></h4>
+          <h4 class="title"><a href="">Community-Driven</a></h4>
           <p class="description">
-            Make your shop stand out with personalized branding options. You can
-            update the landing page titles, description, and add custom
-            photographs to reflect your brand’s identity.
+            MaDuka is more than a marketplace. It's a growing community of creators,
+            collectors, and customers. Connect through shared interests and support
+            independent innovation.
           </p>
         </div>
         <div class="col-lg-4 col-md-6 icon-box">
-          <div class="icon"><i class="bi bi-calendar4-week"></i></div>
-          <h4 class="title"><a href="">Blogging</a></h4>
+          <div class="icon"><i class="bi bi-emoji-smile"></i></div>
+          <h4 class="title"><a href="">Customer Interaction</a></h4>
           <p class="description">
-            Share updates, product stories, tutorials, and industry insights to
-            engage customers on a deeper level directly from your dashboard. Use
-            the platform to tell your brand’s story.
+            Engage in real-time. Shoppers can ask questions before buying, and
+            sellers can respond quickly, offer recommendations, and build
+            trust through open communication.
           </p>
         </div>
       </div>
@@ -266,28 +266,28 @@
       <div class="row no-gutters">
         <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
           <div class="count-box">
-            <i class="bi bi-emoji-smile"></i>
-            <span data-purecounter-start="0" data-purecounter-end="{{ shops_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
-            <p><strong>Registered Shops</strong></p>
-          </div>
-        </div>
-        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
-          <div class="count-box">
-            <i class="bi bi-journal-richtext"></i>
-            <span data-purecounter-start="0" data-purecounter-end="{{ inventory_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
-            <p><strong>Quality Products</strong></p>
-          </div>
-        </div>
-        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
-          <div class="count-box">
-            <i class="bi bi-headset"></i>
+            <i class="bi bi-card-list"></i>
             <span data-purecounter-start="0" data-purecounter-end="{{ categories_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
             <p><strong>Shop Categories</strong></p>
           </div>
         </div>
         <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
           <div class="count-box">
-            <i class="bi bi-people"></i>
+            <i class="bi bi-building-check"></i>
+            <span data-purecounter-start="0" data-purecounter-end="{{ shops_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Registered Shops</strong></p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+          <div class="count-box">
+            <i class="bi bi-menu-button-wide"></i>
+            <span data-purecounter-start="0" data-purecounter-end="{{ inventory_count|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
+            <p><strong>Quality Products</strong></p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+          <div class="count-box">
+            <i class="bi bi-clipboard-check"></i>
             <span data-purecounter-start="0" data-purecounter-end="{{ comp_deliveries|intcomma }}" data-purecounter-duration="1" class="purecounter"></span>
             <p><strong>Completed Deliveries</strong></p>
           </div>
@@ -546,7 +546,7 @@
           <div class="contact-email">
             <i class="bi bi-envelope"></i>
             <h3>Email</h3>
-            <p><a href="mailto:ngugikibuka99@gmail.com">peterkibuka58@gmail.com</a></p>
+            <p><a href="mailto:MaDuka.shopping@proton.me">MaDuka.shopping@proton.me</a></p>
           </div>
         </div>
       </div>
