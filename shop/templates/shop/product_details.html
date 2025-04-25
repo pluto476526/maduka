@@ -539,28 +539,28 @@
                         <div class="u-s-m-b-30">
                             <div class="product-o product-o--hover-on">
                                 <div class="product-o__wrap">
-                                    <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.name r.product_id %}">
+                                    <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.slug r.product_id %}">
                                         <img class="aspect__img" src="{{ r.avatar1.url }}" alt="">
                                     </a>
                                     <div class="product-o__action-wrap">
                                         <ul class="product-o__action-list">
                                             <li>
-                                                <a href="{% url 'product_details' the_shop.name r.product_id %}" data-tooltip="tooltip" data-placement="top" title="Quick View">
+                                                <a href="{% url 'product_details' the_shop.slug r.product_id %}" data-tooltip="tooltip" data-placement="top" title="Quick View">
                                                     <i class="fas fa-search-plus"></i>
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="{% url 'add_to_cart_view' the_shop.name r.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Cart">
+                                                <a href="{% url 'add_to_cart_view' the_shop.slug r.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Cart">
                                                     <i class="fas fa-plus-circle"></i>
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="{% url 'add_to_wishlist_view' the_shop.name r.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist">
+                                                <a href="{% url 'add_to_wishlist_view' the_shop.slug r.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist">
                                                     <i class="fas fa-heart"></i>
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="signin.html" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops">
+                                                <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops">
                                                     <i class="fas fa-envelope"></i>
                                                 </a>
                                             </li>
