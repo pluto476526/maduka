@@ -9,19 +9,26 @@
         <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
         <li><a class="nav-link scrollto" href="#shops">Shops</a></li>
         <li><a class="nav-link scrollto" href="#about">About</a></li>
-        <li><a href="">Blog</a></li>
+        <!--<li><a href="">Blog</a></li>-->
         <li><a class="nav-link scrollto" href="#contact">Contact Us</a></li>
+        <li><a class="getstarted" href="{% url 'chats' %}">Konnekt</a></li>
+
+
+
+        {% if profile.shop %}
+        <li><a class="getstarted" href="{% url 'dash' %}">{{ profile.shop }}</a></li>
+        {% else %}
+        {% if request.user.is_authenticated %}
+        <li>
+          <a class="getstarted" data-bs-toggle="modal" data-bs-target="#newShopModal" href="#">Register Shop</a>
+        </li>
+        {% endif %}
+        {% endif %}
         {% if request.user.is_authenticated %}
         <li><a href="{% url 'sign_out' %}">Sign Out</a></li>
         {% else %}
         <li><a class="getstarted" href="{% url 'sign_in' %}">Sign In</a></li>
-        {% endif %} {% if profile.shop %}
-        <li><a class="getstarted" href="{% url 'dash' %}">{{ profile.shop }}</a></li>
-        {% else %} {% if request.user.is_authenticated %}
-        <li>
-          <a class="getstarted" data-bs-toggle="modal" data-bs-target="#newShopModal" href="#">Register Shop</a>
-        </li>
-        {% endif %} {% endif %}
+        {% endif %}
       </ul>
       <i class="bi bi-list mobile-nav-toggle"></i>
     </nav>

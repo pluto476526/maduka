@@ -15,6 +15,8 @@ class Role(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profile')
     identifier = models.CharField(max_length=10, unique=True, null=True)
+    full_name = models.CharField(max_length=255, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
     avatar = models.ImageField(default='user.jpg')
     shop = models.ForeignKey('shop.Shop', on_delete=models.SET_NULL, blank=True, null=True)
     in_staff = models.BooleanField(default=False)
@@ -23,6 +25,9 @@ class Profile(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     total_spent = models.PositiveIntegerField(default=0)
+    facebook = models.CharField(max_length=255, blank=True, null=True)
+    insta = models.CharField(max_length=255, blank=True, null=True)
+    twitter = models.CharField(max_length=255, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
 
     def __str__(self):

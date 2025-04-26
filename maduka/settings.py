@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'web.apps.WebConfig',
-    'chats.apps.ChatsConfig',
+    'konnekt.apps.KonnektConfig',
     'dash.apps.DashConfig',
     'shop.apps.ShopConfig',
     'main.apps.MainConfig',

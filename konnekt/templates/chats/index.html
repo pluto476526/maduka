@@ -9,7 +9,7 @@
       </a>
       <div class="nav flex-md-column nav-pills flex-grow-1" role="tablist" aria-orientation="vertical">
         <a class="mb-xl-3 mb-md-2 nav-link" data-toggle="pill" href="#nav-tab-user" role="tab">
-          <img src="{{ request.user.profile.avatar }}" class="avatar sm rounded-circle" alt="user avatar">
+          <img src="{{ request.user.profile.avatar.url }}" class="avatar sm rounded-circle" alt="user avatar">
         </a>
         <a class="mb-xl-3 mb-md-2 nav-link active" data-toggle="pill" href="#nav-tab-chat" role="tab">
           <i class="zmdi zmdi-comment-alt"></i>
@@ -51,11 +51,13 @@
                 </button>
               </div>
               <div class="card-user-detail mt-4">
-                <h5>Your Name</h5>
+                <h5>{{ request.user.username|title }}</h5>
                 <span class="text-muted">
-                  <a href="">info@domain.com</a>
+                  <a href="">{{ request.user.email }}</a>
                 </span>
-                <p>+628xxxxxxx - Makassar (IDN)</p>
+                {% if request.user.profile.phone %}
+                <p>{{ request.user.profile.phone }}</p>
+                {% endif %}
                 <div class="social">
                   <a class="icon p-2" href="#" data-toggle="tooltip" title="Facebook">
                     <i class="zmdi zmdi-facebook-box"></i>
@@ -78,7 +80,7 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="mb-0 text-primary">Chat</h3>
             <div>
-              <button class="btn btn-dark" type="button">New Chat</button>
+              <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#InviteFriends">New Chat</button>
             </div>
           </div>
           <div class="form-group input-group-lg search mb-3">
@@ -631,14 +633,14 @@
         <div class="chat d-flex justify-content-center align-items-center h-100 text-center py-xl-4 py-md-3 py-2">
           <div class="container-xxl">
             <div class="avatar lg avatar-bg me-auto ms-auto mb-5">
-              <img class="avatar lg rounded-circle border" src="assets/img/avatar5.png" alt="" />
+              <img class="avatar lg rounded-circle border" src="assets/img/avatar5.png" alt="">
               <span class="a-bg-1">
               </span>
               <span class="a-bg-2">
               </span>
             </div>
             <h5 class="font-weight-bold">
-              Hi, Daeng Coding
+              Hi, {{ request.user|title }}
             </h5>
             <p>
               Start messaging.
@@ -647,7 +649,8 @@
         </div>
       </div>
     </div>
-    <div class="modal fade" id="InviteFriends" tabindex="-1" aria-hidden="true">
+
+      <div class="modal fade" id="InviteFriends" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -685,5 +688,6 @@
       </div>
     </div>
   </div>
+
 
 {% endblock %}

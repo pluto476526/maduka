@@ -1,0 +1,198 @@
+{% extends 'chats/main.html' %}
+{% load static %}
+{% block main %}
+
+
+  <div id="layout" class="theme-cyan">
+     <div class="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
+      <div class="nav flex-md-column nav-pills flex-grow-1" role="tablist" aria-orientation="vertical">
+        <a class="mb-xl-3 mb-md-2 nav-link active" data-bs-toggle="pill" href="{% url 'my_profile' %}" role="tab">
+          <img src="{{ my_profile.avatar.url }}" class="avatar sm rounded-circle" alt="user avatar" style="object-fit: cover;">
+        </a>
+        <a class="mb-xl-3 mb-md-2 nav-link" data-bs-toggle="pill" href="{% url 'chats' %}">
+          <i class="zmdi zmdi-home"></i>
+        </a>
+        <a class="mt-xl-3 mt-md-2 nav-link light-dark-toggle" href="javascript:void(0);">
+          <i class="zmdi zmdi-brightness-2"></i>
+          <input class="light-dark-btn" type="checkbox">
+        </a>
+        <a class="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="{% url 'my_profile' %}" role="tab">
+          <i class="zmdi zmdi-settings"></i>
+        </a>
+      </div>
+
+      <button type="submit" class="btn sidebar-toggle-btn shadow-sm">
+        <i class="zmdi zmdi-menu"></i>
+      </button>
+    </div>
+    <div class="sidebar border-end py-xl-4 py-3 px-xl-4 px-3">
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="nav-tab-user" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0 text-primary">Profile Details</h4>
+            <div>
+              <a href="" title="" class="btn btn-dark">Send Message</a>
+            </div>
+          </div>
+          <div class="card border-0 text-center pt-3 mb-4">
+            <div class="card-body">
+              <div class="" style="height: 20rem;">
+                <img src="{{ request.user.profile.avatar.url }}" alt="avatar" style="height: 100%; width: 100%; object-fit: cover;">
+              </div>
+              <div class="card-user-detail mt-4">
+                <h5>{{ request.user.username|title }}</h5>
+                <span class="text-muted"><a href="" class="__cf_email__">{{ request.user.email }}</a></span>
+                <p>{{ request.user.profile.phone }}</p>
+                <div class="social">
+                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Facebook">
+                    <i class="zmdi zmdi-facebook-box"></i>
+                  </a>
+                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Youtube">
+                    <i class="zmdi zmdi-youtube-play"></i>
+                  </a>
+                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Twitter">
+                    <i class="zmdi zmdi-twitter"></i>
+                  </a>
+                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Instagram">
+                    <i class="zmdi zmdi-instagram"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="main px-xl-5 px-lg-4 px-3">
+      <div class="main-body">
+        <div class="body-header border-bottom py-xl-3 py-2">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+          <div class="container px-0">
+            <div class="row align-items-center">
+              <div class="col-12">
+                <div class="media">
+                  <div class="avatar sm">
+                    <a href="{% url 'chats' %}" title="" class="link">
+                      <i class="zmdi zmdi-arrow-left zmdi-hc-lg"></i>
+                    </a>
+                  </div>
+                  <div class="media-body overflow-hidden">
+                    <div class="d-flex align-items-center mb-1">
+                      <h6 class="fw-bold text-truncate mb-0 me-auto">Status</h6>
+                    </div>
+                    <div class="text-truncate">Last active on: 01 January 2021</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-page d-flex py-xl-3 py-2">
+          <div class="container px-0">
+            <div class="row">
+              <div class="col-12">
+                <ul class="nav nav-tabs nav-overflow page-header-tabs mb-4 mt-md-5 mt-3">
+                  <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#setting-general" role="tab">General Details</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="tab-content">
+
+              <div class="tab-pane fade show active" id="setting-general" role="tabpanel">
+                <div class="row">
+                  <div class="col-12">
+                    <div class="card mb-4">
+                      <div class="card-header">
+                        <h6 class="card-title mb-0">Veteran</h6>
+                        <span class="text-muted small">Registered on: 23/34/3221 june</span>
+                      </div>
+                      <div class="card-header">
+                        <h6 class="card-title mb-0">Registered Shop</h6>
+                        <span class="text-muted small">Registered</span>
+                      </div>
+                      <div class="card-body">
+
+                        <form class="row g-3" method="post" enctype="multipart/form-data">
+                          {% csrf_token %}
+                          <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                              <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" placeholder="Enter full name" name="full_name"
+                                  {% if my_profile.full_name %} value="{{ my_profile.full_name|title }}" {% endif %}>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                              <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" placeholder="Enter phone number" name="phone"
+                                  {% if my_profile.phone %} value="{{ my_profile.phone }}" {% endif %}>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                              <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" placeholder="Facebook profile link" name="facebook"
+                                  {% if my_profile.facebook %} value="{{ my_profile.facebook }}" {% endif %}>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                              <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" placeholder="Instagram profile link" name="insta"
+                                  {% if my_profile.insta %} value="{{ my_profile.insta }}" {% endif %}>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                              <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" placeholder="Twitter profile link" name="twitter"
+                                  {% if my_profile.twitter %} value="{{ my_profile.twitter }}" {% endif %}>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-12">
+                            <div class="form-group">
+                              <div class="input-group">
+                                <textarea rows="4" class="form-control" placeholder="Enter Bio" name="bio">{% if my_profile.bio %} {{ my_profile.bio|capfirst }} {% endif %}</textarea>
+                              </div>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row justify-content-between mt-4">
+                  <div class="col-12 col-md-6">
+                  </div>
+                  <div class="col-auto">
+                    <button class="btn btn-danger mb-5">Back</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+{% endblock %}
