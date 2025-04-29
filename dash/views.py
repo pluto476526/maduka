@@ -394,31 +394,27 @@ def deliveries_view(request):
         with transaction.atomic():
             if order_id:
                 delivery = get_object_or_404(Delivery, id=order_id)
-
-            if source == 'new_delivery':
-                selected_product = get_object_or_404(Inventory, product_id=product_id)
-
-                if int(quantity) <= selected_product.quantity:
-                    Delivery.objects.create(
-                        shop=shop,
-                        unregistered_user=customer,
-                    )
-                    selected_product.quantity -= int(quantity)
-                    selected_product.save()
-                    messages.success(request, f"Delivery for {quantity} {selected_product.units} of {selected_product.product} created.")
-                else:
-                    messages.error(request, f"Only {selected_product.quantity} {selected_product.units} available.")
-            
-            elif source == 'confirm_delivery':
+ 
+            if source == 'confirm_delivery':
                 delivery.status = 'confirmed'
                 delivery.time_confirmed = datetime.now()
                 delivery.admin = request.user
                 delivery.save()
-                # sale_category = get_object_or_404(Category, category=delivery.category.category)
-                # sale_category.total_sales += delivery.total
-                # sale_category.save()
                 shop.total_sales += delivery.total
                 shop.save()
+                
+                del_items = DeliveryItem.objects.filter(delivery=delivery)
+                for d in del_items:
+                    product = get_object_or_404(Inventory, id=d.product.id)
+                    product.quantity -= d.quantity
+                    product.total_sales += d.product.price
+                    product.save()
+                    
+                    sale_category = Category.objects.filter(id=d.product.category.id)
+                    for c in sale_category:
+                        c.total_sales += delivery.total
+                        c.save()
+
                 messages.success(request, f'Delivery {delivery.order_number} confirmed.')
         
             elif source == 'delete_item':
@@ -590,13 +586,19 @@ def physical_sales_view(request):
                 trans.status = 'completed'
                 trans.admin = request.user
                 trans.save()
-                # sel_product.quantity -= int(quantity)
-                # sel_product.save()
-                # sale_category = get_object_or_404(Category, category=sel_product.category.category)
-                # sale_category.total_sales += totals
-                # sale_category.save()
-                # shop.total_sales += totals
-                # shop.save()
+                shop.total_sales += float(delivery.total) 
+                shop.save()
+
+                d_items = DeliveryItem.objects.filter(delivery=delivery)
+                for d in d_items:
+                    product = get_object_or_404(Inventory, id=d.product.id)
+                    product.quantity -= d.quantity
+                    product.total_sales += d.product.price
+                    product.save()
+                    
+                    category = get_object_or_404(Category, id=d.product.category.id)
+                    category.total_sales += float(d.total)
+                    category.save()
                 
                 messages.success(request, f"Order '{order_no}' payment confirmed.")
             
@@ -605,6 +607,7 @@ def physical_sales_view(request):
                     delivery.is_deleted = True
                     delivery.save()
                     messages.success(request, f'Order "{delivery.order_number}" deleted.')
+        
         return redirect('physical_sales')
 
     context = {

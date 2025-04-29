@@ -42,9 +42,6 @@
                 <li class="nav-item">
                   <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-settings">Settings</button>
                 </li>
-                <li class="nav-item">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
-                </li>
               </ul>
               <div class="tab-content pt-2">
                 <div class="tab-pane fade show active profile-overview" id="profile-overview">
@@ -94,36 +91,46 @@
                     {% csrf_token %}
                     <div class="row">
                       <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Profile Images</label>
-                      <div class="col-md-8 col-lg-9 d-flex justify-content-center gap-3">
-                        <div class="w-100"
-                          style="background-image: url('{{ my_shop.avatar1.url }}'); background-repeat: no-repeat; background-size: cover; height: 15rem;">
-                          <div class="pt-2">
-                            <label class="btn btn-primary btn-sm" title="Upload new image">Upload
-                              <input type="file" name="avatar1" class="d-none" data-target="fileName1">
-                            </label>
-                            <strong id="fileName1" class="ms-2 bg-light"></strong>
+                      <div class="col-md-8 col-lg-9">
+                        <div class="row g-3">
+                          
+                          <!-- Avatar 1 -->
+                          <div class="col-12 col-md-4 text-center">
+                            <img src="{{ my_shop.avatar1.url }}" alt="Avatar 1" class="img-fluid rounded" style="height: 15rem; object-fit: cover; width: 100%;">
+                            <div class="pt-2">
+                              <label class="btn btn-primary btn-sm" title="Upload new image">Upload
+                                <input type="file" name="avatar1" class="d-none" data-target="fileName1">
+                              </label>
+                              <strong id="fileName1" class="ms-2 bg-light"></strong>
+                            </div>
                           </div>
-                        </div>
-                        <div class="w-100"
-                          style="background-image: url('{{ my_shop.avatar2.url }}'); background-repeat: no-repeat; background-size: cover; height: 15rem;">
-                          <div class="pt-2">
-                            <label class="btn btn-primary btn-sm" title="Upload new image">Upload
-                              <input type="file" name="avatar2" class="d-none" data-target="fileName2">
-                            </label>
-                            <strong id="fileName2" class="ms-2 bg-light"></strong>
+
+                          <!-- Avatar 2 -->
+                          <div class="col-12 col-md-4 text-center">
+                            <img src="{{ my_shop.avatar2.url }}" alt="Avatar 2" class="img-fluid rounded" style="height: 15rem; object-fit: cover; width: 100%;">
+                            <div class="pt-2">
+                              <label class="btn btn-primary btn-sm" title="Upload new image">Upload
+                                <input type="file" name="avatar2" class="d-none" data-target="fileName2">
+                              </label>
+                              <strong id="fileName2" class="ms-2 bg-light"></strong>
+                            </div>
                           </div>
-                        </div>
-                        <div class="w-100"
-                          style="background-image: url('{{ my_shop.avatar3.url }}'); background-repeat: no-repeat; background-size: cover; height: 15rem;">
-                          <div class="pt-2">
-                             <label class="btn btn-primary btn-sm" title="Upload new image">Upload
-                              <input type="file" name="avatar3" class="d-none" data-target="fileName3">
-                            </label>
-                            <strong id="fileName3" class="ms-2 bg-light"></strong>
+
+                          <!-- Avatar 3 -->
+                          <div class="col-12 col-md-4 text-center">
+                            <img src="{{ my_shop.avatar3.url }}" alt="Avatar 3" class="img-fluid rounded" style="height: 15rem; object-fit: cover; width: 100%;">
+                            <div class="pt-2">
+                              <label class="btn btn-primary btn-sm" title="Upload new image">Upload
+                                <input type="file" name="avatar3" class="d-none" data-target="fileName3">
+                              </label>
+                              <strong id="fileName3" class="ms-2 bg-light"></strong>
+                            </div>
                           </div>
+
                         </div>
                       </div>
                     </div>
+ 
                     <div class="row my-3">
                       <label class="col-md-4 col-lg-3 col-form-label">Shop Name</label>
                       <div class="col-md-8 col-lg-9">
@@ -180,180 +187,115 @@
                   </form>
                   <!-- End Profile Edit Form -->
                 </div>
+
+
                 <div class="tab-pane fade pt-3" id="profile-settings">
                   <!-- Settings Form -->
-                  <form method="post">
-                  {% csrf_token %}
-                  <div class="row mb-3">
-                    <label class="col-md-4 col-lg-3 col-form-label">Low Stock Threshold</label>
+                  <form method="post" id="settings-form">
+                    {% csrf_token %}
+
+                    <!-- Low Stock Threshold -->
+                    <div class="row mb-4">
+                      <label class="col-md-4 col-lg-3 col-form-label">Low Stock Threshold</label>
                       <div class="col-md-8 col-lg-9">
-                        <div class="form-check">
-                          <input class="form-control" type="number" name="ls_threshold" value="{{ threshold.threshold }}">
+                        <input class="form-control" type="number" name="ls_threshold" value="{{ threshold.threshold }}">
+                      </div>
+                    </div>
+
+                    <!-- Landing Page Titles -->
+                    <fieldset class="border p-3 mb-4">
+                      <legend class="w-auto">Landing Page Titles</legend>
+                      {% if my_shop.title1 or my_shop.title2 or my_shop.title3 %}
+                        <div class="mb-2">
+                          <input class="form-control" type="text" name="title1" placeholder="Short title (max 100 chars)" value="{{ my_shop.title1|truncatechars:100 }}">
                         </div>
-                      </div>
-                    </div>
-                  <div class="row mb-3">
-                    <label class="col-md-4 col-lg-3 col-form-label">Landing Page Titles</label>
-                    <div class="col-md-8 col-lg-9">
-                      <div class="form-check">
-                        <input class="form-control" type="text" name="title1"
-                          placeholder="Short title eg. 100% Fresh Farm Produce! (less than 100 characters)"
-                          {% if my_shop.title1 %} value="{{ my_shop.title1|title|truncatechars:100 }}" {% endif %}>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-control" type="text" name="title2"
-                          placeholder="Short title eg. 100% Fresh Farm Produce! (less than 100 characters)"
-                          {% if my_shop.title2 %} value="{{ my_shop.title2|title|truncatechars:100 }}" {% endif %}>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-control" type="text" name="title3"
-                          placeholder="Short title eg. 100% Fresh Farm Produce! (less than 100 characters)"
-                          {% if my_shop.title3 %} value="{{ my_shop.title3|title|truncatechars:100 }}" {% endif %}>
-                      </div>
-                    </div>
-                  </div>
-                  {% if staff_roles %}
-                    <div class="row mb-3 bg-secondary">
-                      <label class="col-md-4 col-lg-3 col-form-label">Staff Roles</label>
-                      <div class="col-md-8 col-lg-9">
-                        {% for role in staff_roles %}
-                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
-                          <div class="col-6">
-                            <label>{{ role.role_name|title }}</label>
-                          </div>
-                          <div class="col-6">
-                            <button type="submit" title="Remove" class="form-check-input btn-close"></button>
-                          </div>
+                        <div class="mb-2">
+                          <input class="form-control" type="text" name="title2" placeholder="Short title (max 100 chars)" value="{{ my_shop.title2|truncatechars:100 }}">
                         </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endif %}
-                    <div class="row mb-3">
-                      <label class="col-md-4 col-lg-3 col-form-label">New Staff Role</label>
-                      <div class="col-md-8 col-lg-9">
-                        <div class="form-check">
+                        <div class="mb-2">
+                          <input class="form-control" type="text" name="title3" placeholder="Short title (max 100 chars)" value="{{ my_shop.title3|truncatechars:100 }}">
+                        </div>
+                      {% endif %}
+                    </fieldset>
+
+                    <!-- Staff Roles -->
+                    <fieldset class="border p-3 mb-4 bg-light">
+                      <legend class="w-auto">Staff Roles</legend>
+                        <div class="mb-4">
+                          <label class="form-label">New Staff Role</label>
                           <input class="form-control" type="text" name="role_name">
                         </div>
-                      </div>
-                    </div>
-                    {% if units %}
-                    <div class="row mb-3 bg-secondary">
-                      <label class="col-md-4 col-lg-3 col-form-label">Product Units</label>
-                      <div class="col-md-8 col-lg-9">
-                        {% for u in units %}
-                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
-                          <div class="col-6">
-                            <label>{{ u.units|title }}</label>
-                          </div>
-                          <div class="col-6">
-                            <a href="">
-                              <button type="button" title="Remove" class="form-check-input btn-close"></button>
-                            </a>
-                          </div>
+                      {% if staff_roles %}
+                      {% for role in staff_roles %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span>{{ role.role_name|title }}</span>
+                          <button type="submit" name="remove_role" value="{{ role.id }}" class="btn-close" title="Remove"></button>
                         </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    {% endif %}
-                    <div class="row mb-3">
-                      <label class="col-md-4 col-lg-3 col-form-label">New Units</label>
-                      <div class="col-md-8 col-lg-9">
-                        <div class="form-check">
+                      {% endfor %}
+                      {% endif %}
+                    </fieldset>
+                    
+
+
+                    <!-- Product Units -->
+                    <fieldset class="border p-3 mb-4 bg-light">
+                      <legend class="w-auto">Product Units</legend>
+                        <div class="mb-4">
+                          <label class="form-label">New Units</label>
                           <input class="form-control" type="text" name="units">
                         </div>
-                      </div>
-                    </div>
-                    {% if p_methods %}
-                    <div class="row mb-3 bg-secondary">
-                      <label class="col-md-4 col-lg-3 col-form-label">Payment Methods</label>
-                      <div class="col-md-8 col-lg-9">
-                        {% for p in p_methods %}
-                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
-                          <div class="col-6">
-                            <label>{{ p.method|title }}</label>
-                          </div>
-                          <div class="col-6">
-                            <button type="submit" title="Remove" class="form-check-input btn-close"></button>
-                          </div>
+                      {% if units %}
+                      {% for u in units %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span>{{ u.units|title }}</span>
+                          <button type="submit" name="remove_unit" value="{{ u.id }}" class="btn-close" title="Remove"></button>
                         </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    {% endif %}
-                    <div class="row mb-3">
-                      <label class="col-md-4 col-lg-3 col-form-label">New Payment Method</label>
-                      <div class="col-md-8 col-lg-9">
-                        <div class="form-check">
+                      {% endfor %}
+                      {% endif %}
+                    </fieldset>    
+
+                    <!-- Payment Methods -->
+                    
+                    <fieldset class="border p-3 mb-4 bg-light">
+                      <legend class="w-auto">Payment Methods</legend>
+                        <div class="mb-4">
+                          <label class="form-label">New Payment Method</label>
                           <input class="form-control" type="text" name="p_mthd">
                         </div>
-                      </div>
-                    </div>
+                      {% if p_methods %}
+                      {% for p in p_methods %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span>{{ p.method|title }}</span>
+                          <button type="submit" name="remove_p_mthd" value="{{ p.id }}" class="btn-close" title="Remove"></button>
+                        </div>
+                      {% endfor %}
+                      {% endif %}
+                    </fieldset>
+
+                    <!-- Counties and Shipping Costs -->
                     {% if counties %}
-                    <div class="row mb-3 bg-secondary">
-                      <label class="col-md-4 col-lg-3 col-form-label">Counties Shipped</label>
-                      <div class="col-md-8 col-lg-9">
-                        {% for c in counties %}
-                        <div class="form-check col-12 d-flex align-items-center justify-content-center">
-                          <div class="col-4">
-                            <label>{{ c.county|title }}</label>
-                          </div>
-                          <div class="col-4">
-                            <label>KES. {{ c.price|intcomma }}</label>
-                          </div>
-                          <div class="col-4">
-                            <button type="submit" title="Remove" class="form-check-input btn-close"></button>
-                          </div>
-                        </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    {% endif %}
-                    <div class="row mb-3">
-                      <label class="col-md-4 col-lg-3 col-form-label">New County, Shipping Cost</label>
-                      <div class="col-md-8 col-lg-9">
-                        <div class="form-check">
-                          <input class="form-control" type="text" name="county">
-                        </div>
-                        <div class="form-check">
+                    <fieldset class="border p-3 mb-4 bg-light">
+                      <legend class="w-auto">Counties Shipped</legend>
+                        <div class="mb-4">
+                          <label class="form-label">New County</label>
+                          <input class="form-control mb-2" type="text" name="county">
+                          <label class="form-label">Shipping Cost (KES.)</label>
                           <input class="form-control" type="number" name="shipping_cost">
                         </div>
-                      </div>
-                    </div>
+                      {% for c in counties %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <div>{{ c.county|title }} — <strong>KES. {{ c.price|intcomma }}</strong></div>
+                          <button type="submit" name="remove_county" value="{{ c.id }}" class="btn-close" title="Remove"></button>
+                        </div>
+                      {% endfor %}
+                      {% endif %}
+                    </fieldset>
                     <input type="hidden" name="source" value="settings_form">
                     <div class="text-center">
-                      <button type="submit" class="btn btn-primary">Save Changes</button>
+                      <button type="submit" class="btn btn-primary" id="save-btn" disabled>Save Changes</button>
                     </div>
                   </form>
-                  <!-- End settings Form -->
-                </div>
-                <div class="tab-pane fade pt-3" id="profile-change-password">
-                  <!-- Change Password Form -->
-                  <form>
-                    <div class="row mb-3">
-                      <label class="col-md-4 col-lg-3 col-form-label">Current Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="password" type="password" class="form-control">
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label class="col-md-4 col-lg-3 col-form-label">New Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="newpassword" type="password" class="form-control">
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label class="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="renewpassword" type="password" class="form-control">
-                      </div>
-                    </div>
-                    <div class="text-center">
-                      <button type="submit" class="btn btn-primary">Change Password</button>
-                    </div>
-                  </form>
-                  <!-- End Change Password Form -->
-                </div>
+                </div>      
               </div>
               <!-- End Bordered Tabs -->
             </div>
@@ -365,16 +307,27 @@
 </div>
 
 <script>
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.addEventListener('change', function() {
-            let fileName = this.files.length > 0 ? this.files[0].name : "No file chosen";
-            let displayElement = document.getElementById(this.getAttribute('data-target'));
-            if (displayElement) {
-                displayElement.textContent = fileName;
-            }
-        });
-    });
+// Enable Save button on input change
+const settingsForm = document.getElementById('settings-form')
+const saveSettingsBtn = document.getElementById('save-btn')
+const fileInputs = document.querySelectorAll('input[type="file"]')
+
+settingsForm.addEventListener('input', () => {
+  saveSettingsBtn.disabled = false;
+});
+
+fileInputs.forEach(input => {
+  input.addEventListener('change', function() {
+  let fileName = this.files.length > 0 ? this.files[0].name : "No file chosen";
+  let displayElement = document.getElementById(this.getAttribute('data-target'));
+  
+  if (displayElement) {
+    displayElement.textContent = fileName;
+  }
+  });
+});
 </script>
+
 
 {% endblock %}
 

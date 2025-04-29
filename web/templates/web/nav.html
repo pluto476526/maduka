@@ -11,12 +11,9 @@
         <li><a class="nav-link scrollto" href="#about">About</a></li>
         <!--<li><a href="">Blog</a></li>-->
         <li><a class="nav-link scrollto" href="#contact">Contact Us</a></li>
-        <li><a class="getstarted" href="{% url 'chats' %}">Konnekt</a></li>
-
-
-
+        <li><a class="getstarted" href="{% url 'chats' %}" title="Chat With Friends">Konnekt</a></li>
         {% if profile.shop %}
-        <li><a class="getstarted" href="{% url 'dash' %}">{{ profile.shop }}</a></li>
+        <li><a class="getstarted" href="{% url 'dash' %}" title="Your Shop Dashboard" style="background-color: #5c9f24; color: aliceblue;">{{ profile.shop }}</a></li>
         {% else %}
         {% if request.user.is_authenticated %}
         <li>
@@ -25,7 +22,7 @@
         {% endif %}
         {% endif %}
         {% if request.user.is_authenticated %}
-        <li><a href="{% url 'sign_out' %}">Sign Out</a></li>
+        <li><a class="getstarted border-0" href="{% url 'sign_out' %}" style="background-color: #f28b82; color: aliceblue;" title="Log Out">Sign Out</a></li>
         {% else %}
         <li><a class="getstarted" href="{% url 'sign_in' %}">Sign In</a></li>
         {% endif %}

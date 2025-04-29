@@ -3,22 +3,81 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
 from dash.models import Profile
+from konnekt.models import Conversation, ConversationItem, Note, Task
 import logging
 
 
 logger = logging.getLogger(__name__)
 
 
+
 @login_required
 def index_view(request):
-    convos = Coversation.items.filter
+    if request.method == 'POST':
+        source = request.POST.get('source')
+        note = request.POST.get('note')
+        noteID = request.POST.get('noteID')
+        task = request.POST.get('task')
+        taskID = request.POST.get('taskID')
+
+        if source == 'add_note':
+            Note.objects.create(user=request.user, note=note)
+            messages.success(request, 'Note saved.')
+        
+        elif source == 'delete_note':
+            note = get_object_or_404(Note, id=noteID)
+            note.is_deleted = True
+            note.save()
+            messages.success(request, 'Note deleted.')
+
+        elif source == 'add_task':
+            Task.objects.create(user=request.user, task=task)
+            messages.success(request, 'Task added.')
+
+        elif source == 'complete_task':
+            task = get_object_or_404(Task, id=taskID)
+            task.is_complete = True
+            task.save()
+            messages.success(request, 'Task completed.')
+
+        elif source == 'delete_task':
+            task = get_object_or_404(Task, id=taskID)
+            task.is_deleted = True
+            task.save()
+            messages.success(request, 'Task deletd.')
+
+        return redirect(request.META.get('HTTP_REFERER'))
+    
     context = {}
-    return render(request, 'chats/index.html', context)
+    return render(request, 'konnekt/index.html', context)
+
+
+@login_required
+def chat_view(request, convo_id):
+    convo = get_object_or_404(Conversation, conv_id=convo_id)
+    texts = ConversationItem.objects.filter(conversation=convo)
+    logger.debug(convo.participants)
+    participants = []
+
+    if convo.is_group:
+        p = convo.participants.exclude(id=request.user.id).first()
+        participants.append(p)
+    
+    else:
+        sender = convo.participants.exclude(id=request.user.id).first()
+
+    context = {
+        'texts': texts,
+        'convo_id': convo_id,
+        'convo': convo,
+        'sender': sender,
+    }
+    return render(request, 'konnekt/chat.html', context)
 
 
 @login_required
 def my_profile_view(request):
-    profile = get_object_or_404(Profile, identifier=request.user.profile.identifier)
+    profile = get_object_or_404(Profile, id=request.user.profile.id)
     
     if request.method == 'POST':
         full_name = request.POST.get('full_name', '').strip().lower()
@@ -56,9 +115,15 @@ def my_profile_view(request):
     context = {
         'my_profile': profile,
     }
-    return render(request, 'chats/my_profile.html', context)
+    return render(request, 'konnekt/my_profile.html', context)
 
 
-def user_profile_view(request):
-    context = {}
-    return render(request, 'chats/user_profile.html', context)
+def user_profile_view(request, identifier):
+    profile = get_object_or_404(Profile, identifier=identifier)
+    context = {
+        'profile': profile,
+    }
+    return render(request, 'konnekt/user_profile.html', context)
+
+
+

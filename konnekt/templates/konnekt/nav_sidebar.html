@@ -1,14 +1,9 @@
-{% extends 'chats/main.html' %}
-{% load static %}
-{% block main %}
-
-  <div id="layout" class="theme-cyan">
-    <div class="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
+<div class="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
       <a href="/" class="brand">MaDuka
         <!--<img src="assets/img/logo2.png" alt="" style="width: 50px;">-->
       </a>
       <div class="nav flex-md-column nav-pills flex-grow-1" role="tablist" aria-orientation="vertical">
-        <a class="mb-xl-3 mb-md-2 nav-link" data-toggle="pill" href="#nav-tab-user" role="tab">
+        <a class="mb-xl-3 mb-md-2 nav-link d-none d-sm-block" data-toggle="pill" href="#nav-tab-user" role="tab">
           <img src="{{ request.user.profile.avatar.url }}" class="avatar sm rounded-circle" alt="user avatar">
         </a>
         <a class="mb-xl-3 mb-md-2 nav-link active" data-toggle="pill" href="#nav-tab-chat" role="tab">
@@ -21,8 +16,11 @@
           <i class="zmdi zmdi-brightness-2"></i>
           <input class="light-dark-btn" type="checkbox">
         </a>
-        <a class="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="{% url 'my_profile' %}" role="tab">
+        <a class="mt-xl-3 mt-md-2 nav-link" href="{% url 'my_profile' %}" role="tab">
           <i class="zmdi zmdi-settings"></i>
+        </a>
+        <a class="mt-xl-3 mt-md-2 nav-link" href="{% url 'chats' %}" role="tab">
+          <i class="zmdi zmdi-home"></i>
         </a>
       </div>
       <button type="submit" class="btn sidebar-toggle-btn shadow-sm">
@@ -101,7 +99,7 @@
                 </div>
               </div>
             </li>
-            <li>
+            <!--<li>
               <a href="pages/bot-chat.html" class="card">
                 <div class="card-body">
                   <div class="media">
@@ -124,43 +122,10 @@
                   </div>
                 </div>
               </a>
-            </li>
-            <li class="online">
-              <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye"></i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star"></i>
-                </button>
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete"></i>
-                </button>
-              </div>
-              <a href="pages/single-chat.html" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <span class="status rounded-circle"></span>
-                      <img class="avatar rounded-circle" src="assets/img/avatar2.png" alt="avatar">
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Avatar 1
-                        </h6>
-                        <p class="small text-muted text-nowrap ms-4 mb-0">
-                          09:00 am
-                        </p>
-                      </div>
-                      <div class="text-truncate">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit...
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
+            </li>-->
+
+            {% for c, p, msg in z_data %}
+            {% if c.convo.is_group %}
             <li>
               <div class="hover_action">
                 <button type="button" class="btn btn-link text-info">
@@ -213,48 +178,41 @@
                 </div>
               </a>
             </li>
-            <li class="away">
+            {% else %}
+            <li class="online">
               <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye">
-                  </i>
+                <!--<button type="button" class="btn btn-link text-info">
+                  <i class="zmdi zmdi-eye"></i>
                 </button>
                 <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star">
-                  </i>
-                </button>
+                  <i class="zmdi zmdi-star"></i>
+                </button>-->
                 <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete">
-                  </i>
+                  <i class="zmdi zmdi-delete"></i>
                 </button>
               </div>
-              <a href="#" class="card">
+              <a href="{% url 'chat_view' c.conv_id %}" class="card">
                 <div class="card-body">
                   <div class="media">
                     <div class="avatar me-3">
-                      <span class="status rounded-circle">
-                      </span>
-                      <img class="avatar rounded-circle" src="assets/img/avatar4.png" alt="avatar">
+                      <span class="status rounded-circle"></span>
+                      <img class="avatar rounded-circle" src="{{ p.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
                     </div>
                     <div class="media-body overflow-hidden">
                       <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Avatar 2
-                        </h6>
-                        <p class="small text-muted text-nowrap ms-4 mb-0">
-                          20:00 pm
-                        </p>
+                        <h6 class="text-truncate mb-0 me-auto">{{ p.username|title }}</h6>
+                        <p class="small text-muted text-nowrap ms-4 mb-0">{{ msg.timestamp }}</p>
                       </div>
-                      <div class="text-truncate">
-                        Lorem ipsum dolor sit amet consectetur.
-                      </div>
+                      <div class="text-truncate">{{ msg.body|capfirst }}</div>
                     </div>
                   </div>
                 </div>
               </a>
             </li>
+            {% endif %}
+            {% endfor %}
 
-            <li class="online">
+            <!--<li class="online">
               <div class="hover_action">
                 <button type="button" class="btn btn-link text-info">
                   <i class="zmdi zmdi-eye">
@@ -300,49 +258,7 @@
                   </div>
                 </div>
               </a>
-            </li>
-            <li class="away">
-              <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete">
-                  </i>
-                </button>
-              </div>
-              <a href="#" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <span class="status rounded-circle">
-                      </span>
-                      <img class="avatar rounded-circle" src="assets/img/avatar6.png" alt="avatar">
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Avatar 5
-                        </h6>
-                        <p class="small text-muted text-nowrap ms-4 mb-0">
-                          11:00 am
-                        </p>
-                      </div>
-                      <div class="text-truncate">
-                        <i class="zmdi zmdi-phone-end me-1">
-                        </i>
-                        Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
+            </li>-->
           </ul>
         </div>
         <div class="tab-pane fade" id="nav-tab-contact" role="tabpanel">
@@ -480,214 +396,3 @@
         </div>
       </div>
     </div>
-    <div class="rightbar d-none d-md-block">
-      <div class="nav flex-column nav-pills border-start py-xl-4 py-3 h-100">
-        <a class="nav-link mb-2 text-center rightbar-link" data-toggle="pill" href="#tab-calendar">
-          <i class="zmdi zmdi-calendar">
-          </i>
-        </a>
-        <a class="nav-link mb-2 text-center rightbar-link" data-toggle="pill" href="#tab-note">
-          <i class="zmdi zmdi-lamp">
-          </i>
-        </a>
-        <a class="nav-link mb-2 text-center rightbar-link" data-toggle="pill" href="#tab-task">
-          <i class="zmdi zmdi-comment-edit">
-          </i>
-        </a>
-        <a class="nav-link mb-2 text-center" href="#">
-          <i class="zmdi zmdi-plus">
-          </i>
-        </a>
-      </div>
-      <div class="tab-content py-xl-4 py-3 px-xl-4 px-3">
-        <div class="tab-pane fade" id="tab-calendar" role="tabpanel">
-          <div class="header border-bottom pb-4 d-flex justify-content-between">
-            <div>
-              <h6 class="mb-0 font-weight-bold">
-                Calendar
-              </h6>
-            </div>
-            <div>
-              <button class="btn btn-link close-sidebar text-muted" type="button">
-                <i class="zmdi zmdi-close">
-                </i>
-              </button>
-            </div>
-          </div>
-          <div class="body mt-4">
-            <div id="mini-calendar">
-            </div>
-          </div>
-        </div>
-        <div class="tab-pane fade" id="tab-note" role="tabpanel">
-          <div class="header border-bottom pb-4 d-flex justify-content-between">
-            <div>
-              <h6 class="mb-0 font-weight-bold">
-                My Notes
-              </h6>
-            </div>
-            <div>
-              <button class="btn btn-link close-sidebar text-muted" type="button">
-                <i class="zmdi zmdi-close">
-                </i>
-              </button>
-            </div>
-          </div>
-          <div class="body mt-4">
-            <div class="add-note">
-              <form>
-                <div class="input-group mb-2">
-                  <textarea rows="3" class="form-control" placeholder="Enter a note here..">
-                    </textarea>
-                </div>
-                <button type="submit" class="btn btn-primary addnote">
-                  Add
-                </button>
-              </form>
-              <ul class="list-unstyled mt-4">
-                <li class="card border-0 mb-2">
-                  <span>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam non assumenda
-                    voluptate.
-                  </span>
-                  <button class="btn btn-sm btn-link">
-                    <i class="zmdi zmdi-delete text-danger">
-                    </i>
-                  </button>
-                </li>
-                <li class="card border-0 mb-2">
-                  <span>
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                  </span>
-                  <button class="btn btn-sm btn-link">
-                    <i class="zmdi zmdi-delete text-danger">
-                    </i>
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="tab-pane fade" id="tab-task" role="tabpanel">
-          <div class="header border-bottom pb-4 d-flex justify-content-between">
-            <div>
-              <h6 class="mb-0 font-weight-bold">
-                My Task List
-              </h6>
-            </div>
-            <div>
-              <button class="btn btn-link close-sidebar text-muted" type="button">
-                <i class="zmdi zmdi-close">
-                </i>
-              </button>
-            </div>
-          </div>
-          <div class="body mt-4">
-            <div class="todo-list">
-              <ul class="list-unstyled todo-list-items">
-                <li>
-                  <label class="c_checkbox">
-                    <input type="checkbox">
-                    <span class="checkmark">
-                    </span>
-                    <span class="ms-2">
-                      Lorem ipsum dolor sit amet.
-                    </span>
-                  </label>
-                  <button class="btn btn-sm btn-link" type="submit">
-                    <i class="zmdi zmdi-delete">
-                    </i>
-                  </button>
-                </li>
-                <li>
-                  <label class="c_checkbox">
-                    <input type="checkbox">
-                    <span class="checkmark">
-                    </span>
-                    <span class="ms-2">
-                      Lorem, ipsum dolor sit amet consectetur.
-                    </span>
-                  </label>
-                  <button class="btn btn-sm btn-link" type="submit">
-                    <i class="zmdi zmdi-delete">
-                    </i>
-                  </button>
-                </li>
-              </ul>
-              <form class="add-items">
-                <div class="input-group mb-2">
-                  <textarea rows="3" class="form-control" placeholder="What do you need to do today?">
-                    </textarea>
-                </div>
-                <button class="add btn btn-primary" type="submit">
-                  Add to List
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="main px-xl-5 px-lg-4 px-3">
-      <div class="chat-body">
-        <div class="chat d-flex justify-content-center align-items-center h-100 text-center py-xl-4 py-md-3 py-2">
-          <div class="container-xxl">
-            <div class="avatar lg avatar-bg me-auto ms-auto mb-5">
-              <img class="avatar lg rounded-circle border" src="assets/img/avatar5.png" alt="">
-              <span class="a-bg-1">
-              </span>
-              <span class="a-bg-2">
-              </span>
-            </div>
-            <h5 class="font-weight-bold">
-              Hi, {{ request.user|title }}
-            </h5>
-            <p>
-              Start messaging.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-      <div class="modal fade" id="InviteFriends" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              Invite New Friends
-            </h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">
-                &times;
-              </span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="form-group">
-                <label>
-                  Email address
-                </label>
-                <input type="email" class="form-control">
-                <small id="emailHelp" class="form-text text-muted">
-                  Lorem, ipsum, dolor sit amet consectetur adipisicing.
-                </small>
-              </div>
-            </form>
-            <div class="mt-5">
-              <button type="button" class="btn btn-primary">
-                Send Invite
-              </button>
-              <button type="button" class="btn btn-link" data-dismiss="modal">
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-{% endblock %}

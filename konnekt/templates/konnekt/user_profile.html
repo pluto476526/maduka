@@ -1,4 +1,4 @@
-{% extends 'chats/main.html' %}
+{% extends 'konnekt/main.html' %}
 {% load static %}
 {% block main %}
 
@@ -37,12 +37,14 @@
           <div class="card border-0 text-center pt-3 mb-4">
             <div class="card-body">
               <div class="" style="height: 20rem;">
-                <img src="{{ request.user.profile.avatar.url }}" alt="avatar" style="height: 100%; width: 100%; object-fit: cover;">
+                <img src="{{ profile.avatar.url }}" alt="avatar" style="height: 100%; width: 100%; object-fit: cover;">
               </div>
               <div class="card-user-detail mt-4">
-                <h5>{{ request.user.username|title }}</h5>
-                <span class="text-muted"><a href="" class="__cf_email__">{{ request.user.email }}</a></span>
-                <p>{{ request.user.profile.phone }}</p>
+                <h5>{{ profile.user.username|title }}</h5>
+                <span class="text-muted"><a href="" class="__cf_email__">{{ profile.user.email }}</a></span>
+                {% if profile.phone %}
+                <p>{{ profile.phone }}</p>
+                {% endif %}
                 <div class="social">
                   <a class="icon p-2" href="#" data-toggle="tooltip" title="Facebook">
                     <i class="zmdi zmdi-facebook-box"></i>
@@ -116,71 +118,51 @@
                     <div class="card mb-4">
                       <div class="card-header">
                         <h6 class="card-title mb-0">Veteran</h6>
-                        <span class="text-muted small">Registered on: 23/34/3221 june</span>
+                        <span class="text-muted small">Registered on: {{ profile.user.date_joined }}</span>
                       </div>
+                      {% if profile.shop %}
                       <div class="card-header">
                         <h6 class="card-title mb-0">Registered Shop</h6>
-                        <span class="text-muted small">Registered</span>
+                        <span class="text-muted small">{{ profile.shop }}</span>
                       </div>
+                      {% endif %}
                       <div class="card-body">
 
-                        <form class="row g-3" method="post" enctype="multipart/form-data">
-                          {% csrf_token %}
+                        <form class="row g-3">
+                          {% if my_profile.full_name %}
                           <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                               <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" placeholder="Enter full name" name="full_name"
-                                  {% if my_profile.full_name %} value="{{ my_profile.full_name|title }}" {% endif %}>
+                                <input type="text" class="form-control form-control-lg" value="{{ my_profile.full_name|title }}">
                               </div>
                             </div>
                           </div>
+                          {% endif %}
+                          {% if my_profile.phone %}
                           <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                               <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" placeholder="Enter phone number" name="phone"
-                                  {% if my_profile.phone %} value="{{ my_profile.phone }}" {% endif %}>
+                                <input type="text" class="form-control form-control-lg" value="{{ my_profile.phone }}">
                               </div>
                             </div>
                           </div>
-                          <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="form-group">
-                              <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" placeholder="Facebook profile link" name="facebook"
-                                  {% if my_profile.facebook %} value="{{ my_profile.facebook }}" {% endif %}>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="form-group">
-                              <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" placeholder="Instagram profile link" name="insta"
-                                  {% if my_profile.insta %} value="{{ my_profile.insta }}" {% endif %}>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="form-group">
-                              <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" placeholder="Twitter profile link" name="twitter"
-                                  {% if my_profile.twitter %} value="{{ my_profile.twitter }}" {% endif %}>
-                              </div>
-                            </div>
-                          </div>
+                          {% endif %}
+                          {% if my_profile.bio %}
                           <div class="col-12">
                             <div class="form-group">
                               <div class="input-group">
-                                <textarea rows="4" class="form-control" placeholder="Enter Bio" name="bio">{% if my_profile.bio %} {{ my_profile.bio|capfirst }} {% endif %}</textarea>
+                                <textarea rows="4" class="form-control">{{ my_profile.bio|capfirst }}</textarea>
                               </div>
                             </div>
                           </div>
+                          {% endif %}
                         </form>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="row justify-content-between mt-4">
-                  <div class="col-12 col-md-6">
-                  </div>
+                  <div class="col-12 col-md-6"></div>
                   <div class="col-auto">
                     <button class="btn btn-danger mb-5">Back</button>
                   </div>

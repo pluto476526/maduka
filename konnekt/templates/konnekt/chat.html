@@ -1,0 +1,631 @@
+{% extends 'konnekt/main.html' %}
+{% load static %}
+{% block main %}
+
+  <div id="layout" class="theme-cyan">
+
+    {% include 'konnekt/nav_sidebar.html' %}
+    {% include 'konnekt/rightbar.html' %}
+
+    <div class="main px-xl-5 px-lg-4 px-3">
+      <div class="chat-body">
+        <div class="chat-header border-bottom py-xl-4 py-md-3 py-2">
+          {% if messages %}
+          {% for message in messages %}
+          <div class="alert alert-info alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+          {% endif %}
+          <div class="container-xxl">
+            <div class="row align-items-center">
+
+              <div class="col-6 col-xl-4">
+                <div class="media">
+                  <div class="me-3 show-user-detail">
+                    <span class="status rounded-circle"></span>
+                    <img class="avatar rounded-circle" src="{{ sender.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
+                  </div>
+                  <div class="media-body overflow-hidden">
+                    <div class="d-flex align-items-center mb-1">
+                      <h6 class="text-truncate mb-0 me-auto">{{ sender.username|title }}</h6>
+                    </div>
+                    <div class="text-truncate">online</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6 col-xl-8 text-end">
+                <ul class="nav justify-content-end">
+                  <li class="nav-item list-inline-item d-none d-md-block me-3">
+                    <a href="#" class="nav-link text-muted px-3" data-toggle="collapse" data-target="#chat-search-div" aria-expanded="true" title="Search this chat">
+                      <i class="zmdi zmdi-search zmdi-hc-lg"></i>
+                    </a>
+                  </li>
+                  {% if sender.profile.phone %}
+                  <li class="nav-item list-inline-item d-none d-sm-block me-3">
+                    <a href="tel:{{ sender.profile.phone }}" class="nav-link text-muted px-3" title="Call">
+                      <i class="zmdi zmdi-phone-forwarded zmdi-hc-lg"></i>
+                    </a>
+                  </li>
+                  {% endif %}
+                  {% if convo.is_group %}
+                  <li class="nav-item list-inline-item add-user-btn">
+                    <a href="#" class="nav-link text-muted px-3" title="Add Members">
+                      <i class="zmdi zmdi-account-add zmdi-hc-lg"></i>
+                    </a>
+                  </li>
+                  {% endif %}
+                  <li class="nav-item list-inline-item add-user-btn">
+                    <a href="#" class="nav-link text-muted px-3" title="Delete Conversation">
+                      <i class="zmdi zmdi-delete zmdi-hc-lg"></i>
+                    </a>
+                  </li>
+                  <li class="nav-item list-inline-item d-block d-sm-none px-3">
+                    <div class="dropdown">
+                      <a class="nav-link text-muted px-0" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="zmdi zmdi-more-vert zmdi-hc-lg"></i>
+                      </a>
+                      <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="#">Search chat</a>
+                        {% if sender.profile.phone %}
+                        <a class="dropdown-item" href="tel:{{ sender.profile.phone }}">Call</a>
+                        {% endif %}
+                        {% if convo.is_group %}
+                        <a class="dropdown-item" href="#">Add Members</a>
+                        {% endif %}
+                        <a class="dropdown-item" href="#">Delete Conversation</a>
+                      </div>
+                    </div>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="collapse" id="chat-search-div">
+          <div class="container-xxl py-2">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Find messages in current conversation">
+              <div class="input-group-append">
+                <span class="input-group-text text-muted">0 / 1</span>
+              </div>
+              <div class="input-group-append">
+                <button type="button" class="btn btn-secondary">Search</button>
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right shadow border-0">
+                  <a class="dropdown-item" href="#">Action</a>
+                  <a class="dropdown-item" href="#">Another action</a>
+                  <a class="dropdown-item" href="#">Something else here</a>
+                  <div role="separator" class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#">Separated link</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-content" id="chatBox">
+          <div class="container-xxl">
+            <ul class="list-unstyled py-4" id="chatItem">
+
+
+      			{% with previous_date=None %}
+      			{% for t in texts %}
+      				{% if t.timestamp|date:"Y-m-d" != previous_date %}
+      				<li class="d-flex message divider mt-xl-5 mt-md-3 mb-xl-5 mb-md-3">
+      					<small class="text-muted">{{ t.timestamp|date:"l" }}</small>
+      				</li>
+      				{% endif %}
+
+      				{% if t.sender == request.user %}
+      				<li class="d-flex message right">
+      					<div class="message-body">
+      					<span class="date-time text-muted">{{ t.timestamp }}<i class="zmdi zmdi-check-all text-primary"></i></span>
+      					<div class="message-row d-flex align-items-center justify-content-end">
+
+      						<div class="dropdown">
+      						<a class="text-muted me-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      							<i class="zmdi zmdi-more-vert"></i>
+      						</a>
+      						<div class="dropdown-menu">
+      							<a class="dropdown-item" href="#">Edit</a>
+      							<a class="dropdown-item" href="#">Share</a>
+      							<a class="dropdown-item" href="#">Delete</a>
+      						</div>
+      						</div>
+
+      						<div class="message-content border p-3">{{ t.body }}</div>
+      					</div>
+      					</div>
+      				</li>
+      				{% else %}
+      				<li class="d-flex message">
+      					<div class="mr-lg-3 me-2">
+      					<img class="avatar sm rounded-circle" src="{{ t.sender.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
+      					</div>
+      					<div class="message-body">
+      					<span class="date-time text-muted">{{ t.sender.username }}, {{ t.timestamp }}</span>
+      					<div class="message-row d-flex align-items-center">
+
+      						<div class="message-content p-3">{{ t.body }}</div>
+
+      						<div class="dropdown">
+      						<a class="text-muted ms-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      							<i class="zmdi zmdi-more-vert"></i>
+      						</a>
+      						<div class="dropdown-menu dropdown-menu-right">
+      							<a class="dropdown-item" href="#">Edit</a>
+      							<a class="dropdown-item" href="#">Share</a>
+      							<a class="dropdown-item" href="#">Delete</a>
+      						</div>
+      						</div>
+
+      					</div>
+      					</div>
+      				</li>
+      				{% endif %}
+
+      				{% comment %} Set the current message's date as previous_date for comparison in the next iteration {% endcomment %}
+      				{% with previous_date=t.timestamp|date:"Y-m-d" %}
+      				{% endwith %}
+      			{% endfor %}
+      			{% endwith %}
+
+            </ul>
+          </div>
+        </div>
+
+        <div class="chat-footer border-top py-xl-4 py-lg-2 py-2">
+          <div class="container-xxl">
+            <div class="row">
+              <div class="col-12">
+        				<form method="post" enctype="multipart/form-data" id="msgForm">
+        					<div class="input-group align-items-center">
+        					<input type="text" class="form-control border-0 pl-0" id="msgBox" placeholder="Type your message...">
+        					<div class="input-group-append d-none d-sm-block">
+        						<span class="input-group-text border-0">
+        						<button class="btn btn-sm btn-link text-muted" data-toggle="tooltip" title="Refresh" type="button"><i class="zmdi zmdi-refresh font-22"></i></button>
+        						</span>
+        					</div>
+        					<div class="input-group-append">
+        						<span class="input-group-text border-0">
+        						<button class="btn btn-sm btn-link text-muted" data-toggle="tooltip" title="Smaily" type="button"><i class="zmdi zmdi-mood font-22"></i></button>
+        						</span>
+        					</div>
+        					<div class="input-group-append">
+        						<span class="input-group-text border-0">
+        						<button class="btn btn-sm btn-link text-muted" data-toggle="tooltip" title="Attachment" type="button"><i class="zmdi zmdi-attachment font-22"></i></button>
+        						</span>
+        					</div>
+
+        					<div class="input-group-append">
+        						<span class="input-group-text border-0 pr-0">
+        						<button type="submit" class="btn btn-primary" id="sendBtn">
+        							<span class="d-none d-md-inline-block me-2">Send</span>
+        							<i class="zmdi zmdi-mail-send"></i>
+        						</button>
+        						</span>
+        					</div>
+        					</div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="user-detail-sidebar py-xl-4 py-3 px-xl-4 px-3">
+        <div class="d-flex flex-column">
+          <div class="header border-bottom pb-4 d-flex justify-content-between">
+            <div>
+              <h6 class="mb-0 font-weight-bold">User Details</h6>
+            </div>
+            <div>
+              <button class="btn btn-link text-muted close-chat-sidebar" type="button"><i class="zmdi zmdi-close"></i></button>
+            </div>
+          </div>
+          <div class="body mt-4">
+            <div class="d-flex justify-content-center">
+              <div class="avatar xxl">
+                <img class="avatar xxl rounded-circle" src="{{ sender.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
+              </div>
+            </div>
+            <div class="text-center mt-3 mb-5">
+              <h4>Username: #{{ sender.username }}</h4>
+              {% if sender.profile.fullname %}
+              <p>Full Name: {{ sender.profile.fullname|title }}</p>
+              {% endif %}
+              <span class="text-muted"><a href="#">Email: {{ sender.email }}</a></span>
+              <p><a href="{% url 'user_profile' sender.profile.identifier %}"><small>View Profile</small></a></p>
+            </div>
+
+            <ul class="chat-list">
+              <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>mutual friend</span>
+              </li>
+              <li>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar2.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 2</h6>
+                        </div>
+                        <div class="text-truncate">+6285xxxxxx</div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar4.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 3</h6>
+                        </div>
+                        <div class="text-truncate">+6285xxxxxx</div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar1.jpg" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 5</h6>
+                        </div>
+                        <div class="text-truncate">+6285xxxxxx</div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="addnew-user-sidebar py-xl-4 py-3 px-xl-4 px-3">
+        <div class="d-flex flex-column">
+          <div class="header border-bottom pb-4 d-flex justify-content-between">
+            <div>
+              <h6 class="mb-0 font-weight-bold">Add new member</h6>
+            </div>
+            <div>
+              <button class="btn btn-link text-muted close-chat-sidebar" type="button"><i class="zmdi zmdi-close"></i></button>
+            </div>
+          </div>
+          <div class="body mt-4">
+
+            <div class="form-group input-group-lg search mb-3">
+              <i class="zmdi zmdi-search"></i>
+              <input type="text" class="form-control" placeholder="Search...">
+            </div>
+
+            <ul class="chat-list">
+              <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>A</span>
+                <div class="dropdown">
+                  <a class="btn btn-link px-1 py-0 border-0 text-muted dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#">Action</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar1.jpg" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 1</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar2.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 2</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar3.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 3</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar4.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 4</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar5.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 5</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>D</span>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar6.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 6</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>M</span>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar2.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 7</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar3.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 8</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>T</span>
+              </li>
+              <li>
+                <div class="hover_action">
+                  <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-plus-circle"></i></button>
+                </div>
+                <a href="#" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="../assets/img/avatar4.png" alt="avatar">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto">Avatar 9</h6>
+                        </div>
+                        <div class="text-truncate">
+                          last seen 1 day ago
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+
+	const wsUrl = `ws://${window.location.host}/ws/konnekt/{{ convo_id }}/`
+	console.log(">>> Establishing connection.")
+
+
+	// Establish the WebSocket connection
+	const chatSocket = new WebSocket(wsUrl);
+
+  const msgForm = document.getElementById('msgForm')
+  const msgBox = document.getElementById('msgBox')
+  const sendBtn = document.getElementById('sendBtn')
+  const chatBox = document.getElementById('chatBox')
+  const chatItem = document.getElementById('chatItem')
+  const senderAvatar = '{{ sender.profile.avatar.url }}'
+
+
+  const scrollToBottm = () => {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  window.addEventListener('load', function() {
+    scrollToBottom();
+  });
+
+
+  // Async function to handle sending the message
+  async function sendMessage() {
+      const message = msgBox.value.trim();
+      if (!message) return;
+
+      try {
+          chatSocket.send(JSON.stringify({
+              'message': message,
+              'convo_id': '{{ convo_id }}',
+              'sender_id': '{{ request.user.id }}',
+              'sender': '{{ request.user.username }}',
+              'timestamp': Date.now(),
+          }));
+          msgBox.value = ''; // Clear the input field
+      } catch (error) {
+          console.error('Failed to send message:', error)
+      }
+  }
+
+  // Send message on button click
+  sendBtn.addEventListener('click', async function(event) {
+      event.preventDefault();
+      await sendMessage();
+  });
+
+  // Send message when pressing 'Enter' (without Shift)
+  msgBox.addEventListener('keypress', async function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          await sendMessage();
+      }
+  });
+
+
+  chatSocket.addEventListener('message', (event) => {
+    const data = JSON.parse(event.data)
+    const sender = data['sender']
+    const message = data['message']
+    const sender_id = data['sender_id']
+    const timestamp = data['timestamp']
+    const s_time = new Date(timestamp).toLocaleString()
+
+    if (sender_id == '{{request.user.id}}') {
+      msgBox.value = '';
+      chatItem.innerHTML += `<li class="d-flex message right"><div class="message-body"><span class="date-time text-muted">${s_time}<i class="zmdi zmdi-check-all text-primary"></i></span><div class="message-row d-flex align-items-center justify-content-end"><div class="dropdown"><a class="text-muted me-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="zmdi zmdi-more-vert"></i></a><div class="dropdown-menu"><a class="dropdown-item" href="#">Edit</a><a class="dropdown-item" href="#">Share</a><a class="dropdown-item" href="#">Delete</a></div></div><div class="message-content border p-3">${message}</div></div></div></li>`;
+    } else {
+      chatItem.innerHTML += `<li class="d-flex message"><div class="mr-lg-3 me-2"><img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;"></div><div class="message-body"><span class="date-time text-muted">${sender}, ${s_time}</span><div class="message-row d-flex align-items-center"><div class="message-content p-3">${message}</div><div class="dropdown"><a class="text-muted ms-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="zmdi zmdi-more-vert"></i></a><div class="dropdown-menu dropdown-menu-right"><a class="dropdown-item" href="#">Edit</a><a class="dropdown-item" href="#">Share</a><a class="dropdown-item" href="#">Delete</a></div></div></div></div></li>`;
+    }
+
+    scrollToBottm();
+  });
+  
+</script>
+
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'chats/main.html' %}
+{% extends 'konnekt/main.html' %}
 {% load static %}
 {% block main %}
 
@@ -89,7 +89,7 @@
         {% for message in messages %}
         <div class="alert alert-info alert-dismissible fade show" role="alert">
             {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
         {% endif %}

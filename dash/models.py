@@ -1,6 +1,5 @@
 from django.db import models
-import secrets
-import string
+import secrets, string
 
 
 class Role(models.Model):

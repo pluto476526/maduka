@@ -1,0 +1,135 @@
+<div class="rightbar d-none d-md-block">
+      <div class="nav flex-column nav-pills border-start py-xl-4 py-3 h-100">
+        <a class="nav-link mb-2 text-center rightbar-link" data-toggle="pill" href="#tab-calendar">
+          <i class="zmdi zmdi-calendar"></i>
+        </a>
+        <a class="nav-link mb-2 text-center rightbar-link" data-toggle="pill" href="#tab-note">
+          <i class="zmdi zmdi-lamp"></i>
+        </a>
+        <a class="nav-link mb-2 text-center rightbar-link" data-toggle="pill" href="#tab-task">
+          <i class="zmdi zmdi-comment-edit"></i>
+        </a>
+        <a class="nav-link mb-2 text-center" href="#">
+          <i class="zmdi zmdi-plus"></i>
+        </a>
+      </div>
+      <div class="tab-content py-xl-4 py-3 px-xl-4 px-3">
+        <div class="tab-pane fade" id="tab-calendar" role="tabpanel">
+          <div class="header border-bottom pb-4 d-flex justify-content-between">
+            <div>
+              <h6 class="mb-0 font-weight-bold">Calendar</h6>
+            </div>
+            <div>
+              <button class="btn btn-link close-sidebar text-muted" type="button">
+                <i class="zmdi zmdi-close"></i>
+              </button>
+            </div>
+          </div>
+          <div class="body mt-4">
+            <div id="mini-calendar"></div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="tab-note" role="tabpanel">
+          <div class="header border-bottom pb-4 d-flex justify-content-between">
+            <div>
+              <h6 class="mb-0 font-weight-bold">My Notes</h6>
+            </div>
+            <div>
+              <button class="btn btn-link close-sidebar text-muted" type="button">
+                <i class="zmdi zmdi-close"></i>
+              </button>
+            </div>
+          </div>
+          <div class="body mt-4">
+            <div class="add-note">
+              <form method="post" action="{% url 'chats' %}">
+                {% csrf_token %}
+                <div class="input-group mb-2">
+                  <textarea rows="3" class="form-control" name="note" placeholder="Enter a note here.." required></textarea>
+                </div>
+                <input type="hidden" name="source" value="add_note">
+                <button type="submit" class="btn btn-primary addnote">Add Note</button>
+              </form>
+              <ul class="list-unstyled mt-4">
+                {% if notes %}
+                {% for n in notes %}
+                <li class="card border-0 mb-2">
+                  <span>{{ n.note|capfirst }}</span>
+                  <form method="post" action="{% url 'chats' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="source" value="delete_note">
+                    <input type="hidden" name="noteID" value="{{ n.id }}">
+                    <button class="btn btn-sm btn-link" type="submit">
+                      <i class="zmdi zmdi-delete text-danger"></i>
+                    </button>
+                  </form>
+                </li>
+                {% endfor %}
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="tab-task" role="tabpanel">
+          <div class="header border-bottom pb-4 d-flex justify-content-between">
+            <div>
+              <h6 class="mb-0 font-weight-bold">My Task List</h6>
+            </div>
+            <div>
+              <button class="btn btn-link close-sidebar text-muted" type="button">
+                <i class="zmdi zmdi-close"></i>
+              </button>
+            </div>
+          </div>
+          <div class="body mt-4">
+            <div class="todo-list">
+              <ul class="list-unstyled todo-list-items">
+                {% if tasks %}
+                {% for t in tasks %}
+                <li>
+                  <div class="d-flex justify-content-between">
+
+                    <form method="post" action="{% url 'chats' %}" id="taskForm-{{ t.id }}">
+                      {% csrf_token %}
+                      <label class="c_checkbox">
+                        <input type="checkbox" id="checkBox-{{ t.id }}" {% if t.is_complete %} checked {% endif %}>
+                        <span class="checkmark"></span>
+                        <span class="ms-2" {% if t.is_complete %} style="text-decoration: line-through;" {% endif %}>
+                          {{ t.task|capfirst }}
+                        </span>
+                      </label>
+                      <input type="hidden" name="taskID" value="{{ t.id }}">
+                      <input type="hidden" name="source" value="complete_task">
+                    </form>
+                    <script>
+                      document.getElementById('checkBox-{{ t.id }}').addEventListener('change', function() {
+                        document.getElementById('taskForm-{{ t.id }}').submit();
+                      });
+                    </script>
+
+                    <form method="post" action="{% url 'chats' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="taskID" value="{{ t.id }}">
+                      <input type="hidden" name="source" value="delete_task">
+                      <button class="btn btn-sm btn-link" type="submit">
+                        <i class="zmdi zmdi-delete"></i>
+                      </button>
+                    </form>
+                  </div>
+                </li>
+                {% endfor %}
+                {% endif %}
+              </ul>
+              <form class="add-items" method="post" action="{% url 'chats' %}">
+                {% csrf_token %}
+                <div class="input-group mb-2">
+                  <textarea rows="3" class="form-control" placeholder="What do you need to do today?" name="task"></textarea>
+                </div>
+                <input type="hidden" name="source" value="add_task">
+                <button class="add btn btn-primary" type="submit">Add Task</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

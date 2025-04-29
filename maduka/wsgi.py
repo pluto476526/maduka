@@ -1,5 +1,5 @@
 """
-WSGI config for ShopSync project.
+WSGI config for maduka project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
