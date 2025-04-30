@@ -1,398 +1,433 @@
 <div class="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
-      <a href="/" class="brand">MaDuka
-        <!--<img src="assets/img/logo2.png" alt="" style="width: 50px;">-->
-      </a>
-      <div class="nav flex-md-column nav-pills flex-grow-1" role="tablist" aria-orientation="vertical">
-        <a class="mb-xl-3 mb-md-2 nav-link d-none d-sm-block" data-toggle="pill" href="#nav-tab-user" role="tab">
-          <img src="{{ request.user.profile.avatar.url }}" class="avatar sm rounded-circle" alt="user avatar">
-        </a>
-        <a class="mb-xl-3 mb-md-2 nav-link active" data-toggle="pill" href="#nav-tab-chat" role="tab">
-          <i class="zmdi zmdi-comment-alt"></i>
-        </a>
-        <a class="mb-xl-3 mb-md-2 nav-link flex-grow-1" data-toggle="pill" href="#nav-tab-contact" role="tab">
-          <i class="zmdi zmdi-account-circle"></i>
-        </a>
-        <a class="mt-xl-3 mt-md-2 nav-link light-dark-toggle" href="javascript:void(0);">
-          <i class="zmdi zmdi-brightness-2"></i>
-          <input class="light-dark-btn" type="checkbox">
-        </a>
-        <a class="mt-xl-3 mt-md-2 nav-link" href="{% url 'my_profile' %}" role="tab">
-          <i class="zmdi zmdi-settings"></i>
-        </a>
-        <a class="mt-xl-3 mt-md-2 nav-link" href="{% url 'chats' %}" role="tab">
-          <i class="zmdi zmdi-home"></i>
-        </a>
-      </div>
-      <button type="submit" class="btn sidebar-toggle-btn shadow-sm">
-        <i class="zmdi zmdi-menu"></i>
-      </button>
-    </div>
-    <div class="sidebar border-end py-xl-4 py-3 px-xl-4 px-3">
-      <div class="tab-content">
-        <div class="tab-pane fade" id="nav-tab-user" role="tabpanel">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-0 text-primary">Profile</h3>
-            <div>
-              <a href="{% url 'sign_out' %}" title="" class="btn btn-dark">Sign Out</a>
-            </div>
-          </div>
-          <div class="form-group input-group-lg search mb-3">
-            <i class="zmdi zmdi-search"></i>
-            <input type="text" class="form-control" placeholder="Search...">
-          </div>
-          <div class="card border-0 text-center pt-3 mb-4">
-            <div class="card-body">
-              <div class="card-user-avatar">
-                <img src="{{ request.user.profile.avatar }}" alt="avatar" style="width: 150px" />
-                <button type="button" class="btn btn-secondary btn-sm">
-                  <i class="zmdi zmdi-edit"></i>
-                </button>
-              </div>
-              <div class="card-user-detail mt-4">
-                <h5>{{ request.user.username|title }}</h5>
-                <span class="text-muted">
-                  <a href="">{{ request.user.email }}</a>
-                </span>
-                {% if request.user.profile.phone %}
-                <p>{{ request.user.profile.phone }}</p>
-                {% endif %}
-                <div class="social">
-                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Facebook">
-                    <i class="zmdi zmdi-facebook-box"></i>
-                  </a>
-                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Youtube">
-                    <i class="zmdi zmdi-youtube-play"></i>
-                  </a>
-                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Twitter">
-                    <i class="zmdi zmdi-twitter"></i>
-                  </a>
-                  <a class="icon p-2" href="#" data-toggle="tooltip" title="Instagram">
-                    <i class="zmdi zmdi-instagram"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+  <a href="/" class="brand">MaDuka
+    <!--<img src="assets/img/logo2.png" alt="" style="width: 50px;">-->
+  </a>
+  <div class="nav flex-md-column nav-pills flex-grow-1" role="tablist" aria-orientation="vertical">
+    <a class="mb-xl-3 mb-md-2 nav-link d-none d-sm-block" data-toggle="pill" href="#nav-tab-user" role="tab">
+      <img src="{{ request.user.profile.avatar.url }}" class="avatar sm rounded-circle" alt="user avatar">
+    </a>
+    <a class="mb-xl-3 mb-md-2 nav-link active" data-toggle="pill" href="#nav-tab-chat" role="tab">
+      <i class="zmdi zmdi-comment-alt"></i>
+    </a>
+    <a class="mb-xl-3 mb-md-2 nav-link flex-grow-1" data-toggle="pill" href="#nav-tab-contact" role="tab">
+      <i class="zmdi zmdi-account-circle"></i>
+    </a>
+    <a class="mt-xl-3 mt-md-2 nav-link light-dark-toggle" href="javascript:void(0);">
+      <i class="zmdi zmdi-brightness-2"></i>
+      <input class="light-dark-btn" type="checkbox">
+    </a>
+    <a class="mt-xl-3 mt-md-2 nav-link" href="{% url 'my_profile' %}" role="tab">
+      <i class="zmdi zmdi-settings"></i>
+    </a>
+    <a class="mt-xl-3 mt-md-2 nav-link" href="{% url 'chats' %}" role="tab">
+      <i class="zmdi zmdi-home"></i>
+    </a>
+  </div>
+  <button type="submit" class="btn sidebar-toggle-btn shadow-sm">
+    <i class="zmdi zmdi-menu"></i>
+  </button>
+  </div>
+  <div class="sidebar border-end py-xl-4 py-3 px-xl-4 px-3">
+  <div class="tab-content">
+    <div class="tab-pane fade" id="nav-tab-user" role="tabpanel">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0 text-primary">Profile</h3>
+        <div>
+          <a href="{% url 'sign_out' %}" title="" class="btn btn-dark">Sign Out</a>
         </div>
-        <div class="tab-pane fade show active" id="nav-tab-chat" role="tabpanel">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-0 text-primary">Chat</h3>
-            <div>
-              <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#InviteFriends">New Chat</button>
-            </div>
+      </div>
+      <div class="form-group input-group-lg search mb-3">
+        <i class="zmdi zmdi-search"></i>
+        <input type="text" class="form-control" placeholder="Search...">
+      </div>
+      <div class="card border-0 text-center pt-3 mb-4">
+        <div class="card-body">
+          <div class="card-user-avatar">
+            <img src="{{ request.user.profile.avatar }}" alt="avatar" style="width: 150px" />
+            <button type="button" class="btn btn-secondary btn-sm">
+              <i class="zmdi zmdi-edit"></i>
+            </button>
           </div>
-          <div class="form-group input-group-lg search mb-3">
-            <i class="zmdi zmdi-search"></i>
-            <input type="text" class="form-control" placeholder="Search...">
-          </div>
-          <ul class="chat-list">
-            <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
-              <span>RECENT CHATS</span>
-              <div class="dropdown">
-                <a class="btn btn-link px-1 py-0 border-0 text-muted dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="zmdi zmdi-filter-list"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-              </div>
-            </li>
-            <!--<li>
-              <a href="pages/bot-chat.html" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <div class="avatar rounded-circle no-image bg-primary text-light">
-                        <span>
-                          <i class="zmdi zmdi-comment-text"></i>
-                        </span>
-                      </div>
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">Chat Bot</h6>
-                      </div>
-                      <div class="text-truncate">
-                        <i class="zmdi zmdi-circle text-success"></i>
-                        Online
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>-->
-
-            {% for c, p, msg in z_data %}
-            {% if c.convo.is_group %}
-            <li>
-              <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete">
-                  </i>
-                </button>
-              </div>
-              <a href="pages/group-chat.html" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <span class="status rounded-circle">
-                      </span>
-                      <div class="avatar rounded-circle no-image cyan">
-                        <span>
-                          DG
-                        </span>
-                      </div>
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Design Group
-                        </h6>
-                        <p class="small text-muted text-nowrap ms-4 mb-0">
-                          07:00 am
-                        </p>
-                      </div>
-                      <div class="text-truncate">
-                        <i class="zmdi zmdi-file-text me-1">
-                        </i>
-                        Lorem ipsum dolor sit amet consectetur, adipisicing....
-                        <div class="avatar-list avatar-list-stacked mt-1">
-                          <img class="avatar xs rounded" src="assets/img/avatar4.png" data-toggle="tooltip" data-placement="top" title="Jojo">
-                          <img class="avatar xs rounded" src="assets/img/avatar3.png" data-toggle="tooltip" data-placement="top" title="Jeje">
-                          <img class="avatar xs rounded" src="assets/img/avatar5.png" data-toggle="tooltip" data-placement="top" title="Jaja">
-                          <img class="avatar xs rounded" src="assets/img/avatar1.jpg" data-toggle="tooltip" data-placement="top" title="Jiji">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
-            {% else %}
-            <li class="online">
-              <div class="hover_action">
-                <!--<button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye"></i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star"></i>
-                </button>-->
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete"></i>
-                </button>
-              </div>
-              <a href="{% url 'chat_view' c.conv_id %}" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <span class="status rounded-circle"></span>
-                      <img class="avatar rounded-circle" src="{{ p.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">{{ p.username|title }}</h6>
-                        <p class="small text-muted text-nowrap ms-4 mb-0">{{ msg.timestamp }}</p>
-                      </div>
-                      <div class="text-truncate">{{ msg.body|capfirst }}</div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
+          <div class="card-user-detail mt-4">
+            <h5>{{ request.user.username|title }}</h5>
+            <span class="text-muted">
+              <a href="">{{ request.user.email }}</a>
+            </span>
+            {% if request.user.profile.phone %}
+            <p>{{ request.user.profile.phone }}</p>
             {% endif %}
-            {% endfor %}
-
-            <!--<li class="online">
-              <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete">
-                  </i>
-                </button>
-              </div>
-              <a href="#" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <span class="status rounded-circle">
-                      </span>
-                      <img class="avatar rounded-circle" src="assets/img/avatar1.jpg" alt="avatar">
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Avatar 4
-                        </h6>
-                        <p class="small text-muted text-nowrap ms-4 mb-0">
-                          17:00 am
-                        </p>
-                      </div>
-                      <div class="text-truncate">
-                        <div class="wave">
-                          <span class="dot">
-                          </span>
-                          <span class="dot">
-                          </span>
-                          <span class="dot">
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div class="social">
+              <a class="icon p-2" href="#" data-toggle="tooltip" title="Facebook">
+                <i class="zmdi zmdi-facebook-box"></i>
               </a>
-            </li>-->
-          </ul>
-        </div>
-        <div class="tab-pane fade" id="nav-tab-contact" role="tabpanel">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-0 text-primary">Contacts</h3>
-            <div>
-              <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#InviteFriends">Invite Friends</button>
+              <a class="icon p-2" href="#" data-toggle="tooltip" title="Youtube">
+                <i class="zmdi zmdi-youtube-play"></i>
+              </a>
+              <a class="icon p-2" href="#" data-toggle="tooltip" title="Twitter">
+                <i class="zmdi zmdi-twitter"></i>
+              </a>
+              <a class="icon p-2" href="#" data-toggle="tooltip" title="Instagram">
+                <i class="zmdi zmdi-instagram"></i>
+              </a>
             </div>
           </div>
-          <div class="form-group input-group-lg search mb-3">
-            <i class="zmdi zmdi-search"></i>
-            <input type="text" class="form-control" placeholder="Search...">
-          </div>
-          <ul class="chat-list">
-            <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
-              <span>A</span>
-              <div class="dropdown">
-                <a class="btn btn-link px-1 py-0 border-0 text-muted dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye"></i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star"></i>
-                </button>
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete"></i>
-                </button>
-              </div>
-              <a href="#" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <img class="avatar rounded-circle" src="assets/img/avatar1.jpg" alt="avatar">
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Avatar 1
-                        </h6>
-                      </div>
-                      <div class="text-truncate">
-                        last seen 1 day ago
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
-            <li>
-              <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete">
-                  </i>
-                </button>
-              </div>
-              <a href="#" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <img class="avatar rounded-circle" src="assets/img/avatar2.png" alt="avatar">
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Avatar 2
-                        </h6>
-                      </div>
-                      <div class="text-truncate">
-                        last seen 2 day ago
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
-            <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
-              <span>
-                C
-              </span>
-            </li>
-            <li>
-              <div class="hover_action">
-                <button type="button" class="btn btn-link text-info">
-                  <i class="zmdi zmdi-eye">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-warning">
-                  <i class="zmdi zmdi-star">
-                  </i>
-                </button>
-                <button type="button" class="btn btn-link text-danger">
-                  <i class="zmdi zmdi-delete">
-                  </i>
-                </button>
-              </div>
-              <a href="#" class="card">
-                <div class="card-body">
-                  <div class="media">
-                    <div class="avatar me-3">
-                      <img class="avatar rounded-circle" src="assets/img/avatar3.png" alt="avatar">
-                    </div>
-                    <div class="media-body overflow-hidden">
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="text-truncate mb-0 me-auto">
-                          Avatar 3
-                        </h6>
-                      </div>
-                      <div class="text-truncate">
-                        last seen 3 day ago
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
+    <div class="tab-pane fade show active" id="nav-tab-chat" role="tabpanel">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0 text-primary">Chat</h3>
+        <div>
+          <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#InviteFriends">New Chat</button>
+        </div>
+      </div>
+      <div class="form-group input-group-lg search mb-3">
+        <i class="zmdi zmdi-search"></i>
+        <input type="text" class="form-control" placeholder="Search...">
+      </div>
+      <ul class="chat-list" id="recent_chats_list">
+        <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+          <span>RECENT CHATS</span>
+          <div class="dropdown">
+            <a class="btn btn-link px-1 py-0 border-0 text-muted dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="zmdi zmdi-filter-list"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+              <a class="dropdown-item" href="#">Action</a>
+              <a class="dropdown-item" href="#">Another action</a>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </div>
+        </li>
+        <!--<li>
+          <a href="pages/bot-chat.html" class="card">
+            <div class="card-body">
+              <div class="media">
+                <div class="avatar me-3">
+                  <div class="avatar rounded-circle no-image bg-primary text-light">
+                    <span>
+                      <i class="zmdi zmdi-comment-text"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="media-body overflow-hidden">
+                  <div class="d-flex align-items-center mb-1">
+                    <h6 class="text-truncate mb-0 me-auto">Chat Bot</h6>
+                  </div>
+                  <div class="text-truncate">
+                    <i class="zmdi zmdi-circle text-success"></i>
+                    Online
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>-->
+
+        {% for c, p, msg in z_data %}
+        {% if c.convo.is_group %}
+        <li>
+          <div class="hover_action">
+            <button type="button" class="btn btn-link text-info">
+              <i class="zmdi zmdi-eye">
+              </i>
+            </button>
+            <button type="button" class="btn btn-link text-warning">
+              <i class="zmdi zmdi-star">
+              </i>
+            </button>
+            <button type="button" class="btn btn-link text-danger">
+              <i class="zmdi zmdi-delete">
+              </i>
+            </button>
+          </div>
+          <a href="pages/group-chat.html" class="card">
+            <div class="card-body">
+              <div class="media">
+                <div class="avatar me-3">
+                  <span class="status rounded-circle">
+                  </span>
+                  <div class="avatar rounded-circle no-image cyan">
+                    <span>
+                      DG
+                    </span>
+                  </div>
+                </div>
+                <div class="media-body overflow-hidden">
+                  <div class="d-flex align-items-center mb-1">
+                    <h6 class="text-truncate mb-0 me-auto">
+                      Design Group
+                    </h6>
+                    <p class="small text-muted text-nowrap ms-4 mb-0">
+                      07:00 am
+                    </p>
+                  </div>
+                  <div class="text-truncate">
+                    <i class="zmdi zmdi-file-text me-1">
+                    </i>
+                    Lorem ipsum dolor sit amet consectetur, adipisicing....
+                    <div class="avatar-list avatar-list-stacked mt-1">
+                      <img class="avatar xs rounded" src="assets/img/avatar4.png" data-toggle="tooltip" data-placement="top" title="Jojo">
+                      <img class="avatar xs rounded" src="assets/img/avatar3.png" data-toggle="tooltip" data-placement="top" title="Jeje">
+                      <img class="avatar xs rounded" src="assets/img/avatar5.png" data-toggle="tooltip" data-placement="top" title="Jaja">
+                      <img class="avatar xs rounded" src="assets/img/avatar1.jpg" data-toggle="tooltip" data-placement="top" title="Jiji">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>
+        {% else %}
+        <li class="online">
+          <div class="hover_action">
+            <!--<button type="button" class="btn btn-link text-info">
+              <i class="zmdi zmdi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-link text-warning">
+              <i class="zmdi zmdi-star"></i>
+            </button>-->
+            <button type="button" class="btn btn-link text-danger">
+              <i class="zmdi zmdi-delete"></i>
+            </button>
+          </div>
+          <a href="{% url 'chat_view' c.conv_id %}" class="card">
+            <div class="card-body">
+              <div class="media">
+                <div class="avatar me-3">
+                  <span class="status rounded-circle"></span>
+                  <img class="avatar rounded-circle" src="{{ p.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
+                </div>
+                <div class="media-body overflow-hidden">
+                  <div class="d-flex align-items-center mb-1">
+                    <h6 class="text-truncate mb-0 me-auto">{{ p.username|title }}</h6>
+                    <p class="small text-muted text-nowrap ms-4 mb-0">{{ msg.timestamp }}</p>
+                  </div>
+                  <div class="text-truncate">{{ msg.body|capfirst }}</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+      </ul>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="tab-pane fade" id="nav-tab-contact" role="tabpanel">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0 text-primary">Contacts</h3>
+        <div>
+          <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#InviteFriends">Invite Friends</button>
+        </div>
+      </div>
+      <div class="form-group input-group-lg search mb-3">
+        <i class="zmdi zmdi-search"></i>
+        <input type="text" class="form-control" placeholder="Search...">
+      </div>
+      <ul class="chat-list">
+        <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+          <span>A</span>
+          <div class="dropdown">
+            <a class="btn btn-link px-1 py-0 border-0 text-muted dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+              <a class="dropdown-item" href="#">Action</a>
+              <a class="dropdown-item" href="#">Another action</a>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="hover_action">
+            <button type="button" class="btn btn-link text-info">
+              <i class="zmdi zmdi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-link text-warning">
+              <i class="zmdi zmdi-star"></i>
+            </button>
+            <button type="button" class="btn btn-link text-danger">
+              <i class="zmdi zmdi-delete"></i>
+            </button>
+          </div>
+          <a href="#" class="card">
+            <div class="card-body">
+              <div class="media">
+                <div class="avatar me-3">
+                  <img class="avatar rounded-circle" src="assets/img/avatar1.jpg" alt="avatar">
+                </div>
+                <div class="media-body overflow-hidden">
+                  <div class="d-flex align-items-center mb-1">
+                    <h6 class="text-truncate mb-0 me-auto">
+                      Avatar 1
+                    </h6>
+                  </div>
+                  <div class="text-truncate">
+                    last seen 1 day ago
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>
+        <li>
+          <div class="hover_action">
+            <button type="button" class="btn btn-link text-info">
+              <i class="zmdi zmdi-eye">
+              </i>
+            </button>
+            <button type="button" class="btn btn-link text-warning">
+              <i class="zmdi zmdi-star">
+              </i>
+            </button>
+            <button type="button" class="btn btn-link text-danger">
+              <i class="zmdi zmdi-delete">
+              </i>
+            </button>
+          </div>
+          <a href="#" class="card">
+            <div class="card-body">
+              <div class="media">
+                <div class="avatar me-3">
+                  <img class="avatar rounded-circle" src="assets/img/avatar2.png" alt="avatar">
+                </div>
+                <div class="media-body overflow-hidden">
+                  <div class="d-flex align-items-center mb-1">
+                    <h6 class="text-truncate mb-0 me-auto">
+                      Avatar 2
+                    </h6>
+                  </div>
+                  <div class="text-truncate">
+                    last seen 2 day ago
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>
+        <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+          <span>
+            C
+          </span>
+        </li>
+        <li>
+          <div class="hover_action">
+            <button type="button" class="btn btn-link text-info">
+              <i class="zmdi zmdi-eye">
+              </i>
+            </button>
+            <button type="button" class="btn btn-link text-warning">
+              <i class="zmdi zmdi-star">
+              </i>
+            </button>
+            <button type="button" class="btn btn-link text-danger">
+              <i class="zmdi zmdi-delete">
+              </i>
+            </button>
+          </div>
+          <a href="#" class="card">
+            <div class="card-body">
+              <div class="media">
+                <div class="avatar me-3">
+                  <img class="avatar rounded-circle" src="assets/img/avatar3.png" alt="avatar">
+                </div>
+                <div class="media-body overflow-hidden">
+                  <div class="d-flex align-items-center mb-1">
+                    <h6 class="text-truncate mb-0 me-auto">
+                      Avatar 3
+                    </h6>
+                  </div>
+                  <div class="text-truncate">
+                    last seen 3 day ago
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const userId = "{{ request.user.id }}";
+    const recentChatsSocket = new WebSocket(`ws://${window.location.host}/ws/konnekt/recent-chats/${userId}/`);
+
+    recentChatsSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const chats = data.recent_chats;
+        const container = document.getElementById("recent_chats_list");
+        container.innerHTML = "";
+
+        chats.forEach(chat => {
+            const li = document.createElement("li");
+            li.className = chat.is_group ? "" : "online";
+
+            let content = `
+            <div class="hover_action">
+                ${chat.is_group ? `
+                <button class="btn btn-link text-info"><i class="zmdi zmdi-eye"></i></button>
+                <button class="btn btn-link text-warning"><i class="zmdi zmdi-star"></i></button>
+                ` : ""}
+                <button class="btn btn-link text-danger"><i class="zmdi zmdi-delete"></i></button>
+            </div>
+            <a href="/konnekt/${chat.conv_id}/" class="card">
+                <div class="card-body">
+                    <div class="media">
+                        <div class="avatar me-3">
+                            <span class="status rounded-circle"></span>`;
+
+            if (chat.is_group) {
+                content += `
+                    <div class="avatar rounded-circle no-image cyan">
+                        <span>${chat.title ? chat.title.slice(0, 2).toUpperCase() : "GR"}</span>
+                    </div>`;
+            } else {
+                content += `<img class="avatar rounded-circle" src="${chat.participants[0]?.avatar_url}" alt="avatar" style="object-fit: cover;">`;
+            }
+
+            content += `
+                        </div>
+                        <div class="media-body overflow-hidden">
+                            <div class="d-flex align-items-center mb-1">
+                                <h6 class="text-truncate mb-0 me-auto">${chat.is_group ? chat.title : chat.participants[0]?.username}</h6>
+                                <p class="small text-muted text-nowrap ms-4 mb-0">${chat.timestamp}</p>
+                            </div>
+                            <div class="text-truncate">${chat.last_message}</div>`;
+
+            if (chat.is_group) {
+                content += `<div class="avatar-list avatar-list-stacked mt-1">`;
+                chat.participants.forEach(p => {
+                    content += `<img class="avatar xs rounded" src="${p.avatar_url}" data-toggle="tooltip" title="${p.username}">`;
+                });
+                content += `</div>`;
+            }
+
+            content += `</div></div></div></a>`;
+            li.innerHTML = content;
+            container.appendChild(li);
+        });
+    };
+
+    recentChatsSocket.onclose = () => {
+        console.error("WebSocket for recent chats closed");
+    };
+});
+</script>
+
+
+

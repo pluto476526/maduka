@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 from dash.models import Profile
 from konnekt.models import Conversation, ConversationItem, Note, Task
 import logging
@@ -56,7 +58,6 @@ def index_view(request):
 def chat_view(request, convo_id):
     convo = get_object_or_404(Conversation, conv_id=convo_id)
     texts = ConversationItem.objects.filter(conversation=convo)
-    logger.debug(convo.participants)
     participants = []
 
     if convo.is_group:

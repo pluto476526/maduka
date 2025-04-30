@@ -83,7 +83,6 @@ TEMPLATES = [
                 'dash.context_processors.get_order',
                 'dash.context_processors.the_shop',
                 'dash.context_processors.shop_sidebar_stats',
-                'konnekt.context_processors.get_recent_chats',
                 'konnekt.context_processors.get_notes',
                 'konnekt.context_processors.get_tasks',
             ],

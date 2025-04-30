@@ -1,5 +1,6 @@
 {% extends 'konnekt/main.html' %}
 {% load static %}
+{% load time_filters %}
 {% block main %}
 
   <div id="layout" class="theme-cyan">
@@ -113,22 +114,18 @@
         <div class="chat-content" id="chatBox">
           <div class="container-xxl">
             <ul class="list-unstyled py-4" id="chatItem">
-
-
-      			{% with previous_date=None %}
-      			{% for t in texts %}
-      				{% if t.timestamp|date:"Y-m-d" != previous_date %}
-      				<li class="d-flex message divider mt-xl-5 mt-md-3 mb-xl-5 mb-md-3">
-      					<small class="text-muted">{{ t.timestamp|date:"l" }}</small>
-      				</li>
-      				{% endif %}
-
+        			{% with previous_date=None %}
+        			{% for t in texts %}
+              {% ifchanged t.timestamp.date %}
+                <li class="d-flex message divider mt-xl-5 mt-md-3 mb-xl-5 mb-md-3">
+                  <small class="text-muted">{{ t.timestamp|date:"l" }}</small>
+                </li>
+              {% endifchanged %}
       				{% if t.sender == request.user %}
       				<li class="d-flex message right">
       					<div class="message-body">
-      					<span class="date-time text-muted">{{ t.timestamp }}<i class="zmdi zmdi-check-all text-primary"></i></span>
+      					<span class="date-time text-muted">{{ t.timestamp|natural_time_format }}<i class="zmdi zmdi-check-all text-primary"></i></span>
       					<div class="message-row d-flex align-items-center justify-content-end">
-
       						<div class="dropdown">
       						<a class="text-muted me-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       							<i class="zmdi zmdi-more-vert"></i>
@@ -139,7 +136,6 @@
       							<a class="dropdown-item" href="#">Delete</a>
       						</div>
       						</div>
-
       						<div class="message-content border p-3">{{ t.body }}</div>
       					</div>
       					</div>
@@ -152,9 +148,7 @@
       					<div class="message-body">
       					<span class="date-time text-muted">{{ t.sender.username }}, {{ t.timestamp }}</span>
       					<div class="message-row d-flex align-items-center">
-
       						<div class="message-content p-3">{{ t.body }}</div>
-
       						<div class="dropdown">
       						<a class="text-muted ms-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       							<i class="zmdi zmdi-more-vert"></i>
@@ -165,7 +159,6 @@
       							<a class="dropdown-item" href="#">Delete</a>
       						</div>
       						</div>
-
       					</div>
       					</div>
       				</li>
@@ -548,10 +541,10 @@
     </div>
   </div>
 
+
 <script>
 
 	const wsUrl = `ws://${window.location.host}/ws/konnekt/{{ convo_id }}/`
-	console.log(">>> Establishing connection.")
 
 
 	// Establish the WebSocket connection
@@ -565,12 +558,18 @@
   const senderAvatar = '{{ sender.profile.avatar.url }}'
 
 
-  const scrollToBottm = () => {
+  const scrollToBottom = () => {
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  window.addEventListener('load', function() {
-    scrollToBottom();
+
+  window.addEventListener('load', function () {
+    // Give the DOM a slight delay to ensure content (e.g., images) is fully loaded
+    setTimeout(() => {
+      if (chatBox) {
+        scrollToBottom();
+      }
+    }, 100);
   });
 
 
@@ -587,7 +586,7 @@
               'sender': '{{ request.user.username }}',
               'timestamp': Date.now(),
           }));
-          msgBox.value = ''; // Clear the input field
+          msgBox.value = '';
       } catch (error) {
           console.error('Failed to send message:', error)
       }
@@ -623,9 +622,8 @@
       chatItem.innerHTML += `<li class="d-flex message"><div class="mr-lg-3 me-2"><img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;"></div><div class="message-body"><span class="date-time text-muted">${sender}, ${s_time}</span><div class="message-row d-flex align-items-center"><div class="message-content p-3">${message}</div><div class="dropdown"><a class="text-muted ms-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="zmdi zmdi-more-vert"></i></a><div class="dropdown-menu dropdown-menu-right"><a class="dropdown-item" href="#">Edit</a><a class="dropdown-item" href="#">Share</a><a class="dropdown-item" href="#">Delete</a></div></div></div></div></li>`;
     }
 
-    scrollToBottm();
+    scrollToBottom();
   });
-  
 </script>
 
 {% endblock %}
