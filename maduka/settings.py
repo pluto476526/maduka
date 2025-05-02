@@ -85,6 +85,8 @@ TEMPLATES = [
                 'dash.context_processors.shop_sidebar_stats',
                 'konnekt.context_processors.get_notes',
                 'konnekt.context_processors.get_tasks',
+                'konnekt.context_processors.get_all_users',
+                'konnekt.context_processors.get_contacts',
             ],
         },
     },

@@ -1,3 +1,4 @@
+{% load time_filters %}
 <div class="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
   <a href="/" class="brand">MaDuka
     <!--<img src="assets/img/logo2.png" alt="" style="width: 50px;">-->
@@ -85,7 +86,7 @@
         <i class="zmdi zmdi-search"></i>
         <input type="text" class="form-control" placeholder="Search...">
       </div>
-      <ul class="chat-list" id="recent_chats_list">
+      <ul class="chat-list" id="recent_chats_list" data-user-id="{{ request.user.id }}">
         <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
           <span>RECENT CHATS</span>
           <div class="dropdown">
@@ -124,7 +125,7 @@
           </a>
         </li>-->
 
-        {% for c, p, msg in z_data %}
+        <!-- {% for c, p, msg in z_data %}
         {% if c.convo.is_group %}
         <li>
           <div class="hover_action">
@@ -179,14 +180,8 @@
           </a>
         </li>
         {% else %}
-        <li class="online">
+        <li id="user-{{ p.id }}">
           <div class="hover_action">
-            <!--<button type="button" class="btn btn-link text-info">
-              <i class="zmdi zmdi-eye"></i>
-            </button>
-            <button type="button" class="btn btn-link text-warning">
-              <i class="zmdi zmdi-star"></i>
-            </button>-->
             <button type="button" class="btn btn-link text-danger">
               <i class="zmdi zmdi-delete"></i>
             </button>
@@ -194,37 +189,27 @@
           <a href="{% url 'chat_view' c.conv_id %}" class="card">
             <div class="card-body">
               <div class="media">
-                <div class="avatar me-3">
-                  <span class="status rounded-circle"></span>
+                <div class="avatar me-3" id="container-{{ p.userID }}">
+                 
+                 <! <span class="status rounded-circle" id="dot-{{ p.userID }}"></span>
                   <img class="avatar rounded-circle" src="{{ p.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
                 </div>
                 <div class="media-body overflow-hidden">
                   <div class="d-flex align-items-center mb-1">
                     <h6 class="text-truncate mb-0 me-auto">{{ p.username|title }}</h6>
-                    <p class="small text-muted text-nowrap ms-4 mb-0">{{ msg.timestamp }}</p>
+                    <p class="small text-muted text-nowrap ms-4 mb-0">{{ msg.timestamp|natural_time_format }}</p>
                   </div>
                   <div class="text-truncate">{{ msg.body|capfirst }}</div>
                 </div>
               </div>
             </div>
           </a>
-        </li>
+        </li> 
         {% endif %}
-        {% endfor %}
+        {% endfor %} -->
 
       </ul>
     </div>
-
-
-
-
-
-
-
-
-
-
-
 
     <div class="tab-pane fade" id="nav-tab-contact" role="tabpanel">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -238,131 +223,58 @@
         <input type="text" class="form-control" placeholder="Search...">
       </div>
       <ul class="chat-list">
-        <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
-          <span>A</span>
-          <div class="dropdown">
-            <a class="btn btn-link px-1 py-0 border-0 text-muted dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            </a>
-            <div class="dropdown-menu dropdown-menu-right">
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </div>
-          </div>
-        </li>
-        <li>
-          <div class="hover_action">
-            <button type="button" class="btn btn-link text-info">
-              <i class="zmdi zmdi-eye"></i>
-            </button>
-            <button type="button" class="btn btn-link text-warning">
-              <i class="zmdi zmdi-star"></i>
-            </button>
-            <button type="button" class="btn btn-link text-danger">
-              <i class="zmdi zmdi-delete"></i>
-            </button>
-          </div>
-          <a href="#" class="card">
-            <div class="card-body">
-              <div class="media">
-                <div class="avatar me-3">
-                  <img class="avatar rounded-circle" src="assets/img/avatar1.jpg" alt="avatar">
+        {% if contacts %}
+          {% for letter, group in contacts %}
+            <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
+              <span>{{ letter }}</span>
+            </li>
+            {% for c in group %}
+              <li>
+                <div class="hover_action">
+                  <a href="{% url 'user_profile' c.contact.profile.identifier %}" class="btn btn-link text-info">
+                    <i class="zmdi zmdi-eye"></i>
+                  </a>
+                  <!--<button type="button" class="btn btn-link text-warning">
+                    <i class="zmdi zmdi-star"></i>
+                  </button>-->
+                  <button type="button" class="btn btn-link text-danger">
+                    <i class="zmdi zmdi-delete"></i>
+                  </button>
                 </div>
-                <div class="media-body overflow-hidden">
-                  <div class="d-flex align-items-center mb-1">
-                    <h6 class="text-truncate mb-0 me-auto">
-                      Avatar 1
-                    </h6>
+                <a href="{% url 'user_profile' c.contact.profile.identifier %}" class="card">
+                  <div class="card-body">
+                    <div class="media">
+                      <div class="avatar me-3">
+                        <img class="avatar rounded-circle" src="{{ c.contact.profile.avatar.url }}" style="object-fit: cover;">
+                      </div>
+                      <div class="media-body overflow-hidden">
+                        <div class="d-flex align-items-center mb-1">
+                          <h6 class="text-truncate mb-0 me-auto text-muted" id="status-{{ c.contact.id }}" data-contact-id="{{ c.contact.id }}">
+                            {% if c.contact.status.is_online %}
+                            🟢 Online
+                            {% elif c.contact.status.last_seen and not c.contact.status.is_online%}
+                              ⚪ Last seen: {{ c.contact.status.last_seen|natural_time_format }}
+                            {% else %}
+                              ⚪ Never
+                            {% endif %}
+                          </h6>
+                        </div>
+                        <div class="text-truncate">{{ c.contact.username }}</div>
+
+                      </div>
+                    </div>
                   </div>
-                  <div class="text-truncate">
-                    last seen 1 day ago
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </li>
-        <li>
-          <div class="hover_action">
-            <button type="button" class="btn btn-link text-info">
-              <i class="zmdi zmdi-eye">
-              </i>
-            </button>
-            <button type="button" class="btn btn-link text-warning">
-              <i class="zmdi zmdi-star">
-              </i>
-            </button>
-            <button type="button" class="btn btn-link text-danger">
-              <i class="zmdi zmdi-delete">
-              </i>
-            </button>
-          </div>
-          <a href="#" class="card">
-            <div class="card-body">
-              <div class="media">
-                <div class="avatar me-3">
-                  <img class="avatar rounded-circle" src="assets/img/avatar2.png" alt="avatar">
-                </div>
-                <div class="media-body overflow-hidden">
-                  <div class="d-flex align-items-center mb-1">
-                    <h6 class="text-truncate mb-0 me-auto">
-                      Avatar 2
-                    </h6>
-                  </div>
-                  <div class="text-truncate">
-                    last seen 2 day ago
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </li>
-        <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
-          <span>
-            C
-          </span>
-        </li>
-        <li>
-          <div class="hover_action">
-            <button type="button" class="btn btn-link text-info">
-              <i class="zmdi zmdi-eye">
-              </i>
-            </button>
-            <button type="button" class="btn btn-link text-warning">
-              <i class="zmdi zmdi-star">
-              </i>
-            </button>
-            <button type="button" class="btn btn-link text-danger">
-              <i class="zmdi zmdi-delete">
-              </i>
-            </button>
-          </div>
-          <a href="#" class="card">
-            <div class="card-body">
-              <div class="media">
-                <div class="avatar me-3">
-                  <img class="avatar rounded-circle" src="assets/img/avatar3.png" alt="avatar">
-                </div>
-                <div class="media-body overflow-hidden">
-                  <div class="d-flex align-items-center mb-1">
-                    <h6 class="text-truncate mb-0 me-auto">
-                      Avatar 3
-                    </h6>
-                  </div>
-                  <div class="text-truncate">
-                    last seen 3 day ago
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </li>
+                </a>
+              </li>
+            {% endfor %}
+          {% endfor %}
+        {% endif %}
+
       </ul>
     </div>
   </div>
 </div>
-
-<script>
+<!-- <script>
 document.addEventListener("DOMContentLoaded", () => {
     const userId = "{{ request.user.id }}";
     const recentChatsSocket = new WebSocket(`ws://${window.location.host}/ws/konnekt/recent-chats/${userId}/`);
@@ -388,8 +300,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="/konnekt/${chat.conv_id}/" class="card">
                 <div class="card-body">
                     <div class="media">
-                        <div class="avatar me-3">
-                            <span class="status rounded-circle"></span>`;
+                        <div class="avatar me-3" id="container-${chat.participants[0]?.userID}">
+                            <span class="status rounded-circle" id="dot-${chat.participants[0]?.userID}"></span>`;
 
             if (chat.is_group) {
                 content += `
@@ -427,7 +339,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("WebSocket for recent chats closed");
     };
 });
-</script>
-
+</script> -->
 
 

@@ -1,5 +1,6 @@
 from django.db import models
 import secrets, string
+from django.utils import timezone
 
 
 class Conversation(models.Model):
@@ -58,3 +59,28 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.user}: {self.task}"
+
+
+class Contact(models.Model):
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='contacts')
+    contact = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='saved_by')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('owner', 'contact')
+
+    def __str__(self):
+        return f'{self.owner} saved {self.contact}'
+
+
+
+class UserStatus(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='status')
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(default=timezone.now)
+    last_ping = models.DateTimeField(default=timezone.now)
+    
+    def __str__(self):
+        return f"{self.user.username}: {'Online' if self.is_online else 'Offline'}"
+

@@ -1,13 +1,25 @@
 from django import template
-from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
+from django.utils.timezone import is_naive, make_aware, now
 
 register = template.Library()
 
 @register.filter
+
+
+
 def natural_time_format(value):
-    now = timezone.now()
-    delta = now - value
+    # If value is a string, try converting it to datetime
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value)
+        except ValueError:
+            return value  # fallback: return raw value if parsing fails
+
+    if is_naive(value):
+        value = make_aware(value)
+
+    delta = now() - value
 
     if delta < timedelta(minutes=1):
         return "Just now"

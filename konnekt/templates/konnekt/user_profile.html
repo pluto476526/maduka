@@ -7,7 +7,7 @@
      <div class="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
       <div class="nav flex-md-column nav-pills flex-grow-1" role="tablist" aria-orientation="vertical">
         <a class="mb-xl-3 mb-md-2 nav-link active" data-bs-toggle="pill" href="{% url 'my_profile' %}" role="tab">
-          <img src="{{ my_profile.avatar.url }}" class="avatar sm rounded-circle" alt="user avatar" style="object-fit: cover;">
+          <img src="{{ request.user.profile.avatar.url }}" class="avatar sm rounded-circle" alt="user avatar" style="object-fit: cover;">
         </a>
         <a class="mb-xl-3 mb-md-2 nav-link" data-bs-toggle="pill" href="{% url 'chats' %}">
           <i class="zmdi zmdi-home"></i>
@@ -164,7 +164,7 @@
                 <div class="row justify-content-between mt-4">
                   <div class="col-12 col-md-6"></div>
                   <div class="col-auto">
-                    <button class="btn btn-danger mb-5">Back</button>
+                    <button class="btn btn-danger mb-5" onclick="history.back()">Back</button>
                   </div>
                 </div>
               </div>

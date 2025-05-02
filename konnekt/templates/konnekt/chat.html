@@ -15,7 +15,7 @@
           {% for message in messages %}
           <div class="alert alert-info alert-dismissible fade show" role="alert">
               {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
           </div>
           {% endfor %}
           {% endif %}
@@ -541,89 +541,127 @@
     </div>
   </div>
 
-
 <script>
+const wsUrl = `ws://${window.location.host}/ws/konnekt/{{ convo_id }}/`;
 
-	const wsUrl = `ws://${window.location.host}/ws/konnekt/{{ convo_id }}/`
+const chatSocket = new WebSocket(wsUrl);
 
+const msgForm = document.getElementById('msgForm');
+const msgBox = document.getElementById('msgBox');
+const sendBtn = document.getElementById('sendBtn');
+const chatBox = document.getElementById('chatBox');
+const chatItem = document.getElementById('chatItem');
+const senderAvatar = '{{ sender.profile.avatar.url }}';
 
-	// Establish the WebSocket connection
-	const chatSocket = new WebSocket(wsUrl);
-
-  const msgForm = document.getElementById('msgForm')
-  const msgBox = document.getElementById('msgBox')
-  const sendBtn = document.getElementById('sendBtn')
-  const chatBox = document.getElementById('chatBox')
-  const chatItem = document.getElementById('chatItem')
-  const senderAvatar = '{{ sender.profile.avatar.url }}'
-
-
-  const scrollToBottom = () => {
+const scrollToBottom = () => {
     chatBox.scrollTop = chatBox.scrollHeight;
-  }
+};
 
-
-  window.addEventListener('load', function () {
-    // Give the DOM a slight delay to ensure content (e.g., images) is fully loaded
+window.addEventListener('load', function () {
     setTimeout(() => {
-      if (chatBox) {
-        scrollToBottom();
-      }
+        if (chatBox) {
+            scrollToBottom();
+        }
     }, 100);
-  });
+});
 
+// Async function to handle sending the message
+async function sendMessage() {
+    const message = msgBox.value.trim();
+    if (!message) {
+        console.error("Message is empty, not sending.");
+        return;
+    }
 
-  // Async function to handle sending the message
-  async function sendMessage() {
-      const message = msgBox.value.trim();
-      if (!message) return;
+    const data = {
+        'message': message,
+        'convo_id': '{{ convo_id }}',
+        'sender_id': '{{ request.user.id }}',
+        'sender': '{{ request.user.username }}',
+        'timestamp': Date.now(),
+    };
 
-      try {
-          chatSocket.send(JSON.stringify({
-              'message': message,
-              'convo_id': '{{ convo_id }}',
-              'sender_id': '{{ request.user.id }}',
-              'sender': '{{ request.user.username }}',
-              'timestamp': Date.now(),
-          }));
-          msgBox.value = '';
-      } catch (error) {
-          console.error('Failed to send message:', error)
-      }
-  }
+    console.log("Sending message:", data);
 
-  // Send message on button click
-  sendBtn.addEventListener('click', async function(event) {
-      event.preventDefault();
-      await sendMessage();
-  });
+    try {
+        chatSocket.send(JSON.stringify(data));
+        msgBox.value = '';
+    } catch (error) {
+        console.error('Failed to send message:', error);
+    }
+}
 
-  // Send message when pressing 'Enter' (without Shift)
-  msgBox.addEventListener('keypress', async function(event) {
-      if (event.key === 'Enter' && !event.shiftKey) {
-          event.preventDefault();
-          await sendMessage();
-      }
-  });
+// Send message on button click
+sendBtn.addEventListener('click', async function(event) {
+    event.preventDefault();
+    await sendMessage();
+});
 
+// Send message when pressing 'Enter' (without Shift)
+msgBox.addEventListener('keypress', async function(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        await sendMessage();
+    }
+});
 
-  chatSocket.addEventListener('message', (event) => {
-    const data = JSON.parse(event.data)
-    const sender = data['sender']
-    const message = data['message']
-    const sender_id = data['sender_id']
-    const timestamp = data['timestamp']
-    const s_time = new Date(timestamp).toLocaleString()
+chatSocket.addEventListener('message', (event) => {
+    const data = JSON.parse(event.data);
+    const sender = data['sender'];
+    const message = data['message'];
+    const sender_id = data['sender_id'];
+    const timestamp = data['timestamp'];
+    const s_time = new Date(timestamp).toLocaleString();
 
     if (sender_id == '{{request.user.id}}') {
-      msgBox.value = '';
-      chatItem.innerHTML += `<li class="d-flex message right"><div class="message-body"><span class="date-time text-muted">${s_time}<i class="zmdi zmdi-check-all text-primary"></i></span><div class="message-row d-flex align-items-center justify-content-end"><div class="dropdown"><a class="text-muted me-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="zmdi zmdi-more-vert"></i></a><div class="dropdown-menu"><a class="dropdown-item" href="#">Edit</a><a class="dropdown-item" href="#">Share</a><a class="dropdown-item" href="#">Delete</a></div></div><div class="message-content border p-3">${message}</div></div></div></li>`;
+        msgBox.value = '';
+        chatItem.innerHTML += `
+        <li class="d-flex message right">
+            <div class="message-body">
+                <span class="date-time text-muted">${s_time}<i class="zmdi zmdi-check-all text-primary"></i></span>
+                <div class="message-row d-flex align-items-center justify-content-end">
+                    <div class="dropdown">
+                        <a class="text-muted me-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="zmdi zmdi-more-vert"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Edit</a>
+                            <a class="dropdown-item" href="#">Share</a>
+                            <a class="dropdown-item" href="#">Delete</a>
+                        </div>
+                    </div>
+                    <div class="message-content border p-3">${message}</div>
+                </div>
+            </div>
+        </li>`;
     } else {
-      chatItem.innerHTML += `<li class="d-flex message"><div class="mr-lg-3 me-2"><img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;"></div><div class="message-body"><span class="date-time text-muted">${sender}, ${s_time}</span><div class="message-row d-flex align-items-center"><div class="message-content p-3">${message}</div><div class="dropdown"><a class="text-muted ms-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="zmdi zmdi-more-vert"></i></a><div class="dropdown-menu dropdown-menu-right"><a class="dropdown-item" href="#">Edit</a><a class="dropdown-item" href="#">Share</a><a class="dropdown-item" href="#">Delete</a></div></div></div></div></li>`;
+        chatItem.innerHTML += `
+        <li class="d-flex message">
+            <div class="mr-lg-3 me-2">
+                <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
+            </div>
+            <div class="message-body">
+                <span class="date-time text-muted">${sender}, ${s_time}</span>
+                <div class="message-row d-flex align-items-center">
+                    <div class="message-content p-3">${message}</div>
+                    <div class="dropdown">
+                        <a class="text-muted ms-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="zmdi zmdi-more-vert"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#">Edit</a>
+                            <a class="dropdown-item" href="#">Share</a>
+                            <a class="dropdown-item" href="#">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>`;
     }
 
     scrollToBottom();
-  });
+});
 </script>
+
 
 {% endblock %}

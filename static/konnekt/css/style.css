@@ -1,0 +1,23 @@
+.add-note li {
+  background-color: var(--sidebar-bg);
+  position: relative;
+  padding: 15px 80px 15px 15px; /* Increased right padding to make room for two buttons */
+  font-size: 15px;
+  line-height: 26px;
+}
+
+.add-note li .btn {
+  position: absolute;
+  top: 10px;
+  padding: 2px 6px;
+}
+
+/* Position the first button */
+.add-note li .btn:first-of-type {
+  right: 40px;
+}
+
+/* Position the second button */
+.add-note li .btn:last-of-type {
+  right: 8px;
+}

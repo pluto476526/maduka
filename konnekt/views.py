@@ -1,16 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.db import transaction
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from dash.models import Profile
-from konnekt.models import Conversation, ConversationItem, Note, Task
+from konnekt.models import Conversation, ConversationItem, Note, Task, Contact
 import logging
 
 
 logger = logging.getLogger(__name__)
-
+User = get_user_model()
 
 
 @login_required
@@ -21,6 +22,7 @@ def index_view(request):
         noteID = request.POST.get('noteID')
         task = request.POST.get('task')
         taskID = request.POST.get('taskID')
+        userID = request.POST.get('userID')
 
         if source == 'add_note':
             Note.objects.create(user=request.user, note=note)
@@ -47,6 +49,29 @@ def index_view(request):
             task.is_deleted = True
             task.save()
             messages.success(request, 'Task deletd.')
+        
+        elif source == 'new_contact':
+            contact = User.objects.get(id=userID)
+            s_contact = Contact.objects.filter(owner=request.user, contact=contact).first()
+            
+            if s_contact:
+                messages.error(request, f'{contact} is already in your contacts list.')
+                return redirect(request.META.get('HTTP_REFERER'))
+            
+            Contact.objects.create(owner=request.user, contact=contact)
+            messages.success(request, f'{contact} added to your contacts list.')
+
+        elif source == 'new_convo':
+            friend = User.objects.get(id=userID)
+            old_convo = Conversation.objects.filter(is_group=False, participants=request.user).filter(participants=friend).first()
+            
+            if old_convo:
+                return redirect('chat_view', old_convo.conv_id)
+
+            convo = Conversation.objects.create(is_group=False)
+            convo.participants.set([request.user, friend])
+            convo.save
+            return redirect('chat_view', convo.conv_id)
 
         return redirect(request.META.get('HTTP_REFERER'))
     
