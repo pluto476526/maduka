@@ -30,9 +30,17 @@
                   </div>
                   <div class="media-body overflow-hidden">
                     <div class="d-flex align-items-center mb-1">
-                      <h6 class="text-truncate mb-0 me-auto">{{ sender.username|title }}</h6>
+                      <h6 class="text-truncate mb-0 me-auto" id="status-{{ sender.id }}" data-contact-id="{{ sender.id }}">
+                        {% if sender.status.is_online %}
+                        🟢 Online
+                        {% elif sender.status.last_seen and not sender.status.is_online%}
+                          ⚪ Last seen: {{ sender.status.last_seen|natural_time_format }}
+                        {% else %}
+                          ⚪ Never
+                        {% endif %}
+                      </h6>
                     </div>
-                    <div class="text-truncate">online</div>
+                    <div class="text-truncate">{{ sender.username }}</div>
                   </div>
                 </div>
               </div>
@@ -122,9 +130,15 @@
                 </li>
               {% endifchanged %}
       				{% if t.sender == request.user %}
-      				<li class="d-flex message right">
+      				<li class="d-flex message right user-message">
       					<div class="message-body">
-      					<span class="date-time text-muted">{{ t.timestamp|natural_time_format }}<i class="zmdi zmdi-check-all text-primary"></i></span>
+      					<span class="date-time text-muted">{{ t.timestamp|natural_time_format }}
+                  {% for r in r_statuses %}
+                  {% if r.user != request.user and r.last_read_at > t.timestamp %}
+                  <i class="zmdi zmdi-check-all text-primary read-mark"></i>
+                  {% endif %}
+                  {% endfor %}
+                </span>
       					<div class="message-row d-flex align-items-center justify-content-end">
       						<div class="dropdown">
       						<a class="text-muted me-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -146,7 +160,7 @@
       					<img class="avatar sm rounded-circle" src="{{ t.sender.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
       					</div>
       					<div class="message-body">
-      					<span class="date-time text-muted">{{ t.sender.username }}, {{ t.timestamp }}</span>
+      					<span class="date-time text-muted">{{ t.sender.username }}, {{ t.timestamp|natural_time_format }}</span>
       					<div class="message-row d-flex align-items-center">
       						<div class="message-content p-3">{{ t.body }}</div>
       						<div class="dropdown">
@@ -540,7 +554,7 @@
       </div>
     </div>
   </div>
-
+<!-- 
 <script>
 const wsUrl = `ws://${window.location.host}/ws/konnekt/{{ convo_id }}/`;
 
@@ -559,11 +573,33 @@ const scrollToBottom = () => {
 
 window.addEventListener('load', function () {
     setTimeout(() => {
-        if (chatBox) {
-            scrollToBottom();
-        }
+        if (chatBox) scrollToBottom();
+
+        // Send read confirmation to the server
+        chatSocket.send(JSON.stringify({
+            type: "read_status.send",
+            convo_id: '{{ convo_id }}',
+            user_id: '{{ request.user.id }}',
+            timestamp: Date.now(),
+        }));
     }, 100);
 });
+
+const formatTime = (dateString) => {
+    if (!dateString) return "Never";
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const delta = (now - date) / 1000;
+        if (delta < 60) return "Just now";
+        if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
+        if (delta < 86400) return `${Math.floor(delta / 3600)} hr ago`;
+        if (delta < 172800) return "Yesterday";
+        return date.toLocaleDateString();
+    } catch {
+        return dateString;
+    }
+};
 
 // Async function to handle sending the message
 async function sendMessage() {
@@ -605,63 +641,296 @@ msgBox.addEventListener('keypress', async function(event) {
     }
 });
 
+
+const pendingReadTimestamps = new Set();
+const currentUserId = document.body.dataset.userId;
+
 chatSocket.addEventListener('message', (event) => {
     const data = JSON.parse(event.data);
     const sender = data['sender'];
     const message = data['message'];
     const sender_id = data['sender_id'];
     const timestamp = data['timestamp'];
-    const s_time = new Date(timestamp).toLocaleString();
+    const s_time = formatTime(timestamp);
 
-    if (sender_id == '{{request.user.id}}') {
-        msgBox.value = '';
-        chatItem.innerHTML += `
-        <li class="d-flex message right">
-            <div class="message-body">
-                <span class="date-time text-muted">${s_time}<i class="zmdi zmdi-check-all text-primary"></i></span>
-                <div class="message-row d-flex align-items-center justify-content-end">
-                    <div class="dropdown">
-                        <a class="text-muted me-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="zmdi zmdi-more-vert"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Share</a>
-                            <a class="dropdown-item" href="#">Delete</a>
+    // Append new message
+    if (message) {
+        let messageHTML = '';
+
+        if (sender_id == currentUserId) { 
+            msgBox.value = '';
+            messageHTML = `
+            <li class="d-flex message right">
+                <div class="message-body">
+                    <span class="date-time text-muted">${s_time}
+                        <i class="zmdi zmdi-check-all text-primary read-mark" data-sender-id="${sender_id}" style="display: none;"></i>
+                    </span>
+                    <div class="message-row d-flex align-items-center justify-content-end">
+                        <div class="dropdown">
+                            <a class="text-muted me-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="zmdi zmdi-more-vert"></i>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">Edit</a>
+                                <a class="dropdown-item" href="#">Share</a>
+                                <a class="dropdown-item" href="#">Delete</a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="message-content border p-3">${message}</div>
-                </div>
-            </div>
-        </li>`;
-    } else {
-        chatItem.innerHTML += `
-        <li class="d-flex message">
-            <div class="mr-lg-3 me-2">
-                <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
-            </div>
-            <div class="message-body">
-                <span class="date-time text-muted">${sender}, ${s_time}</span>
-                <div class="message-row d-flex align-items-center">
-                    <div class="message-content p-3">${message}</div>
-                    <div class="dropdown">
-                        <a class="text-muted ms-1 p-2 text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="zmdi zmdi-more-vert"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Share</a>
-                            <a class="dropdown-item" href="#">Delete</a>
-                        </div>
+                        <div class="message-content border p-3">${message}</div>
                     </div>
                 </div>
-            </div>
-        </li>`;
+            </li>`;
+        } else {
+            messageHTML = `
+            <li class="d-flex message">
+                <div class="mr-lg-3 me-2">
+                    <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
+                </div>
+                <div class="message-body">
+                    <span class="date-time text-muted">${sender}, ${s_time}</span>
+                    <div class="message-row d-flex align-items-center">
+                        <div class="message-content p-3">${message}</div>
+                        <div class="dropdown">
+                            <a class="text-muted ms-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="zmdi zmdi-more-vert"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="#">Edit</a>
+                                <a class="dropdown-item" href="#">Share</a>
+                                <a class="dropdown-item" href="#">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>`;
+        }
+
+        chatItem.insertAdjacentHTML('beforeend', messageHTML);
+
+        // Ensure read marks are revealed after the DOM updates
+        requestAnimationFrame(() => setTimeout(revealReadMarks, 100));
+    }
+
+    // Handle read status updates
+    if (data.type === "read_status.update") {
+        const readerId = data.user_id;
+        console.log('r_id:', readerId);
+        console.log('c_user:', currentUserId);
+
+        // Only apply if this user is the sender
+        if (readerId != currentUserId) {
+            pendingReadTimestamps.add(readerId);
+            requestAnimationFrame(revealReadMarks);
+        }
     }
 
     scrollToBottom();
 });
-</script>
 
+
+function revealReadMarks() {
+    console.log('In revealReadMarks');
+
+    setTimeout(() => {
+        const marks = document.querySelectorAll('.read-mark');
+        console.log('Found read-mark elements after DOM update:', marks);
+
+        const appliedSenderIds = new Set();
+
+        marks.forEach(mark => {
+            const msgSenderId = parseInt(mark.dataset.senderId); // Use sender_id instead of timestamp
+
+            pendingReadTimestamps.forEach(readSenderId => {
+                console.log('Message sender_id:', msgSenderId);
+                console.log('Read sender_id:', readSenderId);
+
+                if (msgSenderId === readSenderId) {
+                    mark.style.display = 'inline';  // Show the read icon
+                    appliedSenderIds.add(readSenderId);
+                }
+            });
+        });
+
+        appliedSenderIds.forEach(id => pendingReadTimestamps.delete(id));
+
+    }, 100);
+}
+
+
+
+</script>
+ -->
+
+
+ <script type="text/javascript">
+   const chatSocket = new WebSocket(
+    "ws://" + window.location.host + "/ws/konnekt/{{ convo_id }}/"
+);
+
+const msgForm = document.getElementById("msgForm");
+const msgBox = document.getElementById("msgBox");
+const sendBtn = document.getElementById("sendBtn");
+const chatItem = document.getElementById("chatBox");
+
+const currentUserId = "{{ request.user.id }}";
+const senderAvatar = "{{ sender.profile.avatar.url }}";
+const convoID = "{{ convo_id }}"
+
+
+function formatTime(ts) {
+    const date = new Date(ts);
+    const now = new Date();
+    const delta = (now - date) / 1000;
+
+    if (delta < 60) return "Just now";
+    if (delta < 3600) return Math.floor(delta / 60) + " min ago";
+    if (delta < 86400) return Math.floor(delta / 3600) + " hr ago";
+    if (delta < 172800) return "Yesterday";
+    return date.toLocaleDateString();
+}
+
+function scrollToBottom() {
+    chatItem.scrollTop = chatItem.scrollHeight;
+}
+
+
+function sendReadReceipt(convID, userID) {
+  if (chatSocket.readyState !== WebSocket.OPEN) return;
+
+  data = {
+      type: "read_status.send",
+      convo_id: convID,
+      user_id: userID,
+      timestamp: Date.now(),
+  }
+
+  chatSocket.send(
+      JSON.stringify(data)
+  );
+}
+
+
+chatItem.addEventListener("scroll", () => {
+    const nearBottom = chatItem.scrollHeight - chatItem.scrollTop <= chatItem.clientHeight + 10;
+    if (nearBottom) {
+        sendReadReceipt(convoID, currentUserId);
+    }
+});
+
+
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        scrollToBottom();
+    }, 100);
+});
+
+
+
+chatSocket.addEventListener("message", (event) => {
+    const data = JSON.parse(event.data);
+    const sender = data["sender"];
+    const message = data["message"];
+    const sender_id = data["sender_id"];
+    const timestamp = data["timestamp"];
+    const s_time = formatTime(timestamp);
+
+    // Append new message
+    if (message) {
+        let messageHTML = "";
+
+        if (sender_id == currentUserId) {
+            msgBox.value = "";
+            messageHTML = `
+            <li class="d-flex message right user-message" data-timestamp="${timestamp}">
+                <div class="message-body">
+                    <span class="date-time text-muted">${s_time}
+                        <i class="zmdi zmdi-check-all text-primary read-mark" style="display: none;"></i>
+                    </span>
+                    <div class="message-row d-flex align-items-center justify-content-end">
+                        <div class="dropdown">
+                            <a class="text-muted me-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="zmdi zmdi-more-vert"></i>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">Edit</a>
+                                <a class="dropdown-item" href="#">Share</a>
+                                <a class="dropdown-item" href="#">Delete</a>
+                            </div>
+                        </div>
+                        <div class="message-content border p-3">${message}</div>
+                    </div>
+                </div>
+            </li>`;
+        } else {
+            messageHTML = `
+            <li class="d-flex message">
+                <div class="mr-lg-3 me-2">
+                    <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
+                </div>
+                <div class="message-body">
+                    <span class="date-time text-muted">${sender}, ${s_time}</span>
+                    <div class="message-row d-flex align-items-center">
+                        <div class="message-content p-3">${message}</div>
+                        <div class="dropdown">
+                            <a class="text-muted ms-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="zmdi zmdi-more-vert"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="#">Edit</a>
+                                <a class="dropdown-item" href="#">Share</a>
+                                <a class="dropdown-item" href="#">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>`;
+        }
+
+        chatItem.insertAdjacentHTML("beforeend", messageHTML);
+    }
+
+
+
+    if (data.type === "read_status.update") {
+        if (data.user_id != currentUserId) {
+          const userMessages = [...document.querySelectorAll(".user-message")];
+          if (userMessages.length > 0) {
+              
+              userMessages.forEach(msg => {
+                  const mark = msg.querySelector(".read-mark");
+                  if (mark) mark.style.display = "inline";
+              });
+
+          }
+        }
+    }
+
+    scrollToBottom();
+});
+
+sendBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const message = msgBox.value.trim();
+    if (!message) return;
+
+    chatSocket.send(
+        JSON.stringify({
+            message: message,
+            sender_id: currentUserId,
+            sender: "{{ request.user.username }}",
+            convo_id: "{{ convo_id }}",
+            timestamp: Date.now(),
+        })
+    );
+});
+
+msgBox.addEventListener("keypress", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendBtn.click();
+    }
+});
+
+ </script>
 
 {% endblock %}

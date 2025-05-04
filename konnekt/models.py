@@ -84,3 +84,11 @@ class UserStatus(models.Model):
     def __str__(self):
         return f"{self.user.username}: {'Online' if self.is_online else 'Offline'}"
 
+
+class ConversationReadStatus(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='read_statuses')
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    last_read_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('conversation', 'user')

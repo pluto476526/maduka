@@ -6,7 +6,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from dash.models import Profile
-from konnekt.models import Conversation, ConversationItem, Note, Task, Contact
+from konnekt.models import Conversation, ConversationItem, Note, Task, Contact, ConversationReadStatus
 import logging
 
 
@@ -82,6 +82,7 @@ def index_view(request):
 @login_required
 def chat_view(request, convo_id):
     convo = get_object_or_404(Conversation, conv_id=convo_id)
+    r_statuses = ConversationReadStatus.objects.filter(conversation=convo)
     texts = ConversationItem.objects.filter(conversation=convo)
     participants = []
 
@@ -97,6 +98,7 @@ def chat_view(request, convo_id):
         'convo_id': convo_id,
         'convo': convo,
         'sender': sender,
+        'r_statuses': r_statuses,
     }
     return render(request, 'konnekt/chat.html', context)
 

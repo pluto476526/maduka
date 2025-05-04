@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="{% static 'konnekt/css/style.min.css' %}">
 <link rel="stylesheet" href="{% static 'konnekt/css/style.css' %}">
 
-<body>
+<body data-user-id="{{ request.user.id }}">
 
   {% block main %}
   {% endblock %}
@@ -433,7 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 groupAvatars = `
                     <div class="avatar-list avatar-list-stacked mt-1">
                         ${avatarsToShow.map(p => `
-                            <img class="avatar xs rounded" src="${p.avatar_url || '/static/images/default-avatar.png'}" data-toggle="tooltip" title="${p.username || 'User'}">
+                            <img class="avatar xs rounded" src="${p.avatar_url}" data-toggle="tooltip" title="${p.username || 'User'}">
                         `).join('')}
                         ${remainingCount > 0 ? `<div class="avatar xs rounded bg-light text-dark d-flex align-items-center justify-content-center">+${remainingCount}</div>` : ''}
                     </div>`;
@@ -461,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="media-body overflow-hidden">
                                 <div class="d-flex align-items-center mb-1">
                                     <h6 class="text-truncate mb-0 me-auto">
-                                        ${isGroup ? chat.title : otherUser?.username || 'Unknown'}
+                                        ${isGroup ? chat.title : otherUser?.username}
                                     </h6>
                                     <p class="small text-muted text-nowrap ms-4 mb-0">
                                         ${formatTime(chat.timestamp)}
@@ -542,6 +542,8 @@ document.addEventListener("DOMContentLoaded", () => {
         recentChatsSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/konnekt/recent-chats/${currentUserId}/`);
 
         recentChatsSocket.onmessage = (event) => {
+            console.log("Recent chat update received:", event.data);
+
             try {
                 const data = JSON.parse(event.data);
                 renderRecentChats(data.recent_chats);
