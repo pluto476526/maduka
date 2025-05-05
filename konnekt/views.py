@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.db import transaction
+from django.utils import timezone
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from dash.models import Profile
@@ -12,6 +14,36 @@ import logging
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+
+
+@csrf_exempt
+def upload_attachment(request):
+    print('>>>>>>>>>>>>>>>>>>>>>hit')
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        convo_id = request.POST.get('convo_id')
+        sender_id = request.POST.get('sender_id')
+
+        conversation = Conversation.objects.get(conv_id=convo_id)
+        sender = User.objects.get(id=sender_id)
+
+        item = ConversationItem.objects.create(
+            conversation=conversation,
+            sender=sender,
+            body='',
+            attachment=file,
+            attachment_type=file.content_type.split('/')[0]
+        )
+
+        # Return the saved message info
+        return JsonResponse({
+            'message_id': item.id,
+            'attachment_url': item.attachment.url,
+            'attachment_type': item.attachment_type,
+            'timestamp': timezone.now().isoformat()
+        })
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 @login_required
@@ -83,7 +115,7 @@ def index_view(request):
 def chat_view(request, convo_id):
     convo = get_object_or_404(Conversation, conv_id=convo_id)
     r_statuses = ConversationReadStatus.objects.filter(conversation=convo)
-    texts = ConversationItem.objects.filter(conversation=convo)
+    texts = ConversationItem.objects.filter(conversation=convo).exclude(body='')
     participants = []
 
     if convo.is_group:

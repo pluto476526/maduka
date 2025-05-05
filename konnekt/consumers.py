@@ -10,6 +10,7 @@ from datetime import datetime
 
 
 User = get_user_model()
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.conv_id = self.scope['url_route']['kwargs']['conv_id']
@@ -21,51 +22,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-
-    # async def receive(self, text_data):
-    #     try:
-    #         data = json.loads(text_data)
-
-    #         if 'message' not in data:
-    #             await self.send(text_data=json.dumps({
-    #                 'error': "Missing 'message' in the data"
-    #             }))
-    #             return
-
-    #         message = data['message']
-    #         sender_id = data.get('sender_id')
-    #         sender = data.get('sender')
-    #         timestamp = data.get('timestamp')
-
-    #         # Save to DB
-    #         await self.save_message(sender_id, message)
-
-    #         # Broadcast to conversation group
-    #         await self.channel_layer.group_send(
-    #             self.room_group_name,
-    #             {
-    #                 'type': 'send_chat_message',
-    #                 'message': message,
-    #                 'sender_id': sender_id,
-    #                 'sender': sender,
-    #                 'timestamp': timestamp,
-    #             }
-    #         )
-
-    #         # Notify recent chats update
-    #         conversation = await self.get_conversation()
-    #         participants = await self.get_participants(conversation)
-    #         for user in participants:
-    #             await self.channel_layer.group_send(
-    #                 f'recent_chats_{user.id}',
-    #                 {'type': 'send_chat_updated'}
-    #             )
-
-    #     except json.JSONDecodeError:
-    #         await self.send(text_data=json.dumps({'error': 'Invalid JSON'}))
-    #     except Exception as e:
-    #         await self.send(text_data=json.dumps({'error': f"Error: {str(e)}"}))
-
 
     async def receive(self, text_data):
         try:
@@ -101,6 +57,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender_id = data.get('sender_id')
             sender = data.get('sender')
             timestamp = data.get('timestamp')
+            attachment_url = data.get('attachment_url')
+            attachment_type = data.get('attachment_type')
 
             # Save to DB
             await self.save_message(sender_id, message)
@@ -114,6 +72,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'sender_id': sender_id,
                     'sender': sender,
                     'timestamp': timestamp,
+                    'attachment_url': attachment_url,
+                    'attachment_type': attachment_type,
                 }
             )
 
@@ -138,10 +98,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'sender_id': event['sender_id'],
             'sender': event['sender'],
             'timestamp': event['timestamp'],
+            'attachment_url': event['attachment_url'],
+            'attachment_type': event['attachment_type'],
         }))
 
     async def send_read_status(self, event):
-        # logger.debug('>>>>>>>read')
         await self.send(text_data=json.dumps({
             'type': 'read_status.update',
             'convo_id': event['convo_id'],
@@ -179,15 +140,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         r_status.last_read_at = datetime.now()
         r_status.save()
-
-
-
-
-
-
-
-
-
 
 
 class RecentChatsConsumer(AsyncWebsocketConsumer):
@@ -234,7 +186,22 @@ class RecentChatsConsumer(AsyncWebsocketConsumer):
 
         recent_chats = []
         for convo in conversations:
+
+            try:
+                read_status = convo.read_statuses.get(user=self.user)
+                last_read_at = read_status.last_read_at
+            except ConversationReadStatus.DoesNotExist:
+                last_read_at = None
+
+            if last_read_at:
+                unread_count = convo.messages.filter(timestamp__gt=last_read_at).count()
+            else:
+                unread_count = convo.messages.count()
+
+
             last_message = convo.messages.order_by('-timestamp').first()
+            lm_sender = convo.participants.exclude(id=self.user_id).first()
+
             recent_chats.append({
                 'conv_id': str(convo.conv_id),
                 'is_group': convo.is_group,
@@ -242,6 +209,8 @@ class RecentChatsConsumer(AsyncWebsocketConsumer):
                     p.username for p in convo.participants.exclude(id=self.user.id)
                 ),
                 'last_message': last_message.body if last_message else "",
+                'unread_count': unread_count,
+                'lm_sender': lm_sender.id,
                 'timestamp': last_message.timestamp.isoformat() if last_message else "",
                 'participants': [
                     {

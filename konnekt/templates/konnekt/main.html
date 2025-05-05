@@ -16,256 +16,126 @@
 
   {% block main %}
   {% endblock %}
-<!-- 
-  <script>
-    let debounceMap = {};
 
-    function debounceUpdate(userId, updateFn, delay = 500) {
-        if (debounceMap[userId]) clearTimeout(debounceMap[userId]);
-        debounceMap[userId] = setTimeout(() => {
-            updateFn();
-            delete debounceMap[userId];
-        }, delay);
-    }
+  <script type="text/javascript">
 
-    function naturalTimeFormat(value) {
-        if (typeof value === 'string') {
-            value = new Date(value);
-            if (isNaN(value)) return value;
-        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentUserId = "{{ request.user.id }}";
+            const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const PING_INTERVAL = 25000;
+            const STATUS_TIMEOUT = 30000;
+            const RECONNECT_DELAY = 5000;
 
-        const now = new Date();
-        const delta = (now - value) / 1000;
+            const userStatuses = new Map();
+            let statusSocket = null;
+            let recentChatsSocket = null;
+            let pingInterval = null;
+            let reconnectTimeout = null;
 
-        if (delta < 60) return "Just now";
-        if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
-        if (delta < 86400) return `${Math.floor(delta / 3600)} hr ago`;
-        if (delta < 172800) return "Yesterday";
-        if (delta < 604800) return `${Math.floor(delta / 86400)} days ago`;
+            const recentChatsList = document.getElementById("recent_chats_list");
 
-        return value.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-        const statusSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/status/`);
-
-        let pingInterval = null;
-
-        statusSocket.onopen = function () {
-            pingInterval = setInterval(() => {
-                if (statusSocket.readyState === WebSocket.OPEN) {
-                    statusSocket.send(JSON.stringify({ type: "ping" }));
-                }
-            }, 30000);
-        };
-
-        statusSocket.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-
-            if (!data.user_id) return;
-
-            const statusDiv = document.getElementById(`status-${data.user_id}`);
-            const userLi = document.querySelector(`user-${data.user_id}`);
-            const onlineDot = document.getElementById(`dot-${data.user_id}`);
-
-            if (!statusDiv || !userLi) return;
-
-            debounceUpdate(data.user_id, () => {
-                if (data.status === 'online') {
-                    statusDiv.textContent = "🟢 Online";
-                    userLi.classList.add("online");
-
-                    if (!onlineDot) {
-                      const span = document.createElement('span');
-                      span.className = 'status rounded-circle';
-                      span.id = `user-${data.user_id}`;
-
-                      const parent = document.getElementById(`container-${data.user_id}`);
-                      if (parent) parent.appendChild(span);
-                    }
-
-
-                } else {
-                    const formatted = data.last_seen ? naturalTimeFormat(data.last_seen) : "Never";
-                    statusDiv.textContent = `⚪ Last seen: ${formatted}`;
-                    userLi.classList.remove("online");
-                    if (onlineDot) onlineDot.remove();
-                }
-            });
-        };
-
-        statusSocket.onclose = function () {
-            console.log("Status socket closed");
-            if (pingInterval) clearInterval(pingInterval);
-        };
-
-        statusSocket.onerror = function (error) {
-            console.error("WebSocket error:", error);
-        };
-    });
-  </script>
-
- -->
-
-<!-- 
-<script>
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const userId = "{{ request.user.id }}";
-        const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-        
-        // State management
-        const userStatuses = new Map();
-        let recentChatsSocket, statusSocket;
-        let pingInterval;
-
-        // Helper functions
-        const helpers = {
-            debounceMap: {},
-            
-            debounce: function(key, callback, delay = 500) {
-                if (this.debounceMap[key]) clearTimeout(this.debounceMap[key]);
-                this.debounceMap[key] = setTimeout(() => {
-                    callback();
-                    delete this.debounceMap[key];
-                }, delay);
-            },
-            
-            naturalTime: function(dateString) {
+            const formatTime = (dateString) => {
                 if (!dateString) return "Never";
-                
-                const date = new Date(dateString);
-                if (isNaN(date)) return dateString;
-                
-                const now = new Date();
-                const delta = (now - date) / 1000;
-                
-                if (delta < 60) return "Just now";
-                if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
-                if (delta < 86400) return `${Math.floor(delta / 3600)} hr ago`;
-                if (delta < 172800) return "Yesterday";
-                if (delta < 604800) return `${Math.floor(delta / 86400)} days ago`;
-                
-                return date.toLocaleDateString(undefined, { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
-                });
-            },
-            
-            updateStatusIndicator: function(userId, status, lastSeen = null) {
-                // Update status text elements
-                const statusTextElements = document.querySelectorAll(`[data-status-for="${userId}"]`);
-                statusTextElements.forEach(el => {
-                    el.textContent = status === 'online' 
-                        ? "🟢 Online" 
-                        : `⚪ Last seen: ${this.naturalTime(lastSeen)}`;
-                });
-                
-                // Update list item classes
-                const listItems = document.querySelectorAll(`[data-user-id="${userId}"]`);
-                listItems.forEach(li => {
-                    if (status === 'online') {
-                        li.classList.add('online');
-                    } else {
-                        li.classList.remove('online');
-                    }
-                });
-                
-                // Update status dots
-                const dots = document.querySelectorAll(`[data-dot-for="${userId}"]`);
-                dots.forEach(dot => {
-                    dot.className = 'status rounded-circle ' + 
-                        (status === 'online' ? 'bg-success' : 'bg-gray');
-                });
-            }
-        };
+                try {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const delta = (now - date) / 1000;
+                    if (delta < 60) return "Just now";
+                    if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
+                    if (delta < 86400) return `${Math.floor(delta / 3600)} hr ago`;
+                    if (delta < 172800) return "Yesterday";
+                    return date.toLocaleDateString();
+                } catch {
+                    return dateString;
+                }
+            };
 
-        // Initialize WebSocket connections
-        function initializeWebSockets() {
-            connectRecentChats();
-            connectStatusSocket();
-            
-            // Reconnect logic if connections drop
-            window.addEventListener('online', () => {
-                if (!recentChatsSocket || recentChatsSocket.readyState === WebSocket.CLOSED) connectRecentChats();
-                if (!statusSocket || statusSocket.readyState === WebSocket.CLOSED) connectStatusSocket();
-            });
-        }
+            const updateStatusIndicator = (userId, status, lastSeen = null) => {
+                document.querySelectorAll(`[data-dot-for="${userId}"]`).forEach(dot => {
+                    dot.className = `status rounded-circle ${status === 'online' ? 'bg-success' : 'bg-gray'}`;
+                });
 
-        // Recent Chats WebSocket
-        function connectRecentChats() {
-            recentChatsSocket = new WebSocket(
-                `${wsProtocol}://${window.location.host}/ws/konnekt/recent-chats/${userId}/`
-            );
+                document.querySelectorAll(`[data-user-id="${userId}"]`).forEach(li => {
+                    li.classList.toggle('online', status === 'online');
+                });
 
-            recentChatsSocket.onmessage = function(e) {
-                const data = JSON.parse(e.data);
-                const container = document.getElementById("recent_chats_list");
-                
-                if (!container) return;
-                
-                container.innerHTML = data.recent_chats.map(chat => {
+                document.querySelectorAll(`[data-status-for="${userId}"]`).forEach(el => {
+                    el.textContent = status === 'online'
+                        ? "🟢 Online"
+                        : `⚪ Last seen: ${formatTime(lastSeen)}`;
+                    el.title = lastSeen ? new Date(lastSeen).toLocaleString() : "";
+                });
+
+               document.querySelectorAll(`[data-contact-id="${userId}"]`).forEach(div => {
+                    div.textContent = status === 'online'
+                        ? "🟢 Online"
+                        : `⚪ Last seen: ${lastSeen ? formatTime(lastSeen) : "Never"}`;
+                });
+
+
+            };
+
+
+            const renderRecentChats = (chats) => {
+                if (!recentChatsList) return;
+
+                recentChatsList.innerHTML = chats.map(chat => {
                     const isGroup = chat.is_group;
                     const otherUser = chat.participants[0];
                     const userStatus = userStatuses.get(otherUser?.userID);
-                    
+                    const isOnline = userStatus?.status === 'online';
+                    const statusDot = !isGroup && isOnline
+                        ? `<span class="status rounded-circle"></span>`
+                        : '';
+
+                    // Group avatar stack logic
+                    let groupAvatars = '';
+                    if (isGroup) {
+                        const avatarsToShow = chat.participants.slice(0, 4);
+                        const remainingCount = chat.participants.length - avatarsToShow.length;
+                        groupAvatars = `
+                            <div class="avatar-list avatar-list-stacked mt-1">
+                                ${avatarsToShow.map(p => `
+                                    <img class="avatar xs rounded" src="${p.avatar_url}" data-toggle="tooltip" title="${p.username || 'User'}">
+                                `).join('')}
+                                ${remainingCount > 0 ? `<div class="avatar xs rounded bg-light text-dark d-flex align-items-center justify-content-center">+${remainingCount}</div>` : ''}
+                            </div>`;
+                    }
+
                     return `
-                    <li class="${!isGroup && userStatus?.status === 'online' ? 'online' : ''}" 
-                        data-user-id="${otherUser?.userID || ''}"
-                        data-conversation-id="${chat.conv_id}">
-                        
+                    <li${!isGroup && isOnline ? ' class="online"' : ''} data-user-id="${otherUser?.userID || ''}" data-conversation-id="${chat.conv_id}">
                         <div class="hover_action">
                             ${isGroup ? `
-                            <button class="btn btn-link text-info"><i class="zmdi zmdi-eye"></i></button>
-                            <button class="btn btn-link text-warning"><i class="zmdi zmdi-star"></i></button>
-                            ` : ''}
-                            <button class="btn btn-link text-danger"><i class="zmdi zmdi-delete"></i></button>
+                            <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-eye"></i></button>
+                            <button type="button" class="btn btn-link text-warning"><i class="zmdi zmdi-star"></i></button>` : ''}
+                            <button type="button" class="btn btn-link text-danger"><i class="zmdi zmdi-delete"></i></button>
                         </div>
-                        
                         <a href="/konnekt/${chat.conv_id}/" class="card">
                             <div class="card-body">
                                 <div class="media">
                                     <div class="avatar me-3">
+                                        <span class="status rounded-circle"></span>
                                         ${isGroup ? `
-                                        <span class="status rounded-circle bg-gray" 
-                                              data-dot-for="${otherUser?.userID || ''}"></span>
                                         <div class="avatar rounded-circle no-image cyan">
                                             <span>${chat.title?.slice(0, 2).toUpperCase() || 'GR'}</span>
-                                        </div>
-                                        ` : `
-                                        <span class="status rounded-circle ${userStatus?.status === 'online' ? 'bg-success' : 'bg-gray'}" 
-                                              data-dot-for="${otherUser?.userID || ''}"></span>
-                                        <img class="avatar rounded-circle" 
-                                             src="${otherUser?.avatar_url}" 
-                                             alt="${otherUser?.username}" 
-                                             style="object-fit: cover;">
-                                        `}
+                                        </div>` : `
+                                        <img class="avatar rounded-circle" src="${otherUser?.avatar_url}" alt="${otherUser?.username}" style="object-fit: cover;">`}
                                     </div>
-                                    
                                     <div class="media-body overflow-hidden">
                                         <div class="d-flex align-items-center mb-1">
                                             <h6 class="text-truncate mb-0 me-auto">
                                                 ${isGroup ? chat.title : otherUser?.username}
                                             </h6>
                                             <p class="small text-muted text-nowrap ms-4 mb-0">
-                                                ${chat.timestamp}
+                                                ${formatTime(chat.timestamp)}
                                             </p>
                                         </div>
-                                        
-                                        <div class="text-truncate">${chat.last_message}</div>
-                                        
-                                        ${isGroup ? `
-                                        <div class="avatar-list avatar-list-stacked mt-1">
-                                            ${chat.participants.map(p => `
-                                                <img class="avatar xs rounded" 
-                                                     src="${p.avatar_url}" 
-                                                     data-toggle="tooltip" 
-                                                     title="${p.username}">
-                                            `).join('')}
+                                        <div class="text-truncate">
+                                          ${chat.last_message 
+                                            ? `${(chat.lm_sender !== currentUserId && chat.unread_count > 0) ? `<span class="badge bg-success me-1">${chat.unread_count}</span>` : ""}<i class="zmdi zmdi-file-text me-1"></i> ${chat.last_message}` 
+                                            : "No messages yet"}
+                                          ${groupAvatars}
                                         </div>
-                                        ` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -274,356 +144,150 @@
                 }).join('');
             };
 
-            recentChatsSocket.onclose = function() {
-                console.log("Recent chats WebSocket closed. Reconnecting...");
-                setTimeout(connectRecentChats, 5000);
-            };
-
-            recentChatsSocket.onerror = function(error) {
-                console.error("Recent chats WebSocket error:", error);
-            };
-        }
-
-        // Status WebSocket
-        function connectStatusSocket() {
-            statusSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/status/`);
-
-            statusSocket.onopen = function() {
-                console.log("Status WebSocket connected");
-                pingInterval = setInterval(() => {
-                    if (statusSocket.readyState === WebSocket.OPEN) {
-                        statusSocket.send(JSON.stringify({ type: "ping" }));
-                    }
-                }, 30000);
-            };
-
-            statusSocket.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                if (!data.user_id) return;
-                
-                // Update our local status cache
-                userStatuses.set(data.user_id, {
-                    status: data.status,
-                    lastSeen: data.last_seen,
-                    username: data.username
-                });
-                
-                // Debounce the UI update
-                helpers.debounce(`status-${data.user_id}`, () => {
-                    helpers.updateStatusIndicator(data.user_id, data.status, data.last_seen);
-                });
-            };
-
-            statusSocket.onclose = function() {
-                console.log("Status WebSocket closed. Reconnecting...");
-                if (pingInterval) clearInterval(pingInterval);
-                setTimeout(connectStatusSocket, 5000);
-            };
-
-            statusSocket.onerror = function(error) {
-                console.error("Status WebSocket error:", error);
-            };
-        }
-
-        // Initialization
-        function initialize() {
-            // Load initial statuses before connecting WebSockets
-            fetch('/api/user-statuses/')
-                .then(response => response.json())
-                .then(statuses => {
-                    statuses.forEach(status => {
-                        userStatuses.set(status.user_id, {
-                            status: status.status,
-                            lastSeen: status.last_seen,
-                            username: status.username
-                        });
-                        helpers.updateStatusIndicator(status.user_id, status.status, status.last_seen);
-                    });
-                    
-                    // Now connect WebSockets
-                    initializeWebSockets();
-                })
-                .catch(error => {
-                    console.error("Failed to fetch initial statuses:", error);
-                    initializeWebSockets();
-                });
-        }
-
-        initialize();
-    });
-</script> -->
-
-  <script type="text/javascript">
-    // public/js/realtime_chat_status.js
-
-document.addEventListener("DOMContentLoaded", () => {
-    const currentUserId = "{{ request.user.id }}";
-    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const PING_INTERVAL = 25000;
-    const STATUS_TIMEOUT = 30000;
-    const RECONNECT_DELAY = 5000;
-
-    const userStatuses = new Map();
-    let statusSocket = null;
-    let recentChatsSocket = null;
-    let pingInterval = null;
-    let reconnectTimeout = null;
-
-    const recentChatsList = document.getElementById("recent_chats_list");
-
-    const formatTime = (dateString) => {
-        if (!dateString) return "Never";
-        try {
-            const date = new Date(dateString);
-            const now = new Date();
-            const delta = (now - date) / 1000;
-            if (delta < 60) return "Just now";
-            if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
-            if (delta < 86400) return `${Math.floor(delta / 3600)} hr ago`;
-            if (delta < 172800) return "Yesterday";
-            return date.toLocaleDateString();
-        } catch {
-            return dateString;
-        }
-    };
-
-    const updateStatusIndicator = (userId, status, lastSeen = null) => {
-        document.querySelectorAll(`[data-dot-for="${userId}"]`).forEach(dot => {
-            dot.className = `status rounded-circle ${status === 'online' ? 'bg-success' : 'bg-gray'}`;
-        });
-
-        document.querySelectorAll(`[data-user-id="${userId}"]`).forEach(li => {
-            li.classList.toggle('online', status === 'online');
-        });
-
-        document.querySelectorAll(`[data-status-for="${userId}"]`).forEach(el => {
-            el.textContent = status === 'online'
-                ? "🟢 Online"
-                : `⚪ Last seen: ${formatTime(lastSeen)}`;
-            el.title = lastSeen ? new Date(lastSeen).toLocaleString() : "";
-        });
-
-       document.querySelectorAll(`[data-contact-id="${userId}"]`).forEach(div => {
-            div.textContent = status === 'online'
-                ? "🟢 Online"
-                : `⚪ Last seen: ${lastSeen ? formatTime(lastSeen) : "Never"}`;
-        });
-
-
-    };
-
-
-    const renderRecentChats = (chats) => {
-        if (!recentChatsList) return;
-
-        recentChatsList.innerHTML = chats.map(chat => {
-            const isGroup = chat.is_group;
-            const otherUser = chat.participants[0];
-            const userStatus = userStatuses.get(otherUser?.userID);
-            const isOnline = userStatus?.status === 'online';
-            const statusDot = !isGroup && isOnline
-                ? `<span class="status rounded-circle"></span>`
-                : '';
-
-            // Group avatar stack logic
-            let groupAvatars = '';
-            if (isGroup) {
-                const avatarsToShow = chat.participants.slice(0, 4);
-                const remainingCount = chat.participants.length - avatarsToShow.length;
-                groupAvatars = `
-                    <div class="avatar-list avatar-list-stacked mt-1">
-                        ${avatarsToShow.map(p => `
-                            <img class="avatar xs rounded" src="${p.avatar_url}" data-toggle="tooltip" title="${p.username || 'User'}">
-                        `).join('')}
-                        ${remainingCount > 0 ? `<div class="avatar xs rounded bg-light text-dark d-flex align-items-center justify-content-center">+${remainingCount}</div>` : ''}
-                    </div>`;
-            }
-
-            return `
-            <li${!isGroup && isOnline ? ' class="online"' : ''} data-user-id="${otherUser?.userID || ''}" data-conversation-id="${chat.conv_id}">
-                <div class="hover_action">
-                    ${isGroup ? `
-                    <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-eye"></i></button>
-                    <button type="button" class="btn btn-link text-warning"><i class="zmdi zmdi-star"></i></button>` : ''}
-                    <button type="button" class="btn btn-link text-danger"><i class="zmdi zmdi-delete"></i></button>
-                </div>
-                <a href="/konnekt/${chat.conv_id}/" class="card">
-                    <div class="card-body">
-                        <div class="media">
-                            <div class="avatar me-3">
-                                <span class="status rounded-circle"></span>
-                                ${isGroup ? `
-                                <div class="avatar rounded-circle no-image cyan">
-                                    <span>${chat.title?.slice(0, 2).toUpperCase() || 'GR'}</span>
-                                </div>` : `
-                                <img class="avatar rounded-circle" src="${otherUser?.avatar_url || '/static/images/default-avatar.png'}" alt="${otherUser?.username || 'User'}" style="object-fit: cover;">`}
-                            </div>
-                            <div class="media-body overflow-hidden">
-                                <div class="d-flex align-items-center mb-1">
-                                    <h6 class="text-truncate mb-0 me-auto">
-                                        ${isGroup ? chat.title : otherUser?.username}
-                                    </h6>
-                                    <p class="small text-muted text-nowrap ms-4 mb-0">
-                                        ${formatTime(chat.timestamp)}
-                                    </p>
-                                </div>
-                                <div class="text-truncate">
-                                    ${chat.last_message ? `<i class="zmdi zmdi-file-text me-1"></i> ${chat.last_message}` : "No messages yet"}
-                                    ${groupAvatars}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </li>`;
-        }).join('');
-    };
-
-    const connectStatusSocket = () => {
-        if (statusSocket) {
-            statusSocket.close();
-            clearTimeout(reconnectTimeout);
-        }
-
-        statusSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/status/`);
-
-        statusSocket.onopen = () => {
-            console.log("[WS] Status socket connected");
-            startPingInterval();
-            statusSocket.send(JSON.stringify({
-                type: "get_initial_statuses",
-                user_id: currentUserId
-            }));
-        };
-
-        statusSocket.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                console.debug("[WS] Received:", data);
-
-                if (data.type === "initial_statuses") {
-                    data.statuses.forEach(({ user_id, status, last_seen }) => {
-                        userStatuses.set(user_id, { status, last_seen });
-                        updateStatusIndicator(user_id, status, last_seen);
-                    });
-                    return;
+            const connectStatusSocket = () => {
+                if (statusSocket) {
+                    statusSocket.close();
+                    clearTimeout(reconnectTimeout);
                 }
 
-                if (data.type === "status.update") {
-                    console.log(`[STATUS] Update for user ${data.user_id}: ${data.status}`);
-                    userStatuses.set(data.user_id, {
-                        status: data.status,
-                        last_seen: data.last_seen
-                    });
-                    updateStatusIndicator(data.user_id, data.status, data.last_seen);
-                }
-            } catch (error) {
-                console.error("[WS] Status message error:", error);
-            }
-        };
+                statusSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/status/`);
 
-        statusSocket.onclose = () => {
-            console.warn("[WS] Status socket closed");
-            clearPingInterval();
-            reconnectTimeout = setTimeout(connectStatusSocket, RECONNECT_DELAY);
-        };
+                statusSocket.onopen = () => {
+                    console.log("[WS] Status socket connected");
+                    startPingInterval();
+                    statusSocket.send(JSON.stringify({
+                        type: "get_initial_statuses",
+                        user_id: currentUserId
+                    }));
+                };
 
-        statusSocket.onerror = (error) => {
-            console.error("[WS] Status socket error:", error);
-        };
-    };
+                statusSocket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.debug("[WS] Received:", data);
 
-    const connectRecentChatsSocket = () => {
-        if (recentChatsSocket) {
-            recentChatsSocket.close();
-            clearTimeout(reconnectTimeout);
-        }
-
-        recentChatsSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/konnekt/recent-chats/${currentUserId}/`);
-
-        recentChatsSocket.onmessage = (event) => {
-            console.log("Recent chat update received:", event.data);
-
-            try {
-                const data = JSON.parse(event.data);
-                renderRecentChats(data.recent_chats);
-            } catch (error) {
-                console.error("[WS] Recent chats message error:", error);
-            }
-        };
-
-        recentChatsSocket.onclose = () => {
-            console.warn("[WS] Recent chats socket closed");
-            reconnectTimeout = setTimeout(connectRecentChatsSocket, RECONNECT_DELAY);
-        };
-
-        recentChatsSocket.onerror = (error) => {
-            console.error("[WS] Recent chats socket error:", error);
-        };
-    };
-
-    const startPingInterval = () => {
-        clearPingInterval();
-        pingInterval = setInterval(() => {
-            if (statusSocket?.readyState === WebSocket.OPEN) {
-                const pingMessage = { type: "ping", user_id: currentUserId };
-                console.log("[PING] Sending:", pingMessage);
-                statusSocket.send(JSON.stringify(pingMessage));
-
-                const now = Date.now();
-                userStatuses.forEach((status, userIdKey) => {
-                    if (status.status === 'online' && status.last_seen) {
-                        const lastSeen = new Date(status.last_seen).getTime();
-                        if (now - lastSeen > STATUS_TIMEOUT) {
-                            console.log(`[STATUS] Timeout for user ${userIdKey}, marking offline.`);
-                            userStatuses.set(userIdKey, { ...status, status: 'offline' });
-                            updateStatusIndicator(userIdKey, 'offline', status.last_seen);
+                        if (data.type === "initial_statuses") {
+                            data.statuses.forEach(({ user_id, status, last_seen }) => {
+                                userStatuses.set(user_id, { status, last_seen });
+                                updateStatusIndicator(user_id, status, last_seen);
+                            });
+                            return;
                         }
+
+                        if (data.type === "status.update") {
+                            console.log(`[STATUS] Update for user ${data.user_id}: ${data.status}`);
+                            userStatuses.set(data.user_id, {
+                                status: data.status,
+                                last_seen: data.last_seen
+                            });
+                            updateStatusIndicator(data.user_id, data.status, data.last_seen);
+                        }
+                    } catch (error) {
+                        console.error("[WS] Status message error:", error);
                     }
-                });
-            }
-        }, PING_INTERVAL);
-    };
+                };
 
-    const clearPingInterval = () => {
-        if (pingInterval) {
-            clearInterval(pingInterval);
-            pingInterval = null;
-        }
-    };
+                statusSocket.onclose = () => {
+                    console.warn("[WS] Status socket closed");
+                    clearPingInterval();
+                    reconnectTimeout = setTimeout(connectStatusSocket, RECONNECT_DELAY);
+                };
 
-    const handleVisibilityChange = () => {
-        if (document.hidden) {
-            clearPingInterval();
-        } else {
-            startPingInterval();
-            if (statusSocket?.readyState === WebSocket.OPEN) {
-                const pingMessage = { type: "ping", user_id: currentUserId };
-                console.log("[PING] Sending (visibility):", pingMessage);
-                statusSocket.send(JSON.stringify(pingMessage));
-            }
-        }
-    };
+                statusSocket.onerror = (error) => {
+                    console.error("[WS] Status socket error:", error);
+                };
+            };
 
-    const cleanup = () => {
-        if (statusSocket) statusSocket.close();
-        if (recentChatsSocket) recentChatsSocket.close();
-        clearPingInterval();
-        clearTimeout(reconnectTimeout);
-    };
+            const connectRecentChatsSocket = () => {
+                if (recentChatsSocket) {
+                    recentChatsSocket.close();
+                    clearTimeout(reconnectTimeout);
+                }
 
-    const init = () => {
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('beforeunload', cleanup);
-        connectStatusSocket();
-        connectRecentChatsSocket();
-    };
+                recentChatsSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/konnekt/recent-chats/${currentUserId}/`);
 
-    init();
-});
+                recentChatsSocket.onmessage = (event) => {
+                    console.log("Recent chat update received:", event.data);
+
+                    try {
+                        const data = JSON.parse(event.data);
+                        renderRecentChats(data.recent_chats);
+                    } catch (error) {
+                        console.error("[WS] Recent chats message error:", error);
+                    }
+                };
+
+                recentChatsSocket.onclose = () => {
+                    console.warn("[WS] Recent chats socket closed");
+                    reconnectTimeout = setTimeout(connectRecentChatsSocket, RECONNECT_DELAY);
+                };
+
+                recentChatsSocket.onerror = (error) => {
+                    console.error("[WS] Recent chats socket error:", error);
+                };
+            };
+
+            const startPingInterval = () => {
+                clearPingInterval();
+                pingInterval = setInterval(() => {
+                    if (statusSocket?.readyState === WebSocket.OPEN) {
+                        const pingMessage = { type: "ping", user_id: currentUserId };
+                        console.log("[PING] Sending:", pingMessage);
+                        statusSocket.send(JSON.stringify(pingMessage));
+
+                        const now = Date.now();
+                        userStatuses.forEach((status, userIdKey) => {
+                            if (status.status === 'online' && status.last_seen) {
+                                const lastSeen = new Date(status.last_seen).getTime();
+                                if (now - lastSeen > STATUS_TIMEOUT) {
+                                    console.log(`[STATUS] Timeout for user ${userIdKey}, marking offline.`);
+                                    userStatuses.set(userIdKey, { ...status, status: 'offline' });
+                                    updateStatusIndicator(userIdKey, 'offline', status.last_seen);
+                                }
+                            }
+                        });
+                    }
+                }, PING_INTERVAL);
+            };
+
+            const clearPingInterval = () => {
+                if (pingInterval) {
+                    clearInterval(pingInterval);
+                    pingInterval = null;
+                }
+            };
+
+            const handleVisibilityChange = () => {
+                if (document.hidden) {
+                    clearPingInterval();
+                } else {
+                    startPingInterval();
+                    if (statusSocket?.readyState === WebSocket.OPEN) {
+                        const pingMessage = { type: "ping", user_id: currentUserId };
+                        console.log("[PING] Sending (visibility):", pingMessage);
+                        statusSocket.send(JSON.stringify(pingMessage));
+                    }
+                }
+            };
+
+            const cleanup = () => {
+                if (statusSocket) statusSocket.close();
+                if (recentChatsSocket) recentChatsSocket.close();
+                clearPingInterval();
+                clearTimeout(reconnectTimeout);
+            };
+
+            const init = () => {
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+                window.addEventListener('beforeunload', cleanup);
+                connectStatusSocket();
+                connectRecentChatsSocket();
+            };
+
+            init();
+        });
 
   </script>
-
   <!--<script src="{% static 'konnekt/js/sockets.js' %}"></script>-->
   <script src="{% static 'konnekt/vendor/jquery/jquery-3.5.1.min.js' %}"></script>
   <script src="{% static 'konnekt/vendor/bootstrap.bundle.min.js' %}"></script>
