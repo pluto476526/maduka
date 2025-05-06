@@ -689,9 +689,9 @@ function scrollToBottom() {
 }
 
 function isNearBottom() {
-  return chatItem.scrollHeight - chatItem.scrollTop <= chatItem.clientHeight + 100;
+  const threshold = 3 * window.innerHeight;
+  return chatItem.scrollHeight - chatItem.scrollTop <= chatItem.clientHeight + threshold;
 }
-
 
 function sendReadReceipt(convID, userID) {
   if (chatSocket.readyState !== WebSocket.OPEN) return;
@@ -733,14 +733,10 @@ chatSocket.addEventListener("message", (event) => {
   const imageUrls = data["image_urls"] || [];
   const photoID = data["uniqueMsgID"]
 
-  console.log('rec images:', photoID);
-
   // Append new message
   if (message || imageUrls.length > 0) {
     let messageHTML = "";
     let imageHTML = "";
-    console.log('to append:', imageUrls)
-
 
     if (imageUrls && imageUrls.length > 0) {
       // let gridClass = 'multi';
@@ -759,8 +755,6 @@ chatSocket.addEventListener("message", (event) => {
     }
 
     if (sender_id == currentUserId) {
-      
-
       document.getElementById("attachmentInput").value = "";
       msgBox.value = "";
       messageHTML = `
@@ -811,6 +805,29 @@ chatSocket.addEventListener("message", (event) => {
 
     chatItem.insertAdjacentHTML("beforeend", messageHTML);
 
+    // Wait for all images to load before scrolling
+    const newlyInserted = chatItem.querySelectorAll(`.message[data-timestamp="${timestamp}"] img`);
+
+    if (newlyInserted.length > 0) {
+      let loadedCount = 0;
+      newlyInserted.forEach(img => {
+        img.addEventListener('load', () => {
+          loadedCount++;
+          if (loadedCount === newlyInserted.length) {
+            if (isNearBottom()) scrollToBottom();
+          }
+        });
+        img.addEventListener('error', () => {
+          loadedCount++;
+          if (loadedCount === newlyInserted.length) {
+            if (isNearBottom()) scrollToBottom();
+          }
+        });
+      });
+    } else {
+      if (isNearBottom()) scrollToBottom(); // no images to wait for
+    }
+
     // Clear file input and previews
     document.getElementById("attachmentInput").value = "";
     fileStore.items.clear(); // clear the stored files
@@ -832,7 +849,7 @@ chatSocket.addEventListener("message", (event) => {
   }
 
 
-
+  // Insert read receipts
   if (data.type === "read_status.update") {
     if (data.user_id != currentUserId) {
       const userMessages = [...document.querySelectorAll(".user-message")];
@@ -847,12 +864,7 @@ chatSocket.addEventListener("message", (event) => {
     }
   }
 
-  if (isNearBottom()) scrollToBottom();
 });
-
-
-
-
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -899,6 +911,7 @@ document.addEventListener("DOMContentLoaded", function() {
         img.className = "img-thumbnail";
         img.style.width = "100%";
         img.style.height = "100%";
+        img.style.objectFit = "cover";
         img.onload = () => URL.revokeObjectURL(img.src);
         wrapper.appendChild(img);
       } else {
@@ -915,7 +928,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 });
-
 
 
 function getCSRFToken() {
@@ -936,8 +948,6 @@ function generateUniqueId(length = 12) {
 
   return result;
 }
-
-
 
 sendBtn.addEventListener("click", async (e) => {
   e.preventDefault();
@@ -982,13 +992,10 @@ sendBtn.addEventListener("click", async (e) => {
       }
     }
   }
-  console.log('u imgs:', uploadedImages);
 
 
   // 2. Send a single WebSocket message with text and all images
   if (message || uploadedImages.length > 0) {
-    console.log('up images:', uploadedImages);
-
     chatSocket.send(JSON.stringify({
       message: message,
       image_urls: uploadedImages.flat(),
@@ -1026,8 +1033,6 @@ msgBox.addEventListener("keypress", function(e) {
   const input = document.getElementById('msgBox');
 
   // Initialize EmojiButton
-  // const picker = new EmojiButton();
-
   const picker = new EmojiButton({
     autoHide: false,
     position: 'top-end',

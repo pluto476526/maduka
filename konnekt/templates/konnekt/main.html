@@ -51,7 +51,7 @@
 
     const updateStatusIndicator = (userId, status, lastSeen = null) => {
         document.querySelectorAll(`[data-dot-for="${userId}"]`).forEach(dot => {
-            dot.className = `status rounded-circle ${status === 'online' ? 'bg-success' : 'bg-gray'}`;
+            dot.className = `${status === 'online' ? 'status rounded-circle' : ''}`;
         });
 
         document.querySelectorAll(`[data-user-id="${userId}"]`).forEach(li => {
@@ -99,7 +99,7 @@
             }
 
             return `
-            <li${!isGroup && isOnline ? ' class="online"' : ''} data-user-id="${otherUser?.userID || ''}" data-conversation-id="${chat.conv_id}">
+            <li${!isGroup && isOnline ? ' class="online"' : ''} data-user-id="${otherUser?.userID}" data-conversation-id="${chat.conv_id}">
                 <div class="hover_action">
                     ${isGroup ? `
                     <button type="button" class="btn btn-link text-info"><i class="zmdi zmdi-eye"></i></button>
@@ -110,7 +110,7 @@
                     <div class="card-body">
                         <div class="media">
                             <div class="avatar me-3">
-                                <span class="status rounded-circle"></span>
+                                <span class="status rounded-circle" data-dot-for="${otherUser?.userID}"></span>
                                 ${isGroup ? `
                                 <div class="avatar rounded-circle no-image cyan">
                                     <span>${chat.title?.slice(0, 2).toUpperCase() || 'GR'}</span>
@@ -129,7 +129,7 @@
                                 <div class="text-truncate">
                                   ${chat.last_message 
                                     ? `${(chat.lm_sender !== currentUserId && chat.unread_count > 0) ? `<span class="badge bg-success me-1">${chat.unread_count}</span>` : ""}<i class="zmdi zmdi-file-text me-1"></i> ${chat.last_message}` 
-                                    : "No messages yet"}
+                                    : "[Images/Attachments]"}
                                   ${groupAvatars}
                                 </div>
                             </div>
@@ -152,24 +152,23 @@
             console.log("[WS] Status socket connected");
             statusSocket.send(JSON.stringify({
                 type: "get_initial_statuses",
-                user_id: currentUserId
             }));
         };
 
         statusSocket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                console.debug("[WS] Received:", data);
+                console.log("[WS] Received:", data);
 
                 if (data.type === "initial_statuses") {
                     data.statuses.forEach(({ user_id, status, last_seen }) => {
                         userStatuses.set(user_id, { status, last_seen });
                         updateStatusIndicator(user_id, status, last_seen);
                     });
-                    return;
                 }
 
-                if (data.type === "status.update") {
+                // if (data.type === "status.update") {
+                if (data.type == "status_update") {
                     console.log(`[STATUS] Update for user ${data.user_id}: ${data.status}`);
                     userStatuses.set(data.user_id, {
                         status: data.status,
@@ -181,6 +180,7 @@
                 console.error("[WS] Status message error:", error);
             }
         };
+
 
         statusSocket.onclose = () => {
             console.warn("[WS] Status socket closed");

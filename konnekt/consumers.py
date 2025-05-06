@@ -117,17 +117,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'timestamp': event['timestamp'],
         }))
 
-
-    # @database_sync_to_async
-    # def save_message(self, sender_id, message):
-    #     sender = User.objects.get(id=sender_id)
-    #     conversation = Conversation.objects.get(conv_id=self.conv_id)
-    #     return ConversationItem.objects.create(
-    #         conversation=conversation,
-    #         sender=sender,
-    #         body=message
-    #     )
-
     @database_sync_to_async
     def save_message(self, sender_id, message, image_urls=None):
         sender = User.objects.get(id=sender_id)
@@ -166,23 +155,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         r_status.save()
 
 
-
-
-
 class RecentChatsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user_id = self.scope['url_route']['kwargs']['user_id']
         self.user = await self.get_user(self.user_id)
 
         if not self.user:
-            logger.debug('User not found')
             await self.close()
             return
 
         self.group_name = f'recent_chats_{self.user_id}'
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
-        logger.debug('Connection established')
         await self.send_recent_chats()
 
     async def disconnect(self, close_code):
@@ -194,9 +178,6 @@ class RecentChatsConsumer(AsyncWebsocketConsumer):
 
     async def send_recent_chats(self):
         recent_chats = await self.get_recent_chats()
-        for r in recent_chats:
-            logger.debug(r)
-
         # Send recent chats with online status information
         await self.send(text_data=json.dumps({
             'type': 'recent_chats',
@@ -225,9 +206,13 @@ class RecentChatsConsumer(AsyncWebsocketConsumer):
                 last_read_at = None
 
             if last_read_at:
-                unread_count = convo.messages.filter(timestamp__gt=last_read_at).count()
+                unread_messages = convo.messages.filter(timestamp__gt=last_read_at)
+                unread_count = unread_messages.count()
+                unread_image_count = MessageImage.objects.filter(message__in=unread_messages).count()
             else:
-                unread_count = convo.messages.count()
+                unread_messages = convo.messages.all()
+                unread_count = unread_messages.count()
+                unread_image_count = MessageImage.objects.filter(message__in=unread_messages).count()
 
             last_message = convo.messages.order_by('-timestamp').first()
             lm_sender = convo.participants.exclude(id=self.user_id).first()
@@ -240,6 +225,7 @@ class RecentChatsConsumer(AsyncWebsocketConsumer):
                 ),
                 'last_message': last_message.body if last_message else "",
                 'unread_count': unread_count,
+                'unread_image_count': unread_image_count,
                 'lm_sender': lm_sender.id,
                 'timestamp': last_message.timestamp.isoformat() if last_message else "",
                 'participants': [
