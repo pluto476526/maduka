@@ -6,31 +6,52 @@
 
 <style type="text/css">
   .image-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
   }
 
-  .thumb-wrapper {
-    flex: 1 0 calc(33.333% - 8px); /* 3 per row on larger screens */
+  /* One image */
+  .image-grid.single .thumb-wrapper {
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+
+  /* Two images */
+  .image-grid.two .thumb-wrapper {
+    flex: 1 0 calc(50% - 8px);
+    max-width: calc(50% - 8px);
+  }
+
+  /* Three or more */
+  .image-grid.multi .thumb-wrapper {
+    flex: 1 0 calc(33.333% - 8px);
     max-width: calc(33.333% - 8px);
   }
 
   .chat-thumbnail {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    object-fit: cover;
-  }
-  @media (max-width: 768px) {
-    .thumb-wrapper {
-      flex: 1 0 calc(50% - 8px); /* 2 per row on smaller screens */
-      max-width: calc(50% - 8px);
-    }
-  }
+  width: 100px;
+  height: 100px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 
 </style>
 
+<!-- <style>
+  
+  .image-grid {
+  display: block;
+}
+
+.thumb-wrapper {
+  display: inline-block;
+  margin: 4px;
+}
+
+</style> -->
   <div id="layout" class="theme-cyan">
 
     {% include 'konnekt/nav_sidebar.html' %}
@@ -178,7 +199,26 @@
       							<a class="dropdown-item" href="#">Delete</a>
       						</div>
       						</div>
-      						<div class="message-content border p-3">{{ t.body }}</div>
+      						<div class="message-content border p-3">
+                    <div>{{ t.body }}</div>
+                    {% if t.attachment %}
+                      <div class="mt-2">
+                        <a href="{{ t.attachment.url }}" target="_blank" class="text-primary">
+                          {{ t.attachment.name|cut:"media/" }}
+                        </a>
+                      </div>
+                    {% endif %}
+        
+                    {% if t.images.all %}
+                    <div class="image-grid mt-2">
+                      {% for img in t.images.all %}
+                        <a href="{{ img.image.url }}" class="thumb-wrapper glightbox">
+                          <img src="{{ img.image.url }}" class="img-thumbnail chat-thumbnail" alt="sent image" data-gallery="{{ img.msgID }}">
+                        </a>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
+                  </div>
       					</div>
       					</div>
       				</li>
@@ -190,27 +230,27 @@
       					<div class="message-body">
       					<span class="date-time text-muted">{{ t.sender.username }}, {{ t.timestamp|natural_time_format }}</span>
       					<div class="message-row d-flex align-items-center">
-      						<div class="message-content p-3">{{ t.body }}
-                       <div class="image-grid mt-2">
-                  
-                    <a href="" class="glightbox thumb-wrapper" data-gallery="message-{{ t.id }}">
-                      <img src="{{ request.user.profile.avatar.url }}" class="img-thumbnail chat-thumbnail" alt="sent image">
-                    </a>
-                    <a href="" class="glightbox thumb-wrapper" data-gallery="message-{{ t.id }}">
-                      <img src="{{ request.user.profile.avatar.url }}" class="img-thumbnail chat-thumbnail" alt="sent image">
-                    </a>
-               
-               <a href="" class="glightbox thumb-wrapper" data-gallery="message-{{ t.id }}">
-                      <img src="{{ request.user.profile.avatar.url }}" class="img-thumbnail chat-thumbnail" alt="sent image">
-                    </a>
-               <a href="" class="glightbox thumb-wrapper" data-gallery="message-{{ t.id }}">
-                      <img src="{{ request.user.profile.avatar.url }}" class="img-thumbnail chat-thumbnail" alt="sent image">
-                    </a>
-               <a href="" class="glightbox thumb-wrapper" data-gallery="message-{{ t.id }}">
-                      <img src="{{ request.user.profile.avatar.url }}" class="img-thumbnail chat-thumbnail" alt="sent image">
-                    </a>
-               
-                </div>
+      						<div class="message-content p-3">
+                    <div>{{ t.body }}</div>
+
+                    {% if t.attachment %}
+                      <div class="mt-2">
+                        <a href="{{ t.attachment.url }}" target="_blank" class="text-primary">
+                          {{ t.attachment.name|cut:"media/" }}
+                        </a>
+                      </div>
+                    {% endif %}
+
+                    {% if t.images.all %}
+                    <div class="image-grid mt-2">
+                      {% for img in t.images.all %}
+
+                        <a href="{{ img.image.url }}" class="thumb-wrapper glightbox" data-gallery="{{ img.msgID }}">
+                          <img src="{{ img.image.url }}" class="img-thumbnail chat-thumbnail" alt="sent image">
+                        </a>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
 
                   </div>
       						<div class="dropdown">
@@ -615,353 +655,407 @@
   </div>
 
  <script type="text/javascript">
-       const chatSocket = new WebSocket(
-        "ws://" + window.location.host + "/ws/konnekt/{{ convo_id }}/"
-    );
 
-    const msgForm = document.getElementById("msgForm");
-    const msgBox = document.getElementById("msgBox");
-    const sendBtn = document.getElementById("sendBtn");
-    const chatItem = document.getElementById("chatBox");
+  const chatSocket = new WebSocket(
+    "ws://" + window.location.host + "/ws/konnekt/{{ convo_id }}/"
+  );
 
-    const currentUserId = "{{ request.user.id }}";
-    const senderAvatar = "{{ sender.profile.avatar.url }}";
-    const convoID = "{{ convo_id }}"
+const fileStore = new DataTransfer();
+
+const msgForm = document.getElementById("msgForm");
+const msgBox = document.getElementById("msgBox");
+const sendBtn = document.getElementById("sendBtn");
+const chatItem = document.getElementById("chatBox");
+
+const currentUserId = "{{ request.user.id }}";
+const senderAvatar = "{{ sender.profile.avatar.url }}";
+const convoID = "{{ convo_id }}"
 
 
-    function formatTime(ts) {
-        const date = new Date(ts);
-        const now = new Date();
-        const delta = (now - date) / 1000;
+function formatTime(ts) {
+  const date = new Date(ts);
+  const now = new Date();
+  const delta = (now - date) / 1000;
 
-        if (delta < 60) return "Just now";
-        if (delta < 3600) return Math.floor(delta / 60) + " min ago";
-        if (delta < 86400) return Math.floor(delta / 3600) + " hr ago";
-        if (delta < 172800) return "Yesterday";
-        return date.toLocaleDateString();
+  if (delta < 60) return "Just now";
+  if (delta < 3600) return Math.floor(delta / 60) + " min ago";
+  if (delta < 86400) return Math.floor(delta / 3600) + " hr ago";
+  if (delta < 172800) return "Yesterday";
+  return date.toLocaleDateString();
+}
+
+function scrollToBottom() {
+  chatItem.scrollTop = chatItem.scrollHeight;
+}
+
+function isNearBottom() {
+  return chatItem.scrollHeight - chatItem.scrollTop <= chatItem.clientHeight + 100;
+}
+
+
+function sendReadReceipt(convID, userID) {
+  if (chatSocket.readyState !== WebSocket.OPEN) return;
+
+  data = {
+    type: "read_status.send",
+    convo_id: convID,
+    user_id: userID,
+    timestamp: Date.now(),
+  }
+
+  chatSocket.send(
+    JSON.stringify(data)
+  );
+}
+
+
+chatItem.addEventListener("scroll", () => {
+  const nearBottom = chatItem.scrollHeight - chatItem.scrollTop <= chatItem.clientHeight + 10;
+  if (nearBottom) sendReadReceipt(convoID, currentUserId);
+});
+
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    scrollToBottom();
+  }, 100);
+});
+
+
+
+chatSocket.addEventListener("message", (event) => {
+  const data = JSON.parse(event.data);
+  const sender = data["sender"];
+  const message = data["message"];
+  const sender_id = data["sender_id"];
+  const timestamp = data["timestamp"];
+  const s_time = formatTime(timestamp);
+  const imageUrls = data["image_urls"] || [];
+  const photoID = data["uniqueMsgID"]
+
+  console.log('rec images:', photoID);
+
+  // Append new message
+  if (message || imageUrls.length > 0) {
+    let messageHTML = "";
+    let imageHTML = "";
+    console.log('to append:', imageUrls)
+
+
+    if (imageUrls && imageUrls.length > 0) {
+      // let gridClass = 'multi';
+      // if (imageUrls.length === 1) gridClass = 'single';  
+      // if (imageUrls.length === 2) gridClass = 'two';
+
+      imageHTML = `
+        <div class="image-grid mt-2">
+          ${imageUrls.map(url => `
+            <a href="${url}" class="thumb-wrapper glightbox" data-gallery="${photoID}">
+              <img src="${url}" class="img-thumbnail chat-thumbnail" alt="image">
+            </a>
+          `).join('')}
+        </div>
+      `;
     }
 
-    function scrollToBottom() {
-        chatItem.scrollTop = chatItem.scrollHeight;
-    }
+    if (sender_id == currentUserId) {
+      
 
-    function isNearBottom() {
-        return chatItem.scrollHeight - chatItem.scrollTop <= chatItem.clientHeight + 100;
-    }
-
-
-    function sendReadReceipt(convID, userID) {
-      if (chatSocket.readyState !== WebSocket.OPEN) return;
-
-      data = {
-          type: "read_status.send",
-          convo_id: convID,
-          user_id: userID,
-          timestamp: Date.now(),
-      }
-
-      chatSocket.send(
-          JSON.stringify(data)
-      );
-    }
-
-
-    chatItem.addEventListener("scroll", () => {
-        const nearBottom = chatItem.scrollHeight - chatItem.scrollTop <= chatItem.clientHeight + 10;
-        if (nearBottom) {
-            sendReadReceipt(convoID, currentUserId);
-        }
-    });
-
-
-    window.addEventListener("load", () => {
-        setTimeout(() => {
-            scrollToBottom();
-        }, 100);
-    });
-
-
-
-    chatSocket.addEventListener("message", (event) => {
-        const data = JSON.parse(event.data);
-        const sender = data["sender"];
-        const message = data["message"];
-        const sender_id = data["sender_id"];
-        const timestamp = data["timestamp"];
-        const s_time = formatTime(timestamp);
-
-        // Append new message
-        if (message) {
-            let messageHTML = "";
-
-            if (sender_id == currentUserId) {
-                msgBox.value = "";
-                messageHTML = `
-                <li class="d-flex message right user-message" data-timestamp="${timestamp}">
-                    <div class="message-body">
-                        <span class="date-time text-muted">${s_time}
-                            <i class="zmdi zmdi-check-all text-primary read-mark" style="display: none;"></i>
-                        </span>
-                        <div class="message-row d-flex align-items-center justify-content-end">
-                            <div class="dropdown">
-                                <a class="text-muted me-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="zmdi zmdi-more-vert"></i>
-                                </a>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#">Edit</a>
-                                    <a class="dropdown-item" href="#">Share</a>
-                                    <a class="dropdown-item" href="#">Delete</a>
-                                </div>
-                            </div>
-                            <div class="message-content border p-3">${message}</div>
+      document.getElementById("attachmentInput").value = "";
+      msgBox.value = "";
+      messageHTML = `
+        <li class="d-flex message right user-message" data-timestamp="${timestamp}">
+            <div class="message-body">
+                <span class="date-time text-muted">${s_time}
+                    <i class="zmdi zmdi-check-all text-primary read-mark" style="display: none;"></i>
+                </span>
+                <div class="message-row d-flex align-items-center justify-content-end">
+                    <div class="dropdown">
+                        <a class="text-muted me-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="zmdi zmdi-more-vert"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Edit</a>
+                            <a class="dropdown-item" href="#">Share</a>
+                            <a class="dropdown-item" href="#">Delete</a>
                         </div>
                     </div>
-                </li>`;
-            } else {
-                messageHTML = `
-                <li class="d-flex message">
-                    <div class="mr-lg-3 me-2">
-                        <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
-                    </div>
-                    <div class="message-body">
-                        <span class="date-time text-muted">${sender}, ${s_time}</span>
-                        <div class="message-row d-flex align-items-center">
-                            <div class="message-content p-3">${message}</div>
-                            <div class="dropdown">
-                                <a class="text-muted ms-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="zmdi zmdi-more-vert"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#">Edit</a>
-                                    <a class="dropdown-item" href="#">Share</a>
-                                    <a class="dropdown-item" href="#">Delete</a>
-                                </div>
-                            </div>
+                    <div class="message-content border p-3">${message}${imageHTML}</div>
+                </div>
+            </div>
+        </li>`;
+    } else {
+      messageHTML = `
+        <li class="d-flex message">
+            <div class="mr-lg-3 me-2">
+                <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
+            </div>
+            <div class="message-body">
+                <span class="date-time text-muted">${sender}, ${s_time}</span>
+                <div class="message-row d-flex align-items-center">
+                    <div class="message-content p-3">${message}${imageHTML}</div>
+                    <div class="dropdown">
+                        <a class="text-muted ms-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="zmdi zmdi-more-vert"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#">Edit</a>
+                            <a class="dropdown-item" href="#">Share</a>
+                            <a class="dropdown-item" href="#">Delete</a>
                         </div>
                     </div>
-                </li>`;
-            }
+                </div>
+            </div>
+        </li>`;
+    }
 
-            chatItem.insertAdjacentHTML("beforeend", messageHTML);
-        }
+    chatItem.insertAdjacentHTML("beforeend", messageHTML);
 
+    // Clear file input and previews
+    document.getElementById("attachmentInput").value = "";
+    fileStore.items.clear(); // clear the stored files
 
+    const previewContainer = document.getElementById("filePreview");
+    if (previewContainer) {
+      previewContainer.querySelectorAll("img").forEach(img => URL.revokeObjectURL(img.src));
+      previewContainer.innerHTML = "";
+    }
 
-        if (data.type === "read_status.update") {
-            if (data.user_id != currentUserId) {
-              const userMessages = [...document.querySelectorAll(".user-message")];
-              if (userMessages.length > 0) {
-                  
-                  userMessages.forEach(msg => {
-                      const mark = msg.querySelector(".read-mark");
-                      if (mark) mark.style.display = "inline";
-                  });
-
-              }
-            }
-        }
-
-        if (isNearBottom()) scrollToBottom();
+    // Re-initialize GLightbox after inserting new images
+    if (window.lightboxInstance) {
+      window.lightboxInstance.destroy();
+    }
+    window.lightboxInstance = GLightbox({
+      selector: '.glightbox'
     });
 
-
-  
-
+  }
 
 
 
+  if (data.type === "read_status.update") {
+    if (data.user_id != currentUserId) {
+      const userMessages = [...document.querySelectorAll(".user-message")];
+      if (userMessages.length > 0) {
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const input = document.getElementById("attachmentInput");
-      const preview = document.getElementById("filePreview");
-      const fileStore = new DataTransfer();
-
-      input.addEventListener("change", function () {
-        [...input.files].forEach((file) => {
-          fileStore.items.add(file);
+        userMessages.forEach(msg => {
+          const mark = msg.querySelector(".read-mark");
+          if (mark) mark.style.display = "inline";
         });
 
+      }
+    }
+  }
+
+  if (isNearBottom()) scrollToBottom();
+});
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+  const input = document.getElementById("attachmentInput");
+  const preview = document.getElementById("filePreview");
+
+  input.addEventListener("change", function() {
+    [...input.files].forEach((file) => {
+      fileStore.items.add(file);
+    });
+
+    input.files = fileStore.files;
+    renderPreviews();
+  });
+
+  function renderPreviews() {
+    preview.innerHTML = ""; // Clear DOM
+
+    [...fileStore.files].forEach((file, index) => {
+      const isImage = file.type.startsWith("image/");
+      const wrapper = document.createElement("div");
+      wrapper.className = "position-relative m-2";
+      wrapper.style.width = "100px";
+      wrapper.style.height = "100px";
+
+      const closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.innerHTML = "&times;";
+      closeBtn.className = "btn btn-sm btn-danger position-absolute top-0 end-0";
+      closeBtn.onclick = () => {
+        const newData = new DataTransfer();
+        [...fileStore.files].forEach((f, i) => {
+          if (i !== index) newData.items.add(f);
+        });
+        fileStore.items.clear();
+        [...newData.files].forEach(f => fileStore.items.add(f));
         input.files = fileStore.files;
-
         renderPreviews();
-      });
+      };
 
-      function renderPreviews() {
-        preview.innerHTML = ""; // Clear current DOM, not DataTransfer files
-
-        [...fileStore.files].forEach((file, index) => {
-          const isImage = file.type.startsWith("image/");
-          const wrapper = document.createElement("div");
-          wrapper.className = "position-relative m-2";
-          wrapper.style.width = "100px";
-          wrapper.style.height = "100px";
-
-          const closeBtn = document.createElement("button");
-          closeBtn.type = "button";
-          closeBtn.innerHTML = "&times;";
-          closeBtn.className = "btn btn-sm btn-danger position-absolute top-0 end-0";
-          closeBtn.onclick = () => {
-            const newData = new DataTransfer();
-            [...fileStore.files].forEach((f, i) => {
-              if (i !== index) newData.items.add(f);
-            });
-            fileStore.items.clear();
-            [...newData.files].forEach(f => fileStore.items.add(f));
-            input.files = fileStore.files;
-            renderPreviews();
-          };
-
-          if (isImage) {
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
-            img.className = "img-thumbnail";
-            img.style.width = "100%";
-            img.style.height = "100%";
-            img.onload = () => URL.revokeObjectURL(img.src);
-            wrapper.appendChild(img);
-          } else {
-            const icon = document.createElement("div");
-            icon.className = "d-flex align-items-center justify-content-center border bg-light";
-            icon.style.width = "100%";
-            icon.style.height = "100%";
-            icon.innerHTML = `<i class="zmdi zmdi-file-text font-22"></i>`;
-            wrapper.appendChild(icon);
-          }
-
-          wrapper.appendChild(closeBtn);
-          preview.appendChild(wrapper);
-        });
+      if (isImage) {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.className = "img-thumbnail";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.onload = () => URL.revokeObjectURL(img.src);
+        wrapper.appendChild(img);
+      } else {
+        const icon = document.createElement("div");
+        icon.className = "d-flex align-items-center justify-content-center border bg-light";
+        icon.style.width = "100%";
+        icon.style.height = "100%";
+        icon.innerHTML = `<i class="zmdi zmdi-file-text font-22"></i>`;
+        wrapper.appendChild(icon);
       }
+
+      wrapper.appendChild(closeBtn);
+      preview.appendChild(wrapper);
     });
+  }
+});
 
 
-    function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+function getCSRFToken() {
+  return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+function generateUniqueId(length = 12) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const cryptoObj = window.crypto || window.msCrypto;
+
+  const randomValues = new Uint32Array(length);
+  cryptoObj.getRandomValues(randomValues);
+
+  for (let i = 0; i < length; i++) {
+      result += chars[randomValues[i] % chars.length];
+  }
+
+  return result;
+}
+
+
+
+sendBtn.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  const message = msgBox.value.trim();
+  const files = attachmentInput.files;
+
+  if (!message && files.length === 0) return;
+
+  const uploadedImages = [];
+  const uniqueMsgID = generateUniqueId(10);
+  let s_uniqueMsgID = '';
+
+
+  // 1. Upload attachments
+  if (files.length > 0) {
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('convo_id', convoID);
+      formData.append('sender_id', currentUserId);
+      formData.append('msgID', uniqueMsgID);
+
+      try {
+        const response = await fetch('/konnekt/upload_attachment/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCSRFToken()
+          },
+          body: formData,
+        });
+
+        const data = await response.json();
+        console.log('form response:', data);
+
+        if (data.attachment_type === 'image') {
+          uploadedImages.push(data.image_urls);
+          s_uniqueMsgID = data.uniqueMsgID;
+        }
+      } catch (err) {
+        console.error("File upload failed:", err);
+      }
     }
+  }
+  console.log('u imgs:', uploadedImages);
 
 
-      sendBtn.addEventListener("click", async (e) => {
-        e.preventDefault();
+  // 2. Send a single WebSocket message with text and all images
+  if (message || uploadedImages.length > 0) {
+    console.log('up images:', uploadedImages);
 
-        const message = msgBox.value.trim();
-        const files = attachmentInput.files;
+    chatSocket.send(JSON.stringify({
+      message: message,
+      image_urls: uploadedImages.flat(),
+      sender_id: currentUserId,
+      uniqueMsgID: s_uniqueMsgID,
+      sender: '{{ request.user.username }}',
+      convo_id: convoID,
+      timestamp: Date.now()
+    }));
+  }
 
-        // No message or attachments? Do nothing.
-        if (!message && files.length === 0) return;
+  // 3. Reset input
+  msgBox.value = "";
+  attachmentInput.value = "";
+  filePreview.innerHTML = "";
+  fileStore.items.clear();
 
-        // 1. Send attachments first (if any)
-        if (files.length > 0) {
-            for (const file of files) {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('convo_id', convoID);
-                formData.append('sender_id', currentUserId);
+});
 
-                try {
-                    const response = await fetch('/konnekt/upload_attachment/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCSRFToken()
-                        },
-                        body: formData,
-                    });
-
-
-                    const data = await response.json();
-
-                    chatSocket.send(JSON.stringify({
-                        message: file.name,  // or "Sent an attachment"
-                        attachment_url: data.attachment_url,
-                        attachment_type: data.attachment_type,
-                        sender_id: currentUserId,
-                        sender: '{{request.user.username}}',
-                        convo_id: convoID,
-                        timestamp: Date.now(),
-                    }));
-                } catch (err) {
-                    console.error("File upload failed:", err);
-                }
-            }
-        }
-
-        // 2. Send the text message (if any)
-        if (message) {
-            chatSocket.send(
-                JSON.stringify({
-                    message: message,
-                    sender_id: currentUserId,
-                    sender: '{{request.user.username}}',
-                    convo_id: convoID,
-                    timestamp: Date.now(),
-                })
-            );
-        }
-
-        // 3. Reset form
-        attachmentInput.value = "";
-        filePreview.innerHTML = "";
-    });
-
-
-
-    // sendBtn.addEventListener("click", (e) => {
-    //     e.preventDefault();
-    //     const message = msgBox.value.trim();
-    //     if (!message) return;
-
-    //     chatSocket.send(
-    //         JSON.stringify({
-    //             message: message,
-    //             sender_id: currentUserId,
-    //             sender: "{{ request.user.username }}",
-    //             convo_id: "{{ convo_id }}",
-    //             timestamp: Date.now(),
-    //         })
-    //     );
-    // });
-
-    msgBox.addEventListener("keypress", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendBtn.click();
-        }
-    });
+msgBox.addEventListener("keypress", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
 
 
 </script>
- <script type="module">
-    import { EmojiButton } from 'https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/dist/index.min.js';
+<script type="module">
+  import {
+    EmojiButton
+  } from 'https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/dist/index.min.js';
 
-    const button = document.getElementById('emojiButton');
-    const input = document.getElementById('msgBox');
+  const button = document.getElementById('emojiButton');
+  const input = document.getElementById('msgBox');
 
-    // Initialize EmojiButton
-    // const picker = new EmojiButton();
+  // Initialize EmojiButton
+  // const picker = new EmojiButton();
 
-    const picker = new EmojiButton({
-        autoHide: false,
-        position: 'top-end',
-        zIndex: 9999
-    });
+  const picker = new EmojiButton({
+    autoHide: false,
+    position: 'top-end',
+    zIndex: 9999
+  });
 
-    // Open emoji picker when the button is clicked
-    button.addEventListener('click', () => {
-        picker.togglePicker(button);
-    });
+  // Open emoji picker when the button is clicked
+  button.addEventListener('click', () => {
+    picker.togglePicker(button);
+  });
 
-    // Append the selected emoji to the input field
-    picker.on('emoji', (emoji) => {
-        input.value += emoji.emoji; // Add emoji to the message box
-    });
+  // Append the selected emoji to the input field
+  picker.on('emoji', (emoji) => {
+    input.value += emoji.emoji; // Add emoji to the message box
+  });
+
 </script>
+
 
 <script type="module">
   import 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js';
 
-  const lightbox = GLightbox({
-    selector: '.glightbox',
-  });
-</script>
+  window.onload = () => {
+    const lightbox = GLightbox({
+      selector: '.glightbox',
+    });
+  };
 
+</script>
 
 {% endblock %}

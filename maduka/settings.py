@@ -63,6 +63,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dash.middleware.HomePageSessionTrackerMiddleware',
     'dash.middleware.SessionExitTrackerMiddleware',
+    'konnekt.middleware.AllowSameOriginFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'maduka.urls'
@@ -86,6 +87,7 @@ TEMPLATES = [
                 'konnekt.context_processors.get_notes',
                 'konnekt.context_processors.get_tasks',
                 'konnekt.context_processors.get_all_users',
+                'konnekt.context_processors.get_session_id',
                 'konnekt.context_processors.get_contacts',
             ],
         },
@@ -207,8 +209,28 @@ LOGGING = {
     },
 }
 
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer",
+#     },
+# }
+
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],  # Redis host and port
+        },
     },
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Database 1, you can change this
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    }
+}
+

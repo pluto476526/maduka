@@ -38,8 +38,15 @@ class ConversationItem(models.Model):
     class Meta:
         ordering = ['timestamp']
 
+
+class MessageImage(models.Model):
+    message = models.ForeignKey(ConversationItem, on_delete=models.CASCADE, related_name='images', null=True, blank=True)
+    image = models.ImageField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    msgID = models.CharField(max_length=10, blank=True, null=True)
+
     def __str__(self):
-        return f"Message from {self.sender} in {self.conversation}"
+        return f"{self.image}"
 
 
 class Note(models.Model):

@@ -8,42 +8,49 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from dash.models import Profile
-from konnekt.models import Conversation, ConversationItem, Note, Task, Contact, ConversationReadStatus
+from konnekt.models import Conversation, ConversationItem, Note, Task, Contact, ConversationReadStatus, MessageImage
 import logging
+import secrets
+import string
 
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-
 @csrf_exempt
 def upload_attachment(request):
-    print('>>>>>>>>>>>>>>>>>>>>>hit')
-    if request.method == 'POST' and request.FILES.get('file'):
-        file = request.FILES['file']
-        convo_id = request.POST.get('convo_id')
-        sender_id = request.POST.get('sender_id')
+    if request.method == 'POST' and request.FILES.getlist('file'):
+        uploaded_files = request.FILES.getlist('file')
+        msgID = request.POST.getlist('msgID')
+        logger.debug(f'>>>>>>>>>>>>>>>>msgid {msgID}')
+        image_urls = []
+        file_urls = []
+        attachment_type = None
 
-        conversation = Conversation.objects.get(conv_id=convo_id)
-        sender = User.objects.get(id=sender_id)
+        for file in uploaded_files:
+            main_type = file.content_type.split('/')[0]
 
-        item = ConversationItem.objects.create(
-            conversation=conversation,
-            sender=sender,
-            body='',
-            attachment=file,
-            attachment_type=file.content_type.split('/')[0]
-        )
+            # Temporarily store files without creating ConversationItem
+            if main_type == 'image':
+                msg_img = MessageImage(image=file)
+                msg_img.msgID = msgID
+                msg_img.save()
+                image_urls.append(msg_img.image.url)
+                attachment_type = 'image'
+            else:
+                file_urls.append(file.url)
+                attachment_type = main_type
 
-        # Return the saved message info
         return JsonResponse({
-            'message_id': item.id,
-            'attachment_url': item.attachment.url,
-            'attachment_type': item.attachment_type,
-            'timestamp': timezone.now().isoformat()
+            'image_urls': image_urls,
+            'file_urls': file_urls,
+            'attachment_type': attachment_type,
+            'uniqueMsgID': msgID,
         })
+
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 
 @login_required
@@ -115,7 +122,7 @@ def index_view(request):
 def chat_view(request, convo_id):
     convo = get_object_or_404(Conversation, conv_id=convo_id)
     r_statuses = ConversationReadStatus.objects.filter(conversation=convo)
-    texts = ConversationItem.objects.filter(conversation=convo).exclude(body='')
+    texts = ConversationItem.objects.filter(conversation=convo)
     participants = []
 
     if convo.is_group:

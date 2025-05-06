@@ -43,7 +43,12 @@ def get_contacts(request):
         g_contacts[first_letter].append(c)
 
     s_contacts = sorted(g_contacts.items())
-    for s in s_contacts:
-        logger.debug('>>>>>>> last seen')
-        logger.debug(s)
     return {'contacts': s_contacts}
+
+
+def get_session_id(request):
+    if not request.user.is_authenticated:
+        return {}
+
+    session_id = request.session.session_key
+    return {'session_id': session_id}
