@@ -87,7 +87,6 @@ TEMPLATES = [
                 'konnekt.context_processors.get_notes',
                 'konnekt.context_processors.get_tasks',
                 'konnekt.context_processors.get_all_users',
-                'konnekt.context_processors.get_session_id',
                 'konnekt.context_processors.get_contacts',
             ],
         },

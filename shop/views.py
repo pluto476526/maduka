@@ -131,7 +131,7 @@ def index(request, slug):
 
     # Fetch categories
     categories = Category.objects.filter(shop=shop, is_deleted=False)
-    top_categories = categories.order_by('-total_sales')[:4]
+    top_categories = categories.order_by('-total_sales')[:3]
     f_categories = categories.filter(is_featured=True).order_by('-timestamp')[:3]
     products = Inventory.objects.filter(shop=shop, is_deleted=False, status='available')
     profile = None
@@ -150,7 +150,7 @@ def index(request, slug):
     tc_products = []
     for t in top_categories:
         cat = get_object_or_404(Category, category=t.category)
-        c_products = products.filter(category=cat)[:3]
+        c_products = products.filter(category=cat)[:2]
         for p in c_products:
             tc_products.append(p)
 

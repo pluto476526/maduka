@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from konnekt.models import Conversation, ConversationItem, Note, Task, Contact
 from collections import defaultdict
 import logging
@@ -26,7 +27,13 @@ def get_all_users(request):
     if not request.user.is_authenticated:
         return {}
 
-    registered_users = get_user_model().objects.order_by('username')
+    # Fetch all registered users except the logged-in user
+    registered_users = get_user_model().objects.exclude(id=request.user.id)
+    
+    # Exclude users that are already in the user's contacts
+    saved_contacts_ids = request.user.contacts.values_list('contact_id', flat=True)
+    registered_users = registered_users.exclude(id__in=saved_contacts_ids).order_by('username')
+
     return {'registered_users': registered_users}
 
 
@@ -45,10 +52,3 @@ def get_contacts(request):
     s_contacts = sorted(g_contacts.items())
     return {'contacts': s_contacts}
 
-
-def get_session_id(request):
-    if not request.user.is_authenticated:
-        return {}
-
-    session_id = request.session.session_key
-    return {'session_id': session_id}

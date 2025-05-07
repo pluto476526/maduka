@@ -149,7 +149,6 @@
         statusSocket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/status/`);
 
         statusSocket.onopen = () => {
-            console.log("[WS] Status socket connected");
             statusSocket.send(JSON.stringify({
                 type: "get_initial_statuses",
             }));
@@ -158,7 +157,6 @@
         statusSocket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                console.log("[WS] Received:", data);
 
                 if (data.type === "initial_statuses") {
                     data.statuses.forEach(({ user_id, status, last_seen }) => {
@@ -167,9 +165,7 @@
                     });
                 }
 
-                // if (data.type === "status.update") {
                 if (data.type == "status_update") {
-                    console.log(`[STATUS] Update for user ${data.user_id}: ${data.status}`);
                     userStatuses.set(data.user_id, {
                         status: data.status,
                         last_seen: data.last_seen
@@ -200,13 +196,8 @@
 
         const wsUrl = `${wsProtocol}://${window.location.host}/ws/konnekt/recent-chats/${currentUserId}/`;
         recentChatsSocket = new WebSocket(wsUrl);
-
-        recentChatsSocket.onopen = (event) => {
-            console.log('rc socket open')
-        }
         
         recentChatsSocket.onmessage = (event) => {
-            console.log("Recent chat update received:", event.data);
             try {
                 const data = JSON.parse(event.data);
                 renderRecentChats(data.recent_chats);
@@ -241,7 +232,6 @@
     init();
 });
 </script>
-  <!--<script src="{% static 'konnekt/js/sockets.js' %}"></script>-->
   <script src="{% static 'konnekt/vendor/jquery/jquery-3.5.1.min.js' %}"></script>
   <script src="{% static 'konnekt/vendor/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'konnekt/vendor/bootstrap-datepicker.min.js' %}"></script>
