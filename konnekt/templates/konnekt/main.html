@@ -231,6 +231,67 @@
 
     init();
 });
+
+
+
+
+let debounceTimer;
+document.getElementById('search-users').addEventListener('keyup', function() {
+    var query = this.value;
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function() {
+        if (query.length >= 3) {
+            fetch('/konnekt/get_user_func/?qq=' + query)
+                .then(response => response.json())
+                .then(data => {
+                    var results = data.results;
+                    var resultsHtml = '';
+
+                    if (results.length === 0) {
+                        resultsHtml = '<li>No results found</li>';
+                    } else {
+                        results.forEach(function(user) {
+                            resultsHtml += `
+                                <li>
+                                    <div class="hover_action">
+                                        <a href="/konnekt/profile/${user.profile__identifier}/" class="btn btn-link text-info">
+                                            <i class="zmdi zmdi-eye"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-link text-danger">
+                                            <i class="zmdi zmdi-delete"></i>
+                                        </button>
+                                    </div>
+                                    <form method="post" action="{% url 'chats' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="source" value="new_convo">
+                                        <input type="hidden" name="userID" value="${user.id}">
+                                        <label class="card">
+                                            <div class="card-body">
+                                                <div class="media">
+                                                    <div class="avatar me-3">
+                                                        <img class="avatar rounded-circle" src="/media/${user.avatar_url}" style="object-fit: cover;">
+                                                    </div>
+                                                    <div class="media-body overflow-hidden">
+                                                        <div class="text-truncate">${user.username}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="submit" class="d-none">
+                                        </label>
+                                    </form>
+                                </li>
+                            `;
+                        });
+                    }
+
+                    document.getElementById('searchUserResults').innerHTML = resultsHtml;
+                })
+
+                .catch(error => console.error('Error fetching search results:', error));
+        }
+    }, 300); // 300ms debounce delay
+});
 </script>
   <script src="{% static 'konnekt/vendor/jquery/jquery-3.5.1.min.js' %}"></script>
   <script src="{% static 'konnekt/vendor/bootstrap.bundle.min.js' %}"></script>

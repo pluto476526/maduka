@@ -37,14 +37,14 @@
           <a href="{% url 'sign_out' %}" title="" class="btn btn-dark">Sign Out</a>
         </div>
       </div>
-      <div class="form-group input-group-lg search mb-3">
+      <!--<div class="form-group input-group-lg search mb-3">
         <i class="zmdi zmdi-search"></i>
         <input type="text" class="form-control" placeholder="Search...">
-      </div>
+      </div>-->
       <div class="card border-0 text-center pt-3 mb-4">
         <div class="card-body">
           <div class="card-user-avatar">
-            <img src="{{ request.user.profile.avatar }}" alt="avatar" style="width: 150px" />
+            <img src="{{ request.user.profile.avatar.url }}" alt="avatar" style="width: 150px" />
             <button type="button" class="btn btn-secondary btn-sm">
               <i class="zmdi zmdi-edit"></i>
             </button>
@@ -82,10 +82,10 @@
           <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#InviteFriends">New Chat</button>
         </div>
       </div>
-      <div class="form-group input-group-lg search mb-3">
+      <!--<div class="form-group input-group-lg search mb-3">
         <i class="zmdi zmdi-search"></i>
         <input type="text" class="form-control" placeholder="Search...">
-      </div>
+      </div>-->
       <ul class="chat-list" id="recent_chats_list" data-user-id="{{ request.user.id }}">
         <li class="header d-flex justify-content-between ps-3 pe-3 mb-1">
           <span>RECENT CHATS</span>
@@ -100,114 +100,6 @@
             </div>
           </div>
         </li>
-        <!--<li>
-          <a href="pages/bot-chat.html" class="card">
-            <div class="card-body">
-              <div class="media">
-                <div class="avatar me-3">
-                  <div class="avatar rounded-circle no-image bg-primary text-light">
-                    <span>
-                      <i class="zmdi zmdi-comment-text"></i>
-                    </span>
-                  </div>
-                </div>
-                <div class="media-body overflow-hidden">
-                  <div class="d-flex align-items-center mb-1">
-                    <h6 class="text-truncate mb-0 me-auto">Chat Bot</h6>
-                  </div>
-                  <div class="text-truncate">
-                    <i class="zmdi zmdi-circle text-success"></i>
-                    Online
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </li>-->
-
-        <!-- {% for c, p, msg in z_data %}
-        {% if c.convo.is_group %}
-        <li>
-          <div class="hover_action">
-            <button type="button" class="btn btn-link text-info">
-              <i class="zmdi zmdi-eye">
-              </i>
-            </button>
-            <button type="button" class="btn btn-link text-warning">
-              <i class="zmdi zmdi-star">
-              </i>
-            </button>
-            <button type="button" class="btn btn-link text-danger">
-              <i class="zmdi zmdi-delete">
-              </i>
-            </button>
-          </div>
-          <a href="pages/group-chat.html" class="card">
-            <div class="card-body">
-              <div class="media">
-                <div class="avatar me-3">
-                  <span class="status rounded-circle">
-                  </span>
-                  <div class="avatar rounded-circle no-image cyan">
-                    <span>
-                      DG
-                    </span>
-                  </div>
-                </div>
-                <div class="media-body overflow-hidden">
-                  <div class="d-flex align-items-center mb-1">
-                    <h6 class="text-truncate mb-0 me-auto">
-                      Design Group
-                    </h6>
-                    <p class="small text-muted text-nowrap ms-4 mb-0">
-                      07:00 am
-                    </p>
-                  </div>
-                  <div class="text-truncate">
-                    <i class="zmdi zmdi-file-text me-1">
-                    </i>
-                    Lorem ipsum dolor sit amet consectetur, adipisicing....
-                    <div class="avatar-list avatar-list-stacked mt-1">
-                      <img class="avatar xs rounded" src="assets/img/avatar4.png" data-toggle="tooltip" data-placement="top" title="Jojo">
-                      <img class="avatar xs rounded" src="assets/img/avatar3.png" data-toggle="tooltip" data-placement="top" title="Jeje">
-                      <img class="avatar xs rounded" src="assets/img/avatar5.png" data-toggle="tooltip" data-placement="top" title="Jaja">
-                      <img class="avatar xs rounded" src="assets/img/avatar1.jpg" data-toggle="tooltip" data-placement="top" title="Jiji">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </li>
-        {% else %}
-        <li id="user-{{ p.id }}">
-          <div class="hover_action">
-            <button type="button" class="btn btn-link text-danger">
-              <i class="zmdi zmdi-delete"></i>
-            </button>
-          </div>
-          <a href="{% url 'chat_view' c.conv_id %}" class="card">
-            <div class="card-body">
-              <div class="media">
-                <div class="avatar me-3" id="container-{{ p.userID }}">
-                 
-                 <! <span class="status rounded-circle" id="dot-{{ p.userID }}"></span>
-                  <img class="avatar rounded-circle" src="{{ p.profile.avatar.url }}" alt="avatar" style="object-fit: cover;">
-                </div>
-                <div class="media-body overflow-hidden">
-                  <div class="d-flex align-items-center mb-1">
-                    <h6 class="text-truncate mb-0 me-auto">{{ p.username|title }}</h6>
-                    <p class="small text-muted text-nowrap ms-4 mb-0">{{ msg.timestamp|natural_time_format }}</p>
-                  </div>
-                  <div class="text-truncate">{{ msg.body|capfirst }}</div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </li> 
-        {% endif %}
-        {% endfor %} -->
-
       </ul>
     </div>
 
@@ -218,10 +110,10 @@
           <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#InviteFriends">Invite Friends</button>
         </div>
       </div>
-      <div class="form-group input-group-lg search mb-3">
+      <!--<div class="form-group input-group-lg search mb-3">
         <i class="zmdi zmdi-search"></i>
         <input type="text" class="form-control" placeholder="Search...">
-      </div>
+      </div>-->
       <ul class="chat-list">
         {% if contacts %}
           {% for letter, group in contacts %}
@@ -271,6 +163,37 @@
         {% endif %}
 
       </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="InviteFriends" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Start New Conversation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="get" action="">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="search-users" class="form-control" name="qq">
+            <small id="emailHelp" class="form-text text-muted">Search from the list of registered users and click on the contact to start a conversation.</small>
+          </div>
+          <div class="mt-5">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+          </div>
+        </form>
+        <div class="mt-5">
+          <ul class="chat-list" id="searchUserResults">
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>

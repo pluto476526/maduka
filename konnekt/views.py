@@ -52,6 +52,25 @@ def upload_attachment(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
+def get_user_func(request):
+    query = request.GET.get('qq', '')
+    logger.debug(f"Search query: {query}")  # Debugging
+
+    if query:
+        try:
+            results = User.objects.filter(username__icontains=query)
+            results_list = list(results.values('id', 'username', 'profile__avatar', 'profile__identifier'))
+            for result in results_list:
+                result['avatar_url'] = result['profile__avatar']
+
+            logger.debug(f"Results: {results_list}")  # Debugging
+            return JsonResponse({'results': results_list})
+        except Exception as e:
+            logger.debug(f"Error: {e}")  # Print any errors
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'results': []})
+
 
 @login_required
 def index_view(request):
