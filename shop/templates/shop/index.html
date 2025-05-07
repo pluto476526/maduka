@@ -116,14 +116,14 @@
                                 </div>
                                 {% for t in top_categories %}
                                 <div class="filter__category-wrapper">
-                                    <button class="btn filter__btn filter__btn--style-1" type="button" data-filter=".{{ t.category }}">{{ t.category|upper }}</button>
+                                    <button class="btn filter__btn filter__btn--style-1" type="button" data-filter=".{{ t.id }}">{{ t.category|upper }}</button>
                                 </div>
                                 {% endfor %}
                             </div>
                             <div class="filter__grid-wrapper u-s-m-t-30">
                                 <div class="row">
                                     {% for tc in tc_products %}
-                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 u-s-m-b-30 filter__item {{ tc.category.category }}">
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 u-s-m-b-30 filter__item {{ tc.category.id }}">
                                         <div class="product-o product-o--hover-on product-o--radius">
                                             <div class="product-o__wrap">
                                                 <a href="{% url 'product_details' the_shop.slug tc.product_id %}" class="aspect aspect--bg-grey aspect--square u-d-block">
