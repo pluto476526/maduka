@@ -83,7 +83,7 @@
                         {% if sender.status.is_online %}
                         🟢 Online
                         {% elif sender.status.last_seen and not sender.status.is_online%}
-                          ⚪ Last seen: {{ sender.status.last_seen|natural_time_format }}
+                          ⚪ {{ sender.status.last_seen|natural_time_format }}
                         {% else %}
                           ⚪ Never
                         {% endif %}

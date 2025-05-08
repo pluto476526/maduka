@@ -58,7 +58,7 @@ def get_user_func(request):
 
     if query:
         try:
-            results = User.objects.filter(username__icontains=query)
+            results = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
             results_list = list(results.values('id', 'username', 'profile__avatar', 'profile__identifier'))
             for result in results_list:
                 result['avatar_url'] = result['profile__avatar']

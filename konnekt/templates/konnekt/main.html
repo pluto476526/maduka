@@ -68,7 +68,7 @@
         document.querySelectorAll(`[data-contact-id="${userId}"]`).forEach(div => {
             div.textContent = status === 'online'
                 ? "🟢 Online"
-                : `⚪ Last seen: ${lastSeen ? formatTime(lastSeen) : "Never"}`;
+                : `⚪ ${lastSeen ? formatTime(lastSeen) : "Never"}`;
         });
     };
 
