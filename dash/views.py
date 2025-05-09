@@ -290,10 +290,13 @@ def inventory_view(request):
                             price = int(row['price'])
                             quantity = int(row['quantity'])
                             unit_name = row['units'].strip().lower()
+                            supplier_name = row['supplier'].strip().lower()
 
                             if not product or not category_name:
                                 raise ValueError("Missing product name or category")
-
+                            
+                            if supplier_name:
+                                supplier, _ = Supplier.objects.get_or_create(shop=shop, name=supplier_name)
                             try:
                                 category = Category.objects.get(category=category_name)
                             except Category.DoesNotExist:
@@ -304,10 +307,6 @@ def inventory_view(request):
                             except Unit.DoesNotExist:
                                 raise ValueError(f"Units '{unit_name}' do not exist")
 
-                            try:
-                                supplier = Supplier.objects.get(name=supplier)
-                            except Supplier.DoesNotExist:
-                                pass
 
                             product_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
                             item = Inventory(
