@@ -297,15 +297,13 @@ def inventory_view(request):
                             
                             if supplier_name:
                                 supplier, _ = Supplier.objects.get_or_create(shop=shop, name=supplier_name)
+                            if unit_name:
+                                unit, _ = Unit.objects.get_or_create(shop=shop, units=unit_name)
+
                             try:
                                 category = Category.objects.get(category=category_name)
                             except Category.DoesNotExist:
                                 raise ValueError(f"Category '{category_name}' does not exist")
-
-                            try:
-                                unit = Unit.objects.filter(shop=shop, units=unit_name).first()
-                            except Unit.DoesNotExist:
-                                raise ValueError(f"Units '{unit_name}' do not exist")
 
 
                             product_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
