@@ -142,6 +142,7 @@
                         <a class="dropdown-item" href="#">Add Members</a>
                         {% endif %}
                         <a class="dropdown-item" href="#">Delete Conversation</a>
+                        <button class="dropdown-item" id="enable-notifications">Notif</button>
                       </div>
                     </div>
                   </li>
@@ -741,124 +742,126 @@ chatSocket.addEventListener("message", (event) => {
   const imageUrls = data["image_urls"] || [];
   const photoID = data["uniqueMsgID"]
 
-  // Append new message
-  if (message || imageUrls.length > 0) {
-    let messageHTML = "";
-    let imageHTML = "";
+  if (data.type === "chat_message") {
+    // Append new message
+    if (message || imageUrls.length > 0) {
+      let messageHTML = "";
+      let imageHTML = "";
 
-    if (imageUrls && imageUrls.length > 0) {
-      // let gridClass = 'multi';
-      // if (imageUrls.length === 1) gridClass = 'single';  
-      // if (imageUrls.length === 2) gridClass = 'two';
+      if (imageUrls && imageUrls.length > 0) {
+        // let gridClass = 'multi';
+        // if (imageUrls.length === 1) gridClass = 'single';  
+        // if (imageUrls.length === 2) gridClass = 'two';
 
-      imageHTML = `
-        <div class="image-grid mt-2">
-          ${imageUrls.map(url => `
-            <a href="${url}" class="thumb-wrapper glightbox" data-gallery="${photoID}">
-              <img src="${url}" class="img-thumbnail chat-thumbnail" alt="image">
-            </a>
-          `).join('')}
-        </div>
-      `;
-    }
+        imageHTML = `
+          <div class="image-grid mt-2">
+            ${imageUrls.map(url => `
+              <a href="${url}" class="thumb-wrapper glightbox" data-gallery="${photoID}">
+                <img src="${url}" class="img-thumbnail chat-thumbnail" alt="image">
+              </a>
+            `).join('')}
+          </div>
+        `;
+      }
 
-    if (sender_id == currentUserId) {
+      if (sender_id == currentUserId) {
+        document.getElementById("attachmentInput").value = "";
+        msgBox.value = "";
+        messageHTML = `
+          <li class="d-flex message right user-message" data-timestamp="${timestamp}">
+              <div class="message-body">
+                  <span class="date-time text-muted">${s_time}
+                      <i class="zmdi zmdi-check-all text-primary read-mark" style="display: none;"></i>
+                  </span>
+                  <div class="message-row d-flex align-items-center justify-content-end">
+                      <div class="dropdown">
+                          <a class="text-muted me-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="zmdi zmdi-more-vert"></i>
+                          </a>
+                          <div class="dropdown-menu">
+                              <a class="dropdown-item" href="#">Edit</a>
+                              <a class="dropdown-item" href="#">Share</a>
+                              <a class="dropdown-item" href="#">Delete</a>
+                          </div>
+                      </div>
+                      <div class="message-content border p-3">${message}${imageHTML}</div>
+                  </div>
+              </div>
+          </li>`;
+      } else {
+        messageHTML = `
+          <li class="d-flex message">
+              <div class="mr-lg-3 me-2">
+                  <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
+              </div>
+              <div class="message-body">
+                  <span class="date-time text-muted">${sender}, ${s_time}</span>
+                  <div class="message-row d-flex align-items-center">
+                      <div class="message-content p-3">${message}${imageHTML}</div>
+                      <div class="dropdown">
+                          <a class="text-muted ms-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="zmdi zmdi-more-vert"></i>
+                          </a>
+                          <div class="dropdown-menu dropdown-menu-right">
+                              <a class="dropdown-item" href="#">Edit</a>
+                              <a class="dropdown-item" href="#">Share</a>
+                              <a class="dropdown-item" href="#">Delete</a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </li>`;
+      }
+
+      chatItem.insertAdjacentHTML("beforeend", messageHTML);
+
+      // Wait for all images to load before scrolling
+      const newlyInserted = chatItem.querySelectorAll(`.message[data-timestamp="${timestamp}"] img`);
+
+      if (newlyInserted.length > 0) {
+        let loadedCount = 0;
+        newlyInserted.forEach(img => {
+          img.addEventListener('load', () => {
+            loadedCount++;
+            if (loadedCount === newlyInserted.length) {
+              if (isNearBottom()) scrollToBottom();
+            }
+          });
+          img.addEventListener('error', () => {
+            loadedCount++;
+            if (loadedCount === newlyInserted.length) {
+              if (isNearBottom()) scrollToBottom();
+            }
+          });
+        });
+      } else {
+        if (isNearBottom()) scrollToBottom(); // no images to wait for
+      }
+
+      // Clear file input and previews
       document.getElementById("attachmentInput").value = "";
-      msgBox.value = "";
-      messageHTML = `
-        <li class="d-flex message right user-message" data-timestamp="${timestamp}">
-            <div class="message-body">
-                <span class="date-time text-muted">${s_time}
-                    <i class="zmdi zmdi-check-all text-primary read-mark" style="display: none;"></i>
-                </span>
-                <div class="message-row d-flex align-items-center justify-content-end">
-                    <div class="dropdown">
-                        <a class="text-muted me-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="zmdi zmdi-more-vert"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Share</a>
-                            <a class="dropdown-item" href="#">Delete</a>
-                        </div>
-                    </div>
-                    <div class="message-content border p-3">${message}${imageHTML}</div>
-                </div>
-            </div>
-        </li>`;
-    } else {
-      messageHTML = `
-        <li class="d-flex message">
-            <div class="mr-lg-3 me-2">
-                <img class="avatar sm rounded-circle" src="${senderAvatar}" alt="avatar" style="object-fit: cover;">
-            </div>
-            <div class="message-body">
-                <span class="date-time text-muted">${sender}, ${s_time}</span>
-                <div class="message-row d-flex align-items-center">
-                    <div class="message-content p-3">${message}${imageHTML}</div>
-                    <div class="dropdown">
-                        <a class="text-muted ms-1 p-2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="zmdi zmdi-more-vert"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Share</a>
-                            <a class="dropdown-item" href="#">Delete</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </li>`;
-    }
+      fileStore.items.clear(); // clear the stored files
 
-    chatItem.insertAdjacentHTML("beforeend", messageHTML);
+      const previewContainer = document.getElementById("filePreview");
+      if (previewContainer) {
+        previewContainer.querySelectorAll("img").forEach(img => URL.revokeObjectURL(img.src));
+        previewContainer.innerHTML = "";
+      }
 
-    // Wait for all images to load before scrolling
-    const newlyInserted = chatItem.querySelectorAll(`.message[data-timestamp="${timestamp}"] img`);
-
-    if (newlyInserted.length > 0) {
-      let loadedCount = 0;
-      newlyInserted.forEach(img => {
-        img.addEventListener('load', () => {
-          loadedCount++;
-          if (loadedCount === newlyInserted.length) {
-            if (isNearBottom()) scrollToBottom();
-          }
-        });
-        img.addEventListener('error', () => {
-          loadedCount++;
-          if (loadedCount === newlyInserted.length) {
-            if (isNearBottom()) scrollToBottom();
-          }
-        });
+      // Re-initialize GLightbox after inserting new images
+      if (window.lightboxInstance) {
+        window.lightboxInstance.destroy();
+      }
+      window.lightboxInstance = GLightbox({
+        selector: '.glightbox'
       });
-    } else {
-      if (isNearBottom()) scrollToBottom(); // no images to wait for
+
     }
-
-    // Clear file input and previews
-    document.getElementById("attachmentInput").value = "";
-    fileStore.items.clear(); // clear the stored files
-
-    const previewContainer = document.getElementById("filePreview");
-    if (previewContainer) {
-      previewContainer.querySelectorAll("img").forEach(img => URL.revokeObjectURL(img.src));
-      previewContainer.innerHTML = "";
-    }
-
-    // Re-initialize GLightbox after inserting new images
-    if (window.lightboxInstance) {
-      window.lightboxInstance.destroy();
-    }
-    window.lightboxInstance = GLightbox({
-      selector: '.glightbox'
-    });
-
   }
 
 
   // Insert read receipts
-  if (data.type === "read_status.update") {
+  if (data.type === "read_status") {
     if (data.user_id != currentUserId) {
       const userMessages = [...document.querySelectorAll(".user-message")];
       if (userMessages.length > 0) {
@@ -869,6 +872,20 @@ chatSocket.addEventListener("message", (event) => {
         });
 
       }
+    }
+  }
+
+
+  // Handle the browser notification
+  if (data.type === 'notification') {
+    if (Notification.permission === "granted") {
+      new Notification(data.title, { body: data.message });
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          new Notification(data.title, { body: data.message });
+        }
+      });
     }
   }
 
@@ -1068,6 +1085,88 @@ msgBox.addEventListener("keypress", function(e) {
       selector: '.glightbox',
     });
   };
+
+</script>
+
+<script type="text/javascript">
+
+    // async function registerServiceWorker() {
+    //     if ('serviceWorker' in navigator) {
+    //         try {
+    //             const registration = await navigator.serviceWorker.register('/static/konnekt/js/notifications_worker.js');
+    //             return registration;
+    //         } catch (error) {
+    //             console.error('ServiceWorker registration failed:', error);
+    //         }
+    //     }
+    //     return null;
+    // }
+
+
+
+
+
+    async function subscribeToPushNotifications(registration) {
+        try {
+            // 1. Get VAPID public key
+            const response = await fetch('/konnekt/notifications/vapid-public-key/');
+            if (!response.ok) throw new Error('Failed to get VAPID key');
+            
+            const pubKey = await response.json();
+            if (!pubKey) throw new Error('Invalid VAPID key format');
+
+            // 2. Convert VAPID key to Uint8Array
+            const convertedVapidKey = urlBase64ToUint8Array(pubKey.vapidPublicKey);
+            console.log(convertedVapidKey);
+
+            // 3. Subscribe to push
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidKey
+            });
+
+            return subscription;
+        } catch (error) {
+            console.error('Push subscription error:', error);
+            throw error;
+        }
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+    }
+
+    async function setupPushNotifications() {
+      const registration = await navigator.serviceWorker.register('/static/konnekt/js/notifications_worker.js');
+      console.log('Service worker registered');
+
+      let subscription = await registration.pushManager.getSubscription();
+      
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+          throw new Error('Permission not granted');
+      }
+
+      subscription = await subscribeToPushNotifications(registration);
+
+      if (window.chatSocket) {
+          window.chatSocket.send(JSON.stringify({
+              type: 'push.subscribe',
+              subscription: subscription.toJSON()
+          }));
+      }
+
+      return subscription;
+  
+    }
+
+    // Initialize when DOM loads
+    document.addEventListener('DOMContentLoaded', setupPushNotifications);
 
 </script>
 

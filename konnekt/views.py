@@ -4,11 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.db import transaction
+from django.conf import settings
 from django.utils import timezone
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from dash.models import Profile
-from konnekt.models import Conversation, ConversationItem, Note, Task, Contact, ConversationReadStatus, MessageImage
+from konnekt.models import Conversation, ConversationItem, Note, Task, Contact, ConversationReadStatus, MessageImage, PushSubscription
 import logging
 import secrets
 import string
@@ -16,6 +17,25 @@ import string
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+
+@login_required
+def get_vapid_public_key(request):
+    return JsonResponse({'vapidPublicKey': settings.VAPID_PUBLIC_KEY})
+
+
+@csrf_exempt
+@login_required
+def save_subscription(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        PushSubscription.objects.update_or_create(
+            user=request.user,
+            defaults={'subscription_data': data}
+        )
+        return JsonResponse({'status': 'subscription saved'})
+    return JsonResponse({'error': 'Invalid method'}, status=400)
+
 
 
 @csrf_exempt

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as lazy
 import secrets, string
 from django.utils import timezone
 
@@ -101,3 +102,17 @@ class ConversationReadStatus(models.Model):
 
     class Meta:
         unique_together = ('conversation', 'user')
+
+
+class PushSubscription(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    endpoint = models.TextField(unique=True, null=True)
+    keys = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = lazy('Push Subscription')
+        verbose_name_plural = lazy('Push Subscriptions')
+
+    def __str__(self):
+        return f"Push subscription for {self.user}"

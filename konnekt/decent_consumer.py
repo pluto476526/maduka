@@ -17,6 +17,142 @@ redis_conn = redis.StrictRedis(host='localhost', port=6379, db=1)
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+# class ChatConsumer(AsyncWebsocketConsumer):
+#     async def connect(self):
+#         self.conv_id = self.scope['url_route']['kwargs']['conv_id']
+#         self.room_group_name = f'chat_{self.conv_id}'
+
+#         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+#         await self.accept()
+
+#     async def disconnect(self, close_code):
+#         if hasattr(self, 'room_group_name'):
+#             await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
+#     async def receive(self, text_data):
+#         try:
+#             data = json.loads(text_data)
+
+#             # Handle read receipt
+#             if data.get('type') == 'read_status.send':
+#                 convo_id = data['convo_id']
+#                 user_id = data['user_id']
+#                 timestamp = data['timestamp']
+
+#                 await self.update_read_status(user_id, timestamp)
+
+#                 await self.channel_layer.group_send(
+#                     self.room_group_name,
+#                     {
+#                         'type': 'send_read_status',
+#                         'convo_id': convo_id,
+#                         'user_id': user_id,
+#                         'timestamp': timestamp,
+#                     }
+#                 )
+#                 return
+
+#             # Handle normal message
+#             if 'message' not in data:
+#                 await self.send(text_data=json.dumps({
+#                     'error': "Missing 'message' in the data"
+#                 }))
+#                 return
+
+#             image_urls = []
+#             message = data['message']
+#             sender_id = data.get('sender_id')
+#             sender = data.get('sender')
+#             timestamp = data.get('timestamp')
+#             image_urls = data.get('image_urls')
+#             uniqueMsgID = data.get('uniqueMsgID')
+
+#             # Save to DB
+#             await self.save_message(sender_id, message, image_urls)
+
+#             # Broadcast chat message
+#             await self.channel_layer.group_send(
+#                 self.room_group_name,
+#                 {
+#                     'type': 'send_chat_message',
+#                     'message': message,
+#                     'sender_id': sender_id,
+#                     'sender': sender,
+#                     'timestamp': timestamp,
+#                     'image_urls': image_urls,
+#                     'uniqueMsgID': uniqueMsgID,
+#                 }
+#             )
+
+#             # Notify recent chats update
+#             conversation = await self.get_conversation()
+#             participants = await self.get_participants(conversation)
+#             for user in participants:
+#                 await self.channel_layer.group_send(
+#                     f'recent_chats_{user.id}',
+#                     {'type': 'send_chat_updated'}
+#                 )
+
+#         except json.JSONDecodeError:
+#             await self.send(text_data=json.dumps({'error': 'Invalid JSON'}))
+#         except Exception as e:
+#             await self.send(text_data=json.dumps({'error': f"Error: {str(e)}"}))
+
+
+#     async def send_chat_message(self, event):
+#         await self.send(text_data=json.dumps({
+#             'message': event['message'],
+#             'sender_id': event['sender_id'],
+#             'sender': event['sender'],
+#             'timestamp': event['timestamp'],
+#             'image_urls': event['image_urls'],
+#             'uniqueMsgID': event['uniqueMsgID'],
+#         }))
+
+#     async def send_read_status(self, event):
+#         await self.send(text_data=json.dumps({
+#             'type': 'read_status.update',
+#             'convo_id': event['convo_id'],
+#             'user_id': event['user_id'],
+#             'timestamp': event['timestamp'],
+#         }))
+
+#     @database_sync_to_async
+#     def save_message(self, sender_id, message, image_urls=None):
+#         sender = User.objects.get(id=sender_id)
+#         conversation = Conversation.objects.get(conv_id=self.conv_id)
+#         item = ConversationItem.objects.create(
+#             conversation=conversation,
+#             sender=sender,
+#             body=message
+#         )
+#         if image_urls:
+#             for url in image_urls:
+#                 img_path = url.split('/media/')[-1]
+#                 msg_img = MessageImage.objects.get(image=img_path)
+#                 msg_img.message = item
+#                 msg_img.save()
+#         return item
+
+#     @database_sync_to_async
+#     def get_conversation(self):
+#         return Conversation.objects.get(conv_id=self.conv_id)
+
+#     @database_sync_to_async
+#     def get_participants(self, conversation):
+#         return list(conversation.participants.all())
+
+
+#     @database_sync_to_async
+#     def update_read_status(self, user_id, timestamp):
+#         user = User.objects.get(id=user_id)
+#         conversation = Conversation.objects.get(conv_id=self.conv_id)
+#         r_status, _ = ConversationReadStatus.objects.get_or_create(
+#             conversation=conversation,
+#             user=user
+#         )
+#         r_status.last_read_at = datetime.now()
+#         r_status.save()
 
 
 class RecentChatsConsumer(AsyncWebsocketConsumer):
@@ -104,6 +240,164 @@ class RecentChatsConsumer(AsyncWebsocketConsumer):
             })
 
         return sorted(recent_chats, key=lambda x: x['timestamp'] or "", reverse=True)
+
+
+
+
+
+# class ChatConsumer(AsyncWebsocketConsumer):
+#     async def connect(self):
+#         # Get conversation ID from URL
+#         self.conv_id = self.scope['url_route']['kwargs']['conv_id']
+#         self.room_group_name = f'chat_{self.conv_id}'
+#         self.user = self.scope["user"]
+        
+#         if self.user.is_anonymous:
+#             await self.close()
+#             return
+            
+#         self.user_group_name = f'user_{self.user.id}'  # Group by user ID for notifications
+
+#         # Join the room group and user group
+#         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+#         await self.channel_layer.group_add(self.user_group_name, self.channel_name)
+
+#         await self.accept()
+
+#     async def disconnect(self, close_code):
+#         # Leave the room group and user group on disconnect
+#         if hasattr(self, 'room_group_name'):
+#             await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+#         if hasattr(self, 'user_group_name'):
+#             await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+
+#     async def receive(self, text_data):
+#         try:
+#             data = json.loads(text_data)
+            
+#             # Handle push subscription
+#             if data.get('type') == 'push.subscribe':
+#                 subscription = data.get('subscription')
+#                 if subscription:
+#                     await self.save_push_subscription(self.user, subscription)
+#                     return
+
+#             # Handle read receipt
+#             if data.get('type') == 'read_status.send':
+#                 convo_id = data['convo_id']
+#                 user_id = data['user_id']
+#                 timestamp = data['timestamp']
+
+#                 await self.update_read_status(user_id, timestamp)
+
+#                 await self.channel_layer.group_send(
+#                     self.room_group_name,
+#                     {
+#                         'type': 'send_read_status',
+#                         'convo_id': convo_id,
+#                         'user_id': user_id,
+#                         'timestamp': timestamp,
+#                     }
+#                 )
+#                 return
+
+#             # Handle normal message
+#             if 'message' not in data:
+#                 await self.send(text_data=json.dumps({
+#                     'error': "Missing 'message' in the data"
+#                 }))
+#                 return
+
+#             # Extract message data
+#             message = data['message']
+#             sender_id = data.get('sender_id')
+#             sender = data.get('sender')
+#             timestamp = data.get('timestamp')
+#             image_urls = data.get('image_urls', [])
+#             uniqueMsgID = data.get('uniqueMsgID')
+
+#             # Save the message to the database
+#             await self.save_message(sender_id, message, image_urls)
+
+#             # Broadcast the chat message to the group
+#             await self.channel_layer.group_send(
+#                 self.room_group_name,
+#                 {
+#                     'type': 'send_chat_message',
+#                     'message': message,
+#                     'sender_id': sender_id,
+#                     'sender': sender,
+#                     'timestamp': timestamp,
+#                     'image_urls': image_urls,
+#                     'uniqueMsgID': uniqueMsgID,
+#                 }
+#             )
+
+#             # Notify recent chats update to participants
+#             conversation = await self.get_conversation()
+#             participants = await self.get_participants(conversation)
+            
+#             for user in participants:
+#                 if user.id == sender_id:
+#                     continue
+                    
+#                 # Send Web Push notification if available
+#                 subscription = await self.get_push_subscription(user)
+#                 if subscription:
+#                     try:
+#                         await self.send_push_notification(
+#                             subscription,
+#                             "New Message",
+#                             f'New message from {sender}',
+#                             {'conversation_id': self.conv_id}
+#                         )
+#                     except Exception as e:
+#                         print(f"Failed to send push notification: {e}")
+
+#                 # Send WebSocket notification
+#                 await self.channel_layer.group_send(
+#                     f'user_{user.id}',
+#                     {
+#                         'type': 'send_browser_notification',
+#                         'title': 'New Message',
+#                         'message': f'New message from {sender}',
+#                         'data': {'conversation_id': self.conv_id}
+#                     }
+#                 )
+
+#         except json.JSONDecodeError:
+#             await self.send(text_data=json.dumps({'error': 'Invalid JSON'}))
+#         except Exception as e:
+#             await self.send(text_data=json.dumps({'error': f"Error: {str(e)}"}))
+
+
+#     async def send_chat_message(self, event):
+#         # Send the chat message to the WebSocket
+#         await self.send(text_data=json.dumps({
+#             'message': event['message'],
+#             'sender_id': event['sender_id'],
+#             'sender': event['sender'],
+#             'timestamp': event['timestamp'],
+#             'image_urls': event['image_urls'],
+#             'uniqueMsgID': event['uniqueMsgID'],
+#         }))
+
+#     async def send_read_status(self, event):
+#         # Send the read status update to the WebSocket
+#         await self.send(text_data=json.dumps({
+#             'type': 'read_status.update',
+#             'convo_id': event['convo_id'],
+#             'user_id': event['user_id'],
+#             'timestamp': event['timestamp'],
+#         }))
+
+#     async def send_browser_notification(self, event):
+#         # Send browser notification event to the frontend
+#         await self.send(text_data=json.dumps({
+#             'type': 'browser.notification',
+#             'title': event['title'],
+#             'message': event['message'],
+#         }))
 
 
 

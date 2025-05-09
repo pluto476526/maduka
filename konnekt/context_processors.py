@@ -33,7 +33,6 @@ def get_all_users(request):
     # Exclude users that are already in the user's contacts
     saved_contacts_ids = request.user.contacts.values_list('contact_id', flat=True)
     registered_users = registered_users.exclude(id__in=saved_contacts_ids).order_by('username')
-
     return {'registered_users': registered_users}
 
 

@@ -77,6 +77,7 @@ def register(request):
     register_form = UserRegistrationForm(request.POST or None)
     if request.method == 'POST' and register_form.is_valid():
         register_form.save()
+        Profile.objects.get_or_create(user=user)
         messages.success(request, 'Registration successful. Please sign in.')
         return redirect('sign_in')
 

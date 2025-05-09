@@ -18,6 +18,8 @@
   {% block main %}
   {% endblock %}
 
+
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const currentUserId = "{{ request.user.id }}";
@@ -292,7 +294,10 @@ document.getElementById('search-users').addEventListener('keyup', function() {
         }
     }, 300); // 300ms debounce delay
 });
+
+
 </script>
+
   <script src="{% static 'konnekt/vendor/jquery/jquery-3.5.1.min.js' %}"></script>
   <script src="{% static 'konnekt/vendor/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'konnekt/vendor/bootstrap-datepicker.min.js' %}"></script>
