@@ -150,12 +150,14 @@ def chat_view(request, convo_id):
     
     else:
         sender = convo.participants.exclude(id=request.user.id).first()
-
+        contact = Contact.objects.filter(owner=request.user, contact=sender).exists()
+    
     context = {
         'texts': texts,
         'convo_id': convo_id,
         'convo': convo,
         'sender': sender,
+        'contact': contact,
         'r_statuses': r_statuses,
     }
     return render(request, 'konnekt/chat.html', context)

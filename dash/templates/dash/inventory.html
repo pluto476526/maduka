@@ -1,15 +1,13 @@
-{% extends 'dash/main.html' %} {% load humanize %} {% block main %}
+{% extends 'dash/main.html' %}
+{% load static %}
+{% load humanize %}
+{% block main %}
 <div class="content-wrapper">
   <div class="row">
     {% if messages %} {% for message in messages %}
     <div class="alert alert-info alert-dismissible fade show" role="alert">
       {{ message }}
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="alert"
-        aria-label="Close"
-      ></button>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %} {% endif %}
     <div class="col-sm-12 grid-margin stretch-card">
@@ -18,14 +16,16 @@
           <div class="d-sm-flex justify-content-between align-items-start">
             <div>
               <h4 class="card-title">Inventory</h4>
-              <p class="card-description">
-                View and manage your shop inventory.
-              </p>
+              <p class="card-description">View and manage your shop inventory.</p>
             </div>
             <div>
               <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button" data-bs-toggle="modal" data-bs-target="#newProductModal" >
                 <i class="mdi mdi-account-plus"></i>
                 New Product
+              </button>
+              <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button" data-bs-toggle="modal" data-bs-target="#bulkUploadModal" >
+                <i class="mdi mdi-account-plus"></i>
+                Bulk Upload
               </button>
             </div>
           </div>
@@ -269,4 +269,83 @@
   </div>
 </div>
 <!-- New Product Modal -->
+
+
+
+<!-- Bulk Upload Modal -->
+<div class="modal fade" id="bulkUploadModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Bulk Upload Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container pb-2">
+          <p class="lead">Follow these guidelines to upload multiple products via CSV.</p>
+          <h5 class="mt-4">✅ Required CSV Format</h5>
+          <ul class="list-group list-group-flush mb-3">
+              <li class="list-group-item"><strong>product</strong>: Name of the product (max 50 characters)</li>
+              <li class="list-group-item"><strong>category</strong>: Must match an existing category exactly</li>
+              <li class="list-group-item"><strong>description</strong>: Optional product details</li>
+              <li class="list-group-item"><strong>price</strong>: Positive integer (e.g., 1500)</li>
+              <li class="list-group-item"><strong>quantity</strong>: Number of items in stock</li>
+          </ul>
+          <h5>📄 Sample CSV Content</h5>
+          <pre class="bg-dark text-white border p-0">
+            <code>
+              product,category,description,price,quantity,units,supplier,isFeatured
+              Wireless Mouse,Electronics,Ergonomic wireless mouse with USB receiver,1500,30,units,,True
+              Bluetooth Speaker,Audio,Portable Bluetooth speaker with deep bass,2500,20,pieces,Kim,False
+              LED Desk Lamp,Home,Adjustable LED lamp with dimmable brightness,1200,15,pieces,Don,True
+              Notebook 200 Pages,Stationery,College-ruled notebook ideal for school use,300,100,books,,False
+              Stainless Steel Water Bottle,Home,1L insulated bottle for hot and cold drinks,900,50,pieces,,False
+            </code>
+          </pre>
+          <h5>📌 Important Guidelines</h5>
+          <ul class="list-group list-group-numbered mb-4">
+              <li class="list-group-item">Use <strong>.csv</strong> format (export from Excel or Google Sheets if needed).</li>
+              <li class="list-group-item">Ensure category names are <strong>exactly as defined</strong> in the system.</li>
+              <li class="list-group-item">Do not leave any <strong>required field</strong> blank.</li>
+              <li class="list-group-item">Avoid duplicate product entries.</li>
+          </ul>
+          <div class="alert alert-info">
+              <strong>Need a template?</strong> <a href="{% static 'dash/example.csv' %}" class="alert-link">Download sample CSV</a>.
+          </div>
+        </div>
+
+        <!-- Floating Labels Form -->
+        <form class="row g-3" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="col-md-12">
+            <div class="d-flex align-items-center gap-3">
+              <label class="btn btn-sm btn-primary">Upload CSV
+                <input type="file" name="bulk_csv" class="d-none" id="csvInput" accept=".csv">
+              </label>
+            </div>
+          </div>
+          <div id="fileName"></div>
+          <input type="hidden" name="source" value="bulk_upload">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">Upload</button>
+          </div>
+        </form>
+        <!-- End floating Labels Form -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Bulk Upload Modal -->
+
+<script>
+  document.getElementById('csvInput').addEventListener('change', function () {
+    const file = this.files[0];
+    const fileName = file?.name || "No file selected";
+    document.getElementById('fileName').textContent = fileName;
+  });
+</script>
+
 {% endblock %}
+
+

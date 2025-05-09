@@ -10,7 +10,8 @@ from django.db import transaction, models
 from shop.models import Shop, Ticket, CountyShipped, BlogPost, BlogCategory, BlogComment
 from main.models import MainHelpDesk, Notification
 from datetime import datetime, timedelta, timezone
-import logging
+from io import TextIOWrapper
+import logging, csv, secrets, string
 from dash.models import (
     Category,
     Inventory,
@@ -50,6 +51,7 @@ def percent_off(price, sale):
     except (ValueError, TypeError) as e:
         logger.error(f"Invalid input for percent_off: {e}")
         return 0
+
 
 
 @login_required
@@ -208,6 +210,7 @@ def inventory_view(request):
         source = request.POST.get('source')
         product_id = request.POST.get('id')
         avatar = request.FILES.get('avatar')
+        csv_file = request.FILES.get('bulk_csv')
         confirm_delete = request.POST.get('delete_item')
 
         if product_id:
@@ -259,6 +262,83 @@ def inventory_view(request):
                     product.is_deleted = True
                     product.save()
                     messages.success(request, f'Item "{product.product}" deleted.')
+
+            elif source == 'bulk_upload':
+
+                try:
+                    if not csv_file.content_type in ['text/csv', 'text/plain', 'application/vnd.ms-excel']:
+                        messages.error(request, "Only text-based CSV files are allowed.")
+                        return redirect("inventory")
+
+                    decoded_file = TextIOWrapper(csv_file.file, encoding='utf-8')
+                    reader = csv.DictReader(decoded_file)
+
+                    required_fields = {'product', 'category', 'price', 'quantity', 'units'}
+                    if not required_fields.issubset(reader.fieldnames):
+                        messages.error(request, f"CSV is missing required columns: {required_fields - set(reader.fieldnames)}")
+                        return redirect('inventory')
+
+                    items = []
+                    errors = []
+                    line_number = 1  # header is line 1
+
+                    for row in reader:
+                        line_number += 1
+                        try:
+                            product = row['product'].strip()
+                            category_name = row['category'].strip().lower()
+                            price = int(row['price'])
+                            quantity = int(row['quantity'])
+                            unit_name = row['units'].strip().lower()
+
+                            if not product or not category_name:
+                                raise ValueError("Missing product name or category")
+
+                            try:
+                                category = Category.objects.get(category=category_name)
+                            except Category.DoesNotExist:
+                                raise ValueError(f"Category '{category_name}' does not exist")
+
+                            try:
+                                unit = Unit.objects.get(units=unit_name)
+                            except Unit.DoesNotExist:
+                                raise ValueError(f"Units '{unit_name}' do not exist")
+
+                            try:
+                                supplier = Supplier.objects.get(name=supplier)
+                            except Supplier.DoesNotExist:
+                                pass
+
+                            product_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                            item = Inventory(
+                                shop=shop,
+                                product=product,
+                                product_id=product_id,
+                                category=category,
+                                description=row.get('description', '').strip(),
+                                price=price,
+                                units=unit,
+                                quantity=quantity,
+                                supplier=supplier,
+                                is_featured=row.get('isFeatured', '').strip(),
+                            )
+                            items.append(item)
+                        except Exception as e:
+                            errors.append(f"Line {line_number}: {str(e)}")
+
+                    if items:
+                        Inventory.objects.bulk_create(items)
+                        messages.success(request, f"{len(items)} products uploaded successfully.")
+
+                    if errors:
+                        for error in errors:
+                            messages.warning(request, error)
+
+                except Exception as e:
+                    messages.error(request, f"Failed to process file: {str(e)}")
+                    return redirect('inventory')
+
+
         return redirect('inventory')
 
     context = {

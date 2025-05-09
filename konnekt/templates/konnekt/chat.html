@@ -127,6 +127,14 @@
                       </a>
                       <div class="dropdown-menu dropdown-menu-right">
                         <a class="dropdown-item" href="#">Search chat</a>
+                        {% if not contact %}
+                        <form method="post" action="{% url 'chats' %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="source" value="new_contact">
+                          <input type="hidden" name="userID" value="{{ sender.id }}">
+                          <button class="dropdown-item" type="submit">Add to Contacts</button>
+                        </form>
+                        {% endif %}
                         {% if sender.profile.phone %}
                         <a class="dropdown-item" href="tel:{{ sender.profile.phone }}">Call</a>
                         {% endif %}
