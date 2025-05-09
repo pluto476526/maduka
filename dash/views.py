@@ -300,7 +300,7 @@ def inventory_view(request):
                                 raise ValueError(f"Category '{category_name}' does not exist")
 
                             try:
-                                unit = Unit.objects.get(units=unit_name)
+                                unit = Unit.objects.filter(shop=shop, units=unit_name).first()
                             except Unit.DoesNotExist:
                                 raise ValueError(f"Units '{unit_name}' do not exist")
 
