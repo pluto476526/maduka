@@ -20,6 +20,10 @@
                 <i class="mdi mdi-account-plus"></i>
                 New Post
               </button>
+              <button class="btn btn-primary btn-sm text-white mb-0 me-0" type="button" data-bs-toggle="modal" data-bs-target="#bulkUploadModal">
+                <i class="mdi mdi-account-plus"></i>
+                Bulk Upload
+              </button>
             </div>
           </div>
           <div class="table-responsive">
@@ -130,13 +134,13 @@
           </div>
           <div class="col-md-12 d-flex">
             <label class="btn btn-primary" title="Select Image">Select Image
-              <input type="file" class="d-none" name="avatar">
+              <input type="file" class="d-none" name="avatar" id="avatarInput">
             </label>
-            <strong id="fileName"></strong>&nbsp;&nbsp;
             <div class="d-flex align-items-center gap-3">
               <label class="form-check-label">Set Featured</label>
               <input type="checkbox" name="is_featured" value="True" class="form-check">
             </div>
+            <strong id="avatarName"></strong>
           </div>
         </div>
         <input type="hidden" name="source" value="new_post">
@@ -208,13 +212,20 @@
           </div>
           <div class="col-md-12 d-flex">
             <label class="btn btn-primary" title="Select Image">Select Image
-              <input type="file" class="d-none">
+              <input type="file" class="d-none" name="avatar" id="avatarInput{{p.id}}">
             </label>
-            <strong id="fileName"></strong>&nbsp;&nbsp;
             <div class="d-flex align-items-center gap-3">
               <label class="form-check-label">Set Featured</label>
               <input type="checkbox" name="is_featured" value="True" class="form-check" {% if p.is_featured %} checked {% endif %}>
             </div>
+            <strong id="avatarName{{p.id}}"></strong>&nbsp;&nbsp;
+            <script>
+              document.getElementById('avatarInput{{p.id}}').addEventListener('change', function () {
+                const file = this.files[0];
+                const fileName = file?.name || "No file selected";
+                document.getElementById('avatarName{{p.id}}').textContent = fileName;
+              });
+            </script>
           </div>
         </div>
         <input type="hidden" name="post_id" value="{{ p.id }}">
@@ -230,6 +241,92 @@
 </div>
 {% endfor %}
 <!-- Edit Post Modal -->
+
+
+
+<!-- Bulk Upload Modal -->
+<div class="modal fade" id="bulkUploadModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Bulk Upload Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container pb-2">
+            <p class="lead">Follow these guidelines to upload multiple blog posts via CSV.</p>
+            
+            <h5 class="mt-4">✅ Required CSV Format</h5>
+            <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item"><strong>title</strong>: Blog post title (max 100 characters)</li>
+                <li class="list-group-item"><strong>category</strong>: Must match an existing category exactly</li>
+                <li class="list-group-item"><strong>body</strong>: Main content of the blog post</li>
+                <li class="list-group-item"><strong>summary</strong>: Brief excerpt that summarizes the post</li>
+                <li class="list-group-item"><strong>isFeatured</strong>: Optional - Set to "True" to feature this post (default: "False")</li>
+            </ul>
+            
+            <h5>📄 Sample CSV Content</h5>
+            <pre class="bg-dark text-white border p-0">
+                <code>
+        title,category,body,summary,isFeatured
+        "Getting Started with Python","Programming","Full article content here...","A beginner's guide to Python programming",True
+        "Healthy Eating Habits","Lifestyle","Full article content here...","Simple tips for better nutrition",False
+        "Travel Photography Tips","Photography","Full article content here...","How to capture amazing travel moments",True
+        "Remote Work Productivity","Business","Full article content here...","Boost your efficiency while working from home",
+                </code>
+            </pre>
+            
+            <h5>📌 Important Guidelines</h5>
+            <ul class="list-group list-group-numbered mb-4">
+                <li class="list-group-item">Use <strong>.csv</strong> format (export from Excel or Google Sheets if needed).</li>
+                <li class="list-group-item">Ensure category names are <strong>exactly as defined</strong> in the system.</li>
+                <li class="list-group-item">Do not leave <strong>title, category, body, or summary</strong> fields blank.</li>
+                <li class="list-group-item">For <strong>isFeatured</strong>, use "True" or "False" (leave blank for default "False").</li>
+                <li class="list-group-item">Avoid duplicate titles as they may cause conflicts.</li>
+            </ul>
+            
+            <div class="alert alert-info">
+                <strong>Need a template?</strong> <a href="{% static 'dash/example.csv' %}" class="alert-link">Download sample CSV</a>.
+            </div>
+        </div>
+
+        <!-- Floating Labels Form -->
+        <form class="row g-3" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="col-md-12">
+            <div class="d-flex align-items-center gap-3">
+              <label class="btn btn-sm btn-primary">Upload CSV
+                <input type="file" name="bulk_csv" class="d-none" id="csvInput2" accept=".csv">
+              </label>
+            </div>
+          </div>
+          <div id="csvName"></div>
+          <input type="hidden" name="source" value="bulk_upload">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">Upload</button>
+          </div>
+        </form>
+        <!-- End floating Labels Form -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Bulk Upload Modal -->
+
+<script>
+function setupFileInputListener(inputId, fileNameDisplayId) {
+  document.getElementById(inputId).addEventListener('change', function() {
+    const file = this.files[0];
+    const fileName = file?.name || "No file selected";
+    document.getElementById(fileNameDisplayId).textContent = fileName;
+  });
+}
+
+// Set up listeners for your inputs
+setupFileInputListener('csvInput2', 'csvName');
+setupFileInputListener('avatarInput', 'avatarName');
+</script>
 
 
 {% endblock %}

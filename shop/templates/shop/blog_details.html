@@ -16,7 +16,7 @@
                     <div class="breadcrumb__wrap">
                         <ul class="breadcrumb__list">
                             <li class="is-marked">
-                                <a href="wishlist.html">{{ m }}</a>
+                                <a href="#">{{ m }}</a>
                             </li>
                         </ul>
                     </div>
@@ -43,27 +43,27 @@
                     <div class="bp-detail__stat">
                         <span class="bp-detail__stat-wrap">
                             <span class="bp-detail__publish-date">
-                                <a href="blog-right-sidebar.html"><span>{{ post.timestamp }}</span></a>
+                                <a href="#"><span>{{ post.timestamp }}</span></a>
                             </span>
                         </span>
                         <span class="bp-detail__stat-wrap">
                             <span class="bp-detail__author">
-                                <a href="blog-right-sidebar.html">{{ post.author.username|title }}</a>
+                                <a href="{% url 'user_profile' post.author.profile.identifier %}">{{ post.author.username|title }}</a>
                             </span>
                         </span>
                         <span class="bp-detail__stat-wrap">
                             <span class="bp-detail__category">
-                                <a href="blog-right-sidebar.html">{{ post.category.category|title }}</a>
+                                <a href="#">{{ post.category.category|title }}</a>
                             </span>
                         </span>
                     </div>
                     <span class="bp-detail__h1">
-                        <a href="blog-detail.html">{{ post.title|title }}</a>
+                        <a href="#">{{ post.title|title }}</a>
                     </span>
                     <div class="blog-t-w">
-                        <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Travel</a>
-                        <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Culture</a>
-                        <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Place</a>
+                        <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Travel</a>
+                        <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Culture</a>
+                        <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Place</a>
                     </div>
                     <p class="bp-detail__p">{{ post.content|capfirst }}</p>
                     <div class="post-center-wrap">
@@ -87,10 +87,10 @@
                     </div>
                     <div class="gl-l-r bp-detail__postnp">
                         <div>
-                            <a href="blog-detail.html">Previous Post</a></div>
+                            <a href="#">Previous Post</a></div>
                         <div>
 
-                            <a href="blog-detail.html">Next Post</a></div>
+                            <a href="#">Next Post</a></div>
                     </div>
                 </div>
             </div>
@@ -104,7 +104,7 @@
                     <div class="col-lg-12">
                         <div class="d-meta__comment-arena">
 
-                            <span class="d-meta__text u-s-m-b-36">6 thoughts on "{{ post.title|title }}"</span>
+                            <span class="d-meta__text u-s-m-b-36">Thoughts on "{{ post.title|title }}"</span>
                             <div class="d-meta__comments u-s-m-b-30">
                                 <ol>
                                     {% for c in comments %}
@@ -113,7 +113,7 @@
                                         <div class="d-meta__p-comment">
                                             <div class="p-comment__wrap1">
                                                 <div class="aspect p-comment__img-wrap">
-                                                    <img src="{{ request.user.profile.avatar.url }}" style="width: 100%;">
+                                                    <img src="{{ request.user.profile.avatar.url }}" style="object-fit: cover;">
                                                 </div>
                                             </div>
                                             <div class="p-comment__wrap2">

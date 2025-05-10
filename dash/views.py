@@ -1238,6 +1238,7 @@ def pending_posts_view(request):
         source = request.POST.get('source')
         avatar = request.FILES.get('avatar')
         post_id = request.POST.get('post_id')
+        csv_file = request.FILES.get('bulk_csv')
         confirm_delete = request.POST.get('delete_item')
         
         if not is_featured:
@@ -1252,35 +1253,94 @@ def pending_posts_view(request):
         if not avatar:
             avatar = 'blog.jpg'
 
-        if source == 'new_post':
-            BlogPost.objects.create(shop=shop, author=request.user, title=title, category=category, avatar=avatar, summary=summary, content=content, is_featured=is_featured)
-            messages.success(request, 'Blogpost created.')
-            return redirect('pending_posts')
+        with transaction.atomic():
+            if source == 'new_post':
+                BlogPost.objects.create(shop=shop, author=request.user, title=title, category=category, avatar=avatar, summary=summary, content=content, is_featured=is_featured)
+                messages.success(request, 'Blogpost created.')
+                return redirect('pending_posts')
 
-        elif source == 'edit_post':
-            post.title = title
-            post.category = category
-            post.summary = summary
-            post.content = content
-            if avatar:
-                post.avatar = avatar
-            if is_featured:
-                post.is_featured = is_featured
-            post.save()
-            messages.success(request, 'BlogPost #{post.blogID} edited.')
-            return redirect('pending_posts')
-
-        elif source == 'confirm_post':
-            post.status = 'confirmed'
-            post.save()
-            messages.success(request, 'BlogPost #{post.blogID} confirmed and posted.')
-            return redirect('pending_posts')
-
-        elif source == 'delete_item':
-            if confirm_delete:
-                post.is_deleted = True
+            elif source == 'edit_post':
+                post.title = title
+                post.category = category
+                post.summary = summary
+                post.content = content
+                if avatar:
+                    post.avatar = avatar
+                if is_featured:
+                    post.is_featured = is_featured
                 post.save()
-                messages.success(request, f'BlogPost #{post.blogID} deleted')
+                messages.success(request, 'BlogPost #{post.blogID} edited.')
+                return redirect('pending_posts')
+
+            elif source == 'confirm_post':
+                post.status = 'confirmed'
+                post.save()
+                messages.success(request, 'BlogPost #{post.blogID} confirmed and posted.')
+                return redirect('pending_posts')
+
+            elif source == 'delete_item':
+                if confirm_delete:
+                    post.is_deleted = True
+                    post.save()
+                    messages.success(request, f'BlogPost #{post.blogID} deleted')
+
+            elif source == 'bulk_upload':
+                try:
+                    if not csv_file.content_type in ['text/csv', 'text/plain', 'application/vnd.ms-excel']:
+                        messages.error(request, "Only text-based CSV files are allowed.")
+                        return redirect("pending_posts")
+
+                    decoded_file = TextIOWrapper(csv_file.file, encoding='utf-8')
+                    reader = csv.DictReader(decoded_file)
+
+                    required_fields = {'title', 'category', 'body', 'summary'}
+                    if not required_fields.issubset(reader.fieldnames):
+                        messages.error(request, f"CSV is missing required columns: {required_fields - set(reader.fieldnames)}")
+                        return redirect('pending_posts')
+
+                    items = []
+                    errors = []
+                    line_number = 1  # header is line 1
+
+                    for row in reader:
+                        line_number += 1
+                        try:
+                            title = row['title'].strip()
+                            category_name = row['category'].strip().lower()
+                            body = row['body'].strip()
+                            summary = row['summary'].strip()
+
+                            if not title or not category_name:
+                                raise ValueError("Missing blog title or category")
+
+                            category, _ = BlogCategory.objects.get_or_create(shop=shop, category=category_name)
+                            blogID = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+                            item = BlogPost(
+                                shop=shop,
+                                blogID=blogID,
+                                author=request.user,
+                                title=title,
+                                category=category,
+                                summary=summary,
+                                content=body,
+                                is_featured=row.get('isFeatured', '').strip(),
+                            )
+                            items.append(item)
+                        except Exception as e:
+                            errors.append(f"Line {line_number}: {str(e)}")
+
+                    if items:
+                        BlogPost.objects.bulk_create(items)
+                        messages.success(request, f"{len(items)} blogposts uploaded successfully.")
+
+                    if errors:
+                        for error in errors:
+                            messages.warning(request, error)
+
+                except Exception as e:
+                    messages.error(request, f"Failed to process uploaded file: {str(e)}")
+                    logger.debug(f"Failed to process file: {str(e)}")
+                    return redirect('pending_posts')
 
     context = {
         'pending_posts': pending_posts,

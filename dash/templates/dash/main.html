@@ -77,6 +77,101 @@
   </div>
   <!-- container-scroller -->
 
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const currentUserId = "{{ request.user.id }}";
+      const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+      const STATUS_TIMEOUT = 30000;
+      const RECONNECT_DELAY = 5000;
+
+      let recentChatsSocket = null;
+      let recentChatsReconnectTimeout = null;
+
+      const recentChatsList = document.getElementById("recent_chats_list");
+
+      const formatTime = (dateString) => {
+        if (!dateString) return "Never";
+        try {
+          const date = new Date(dateString);
+          const now = new Date();
+          const delta = (now - date) / 1000;
+          if (delta < 60) return "Just now";
+          if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
+          if (delta < 86400) return `${Math.floor(delta / 3600)} hr ago`;
+          if (delta < 172800) return "Yesterday";
+          return date.toLocaleDateString();
+        } catch {
+          return dateString;
+        }
+      };
+
+
+
+      const renderRecentChats = (chats) => {
+        if (!recentChatsList) return;
+
+        // Filter chats to display only those where the user is the recipient
+        const filteredChats = chats.filter(chat => chat.lm_sender !== parseInt(currentUserId));
+
+        recentChatsList.innerHTML = filteredChats.map(chat => {
+          const { conv_id, title, last_message, timestamp, unread_count, lm_sender, participants } = chat;
+          const sender = participants ? participants.find(p => p.userID == lm_sender) : null;
+
+          return `
+            <a class="dropdown-item preview-item" href="/konnekt/${conv_id}">
+              <div class="preview-thumbnail">
+                <img src="${sender.avatar_url}" class="img-sm profile-pic" style="object-fit: cover;" alt="${title}">
+              </div>
+              <div class="preview-item-content flex-grow py-2">
+                <p class="preview-subject ellipsis font-weight-medium text-dark">
+                ${title} <small class="text-muted">${formatTime(timestamp)}</small></p>
+                <p class="fw-light small-text mb-0">${unread_count > 0 ? `<span class="badge bg-success me-1 small-text" style="padding: 3px 5px; margin-left: -1rem;">${unread_count}</span>` : ''} ${last_message}</p>
+              </div>
+            </a>
+          `;
+        }).join('');
+      };
+
+      const connectRecentChatsSocket = () => {
+        if (recentChatsSocket) {
+          recentChatsSocket.close();
+          clearTimeout(recentChatsReconnectTimeout);
+        }
+
+        const wsUrl = `${wsProtocol}://${window.location.host}/ws/konnekt/recent-chats/${currentUserId}/`;
+        recentChatsSocket = new WebSocket(wsUrl);
+        
+        recentChatsSocket.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          console.log('data:', data);
+          renderRecentChats(data.recent_chats);
+       
+        };
+
+        recentChatsSocket.onclose = () => {
+          console.warn("[WS] Recent chats socket closed");
+          recentChatsReconnectTimeout = setTimeout(connectRecentChatsSocket, RECONNECT_DELAY);
+        };
+
+        recentChatsSocket.onerror = (error) => {
+          console.error("[WS] Recent chats socket error:", error);
+        };
+    };
+
+    const cleanup = () => {
+      if (recentChatsSocket) recentChatsSocket.close();
+      clearTimeout(recentChatsReconnectTimeout);
+    };
+
+    const init = () => {
+      window.addEventListener('beforeunload', cleanup);
+      connectRecentChatsSocket();
+    };
+
+    init();
+  });
+</script>
+
   <!-- plugins:js -->
   <script src="{% static 'dash/vendors/js/vendor.bundle.base.js' %}"></script>
   <!-- endinject -->
