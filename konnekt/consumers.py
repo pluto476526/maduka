@@ -70,7 +70,7 @@ class RecentChatsConsumer(AsyncWebsocketConsumer):
                 last_read_at = None
 
             if last_read_at:
-                unread_messages = convo.messages.filter(timestamp__gt=last_read_at)
+                unread_messages = convo.messages.filter(timestamp__gt=last_read_at).exclude(sender=self.user.id)
                 unread_count = unread_messages.count()
                 unread_image_count = MessageImage.objects.filter(message__in=unread_messages).count()
             else:
@@ -136,15 +136,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
-            
-            # Handle push subscription separately
+
+            # Handle push subscription
             if data.get('type') == 'push.subscribe':
                 subscription = data.get('subscription')
                 if subscription:
                     await self.save_push_subscription(self.user, subscription)
                     return
 
-            # Handle read receipt separately
+
+            # Handle read receipt
             if data.get('type') == 'read_status.send':
                 convo_id = data['convo_id']
                 user_id = data['user_id']
@@ -163,7 +164,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
                 return
 
-            # Handle normal message - ONLY this should create chat messages
+            # Handle normal message
             if 'message' not in data:
                 await self.send(text_data=json.dumps({
                     'error': "Missing 'message' in the data"
@@ -196,17 +197,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-            # Handle notifications separately
-            await self.handle_notifications(sender_id, sender)
-
             # Update recent chats
             conversation = await self.get_conversation()
             participants = await self.get_participants(conversation)
             for user in participants:
+                logger.debug(user)
                 await self.channel_layer.group_send(
                     f'recent_chats_{user.id}',
                     {'type': 'send_chat_updated'}
                 )
+
+            # Handle notifications
+            await self.handle_notifications(sender_id, sender)
 
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({'error': 'Invalid JSON'}))
@@ -219,21 +221,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         participants = await self.get_participants(conversation)
         
         for user in participants:
-            if user.id == sender_id:
+            if str(user.id) == str(sender_id):
                 continue
                 
             # Send Web Push notification if available
             subscription = await self.get_push_subscription(user)
+            logger.debug(f'subscription:{subscription}')
             if subscription:
                 try:
+                    logger.debug('>>>>>>>>>>>>>>>>>>>>>>>pushing')
                     await self.send_push_notification(
                         subscription,
                         "New Message",
                         f'New message from {sender}',
                         {'conversation_id': self.conv_id}
                     )
+                    logger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>pushed')
                 except Exception as e:
-                    print(f"Failed to send push notification: {e}")
+                    logger.error(f"Failed to send push notification: {e}")
 
             # Send WebSocket notification
             await self.channel_layer.group_send(
@@ -241,8 +246,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'notification_message',  # Changed from send_browser_notification
                     'notification_type': 'new_message',
-                    'title': 'New Message',
-                    'message': f'New message from {sender}',
+                    'title': 'Konnekt',
+                    'message': f'New text message from {sender}',
                     'data': {
                         'conversation_id': self.conv_id,
                         'sender_id': sender_id
@@ -350,6 +355,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "sub": f"mailto:{settings.NOTIFICATION_EMAIL}"
         }
         
+        notification_payload = {
+            "title": title,
+            "body": message,
+            "requireInteraction": True,  # Keeps notification visible until clicked
+            "vibrate": [200, 100, 200, 100, 200, 100, 200],  # Vibration pattern (ms)
+            "actions": [
+                {
+                    "action": "view",
+                    "title": "View"
+                },
+                {
+                    "action": "dismiss",
+                    "title": "Dismiss"
+                }
+            ],
+            "badge": "/static/konnekt/img/badge-icon.png",  # Small icon for some platforms
+            "icon": "/static/konnekt/img/notification-icon.png",  # Main notification icon
+            "renotify": True,  # Vibrates/sounds again for grouped notifications
+            "silent": False,  # Whether to suppress sound/vibration
+            "timestamp": int(time.time() * 1000),  # When notification was created
+            "data": data or {}  # Your custom data payload
+        }
+        logger.debug(notification_payload)
+        
         try:
             webpush(
                 subscription_info={
@@ -359,11 +388,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "auth": subscription.keys['auth']
                     }
                 },
-                data=json.dumps({
-                    "title": title,
-                    "message": message,
-                    "data": data or {}
-                }),
+                data=json.dumps(notification_payload),
                 vapid_private_key=vapid_private_key,
                 vapid_claims=vapid_claims
             )
@@ -373,3 +398,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await database_sync_to_async(subscription.delete)()
             else:
                 raise
+
+
+    # async def send_push_notification(self, subscription, title, message, data=None):
+    #     from pywebpush import webpush, WebPushException
+    #     from django.conf import settings
+        
+    #     vapid_private_key = getattr(settings, 'VAPID_PRIVATE_KEY')
+    #     vapid_claims = {
+    #         "sub": f"mailto:{settings.NOTIFICATION_EMAIL}"
+    #     }
+        
+    #     try:
+    #         webpush(
+    #             subscription_info={
+    #                 "endpoint": subscription.endpoint,
+    #                 "keys": {
+    #                     "p256dh": subscription.keys['p256dh'],
+    #                     "auth": subscription.keys['auth']
+    #                 }
+    #             },
+    #             data=json.dumps({
+    #                 "title": title,
+    #                 "message": message,
+    #                 "data": data or {}
+    #             }),
+    #             vapid_private_key=vapid_private_key,
+    #             vapid_claims=vapid_claims
+    #         )
+    #     except WebPushException as ex:
+    #         if ex.response.status_code == 410:
+    #             # Subscription is no longer valid, delete it
+    #             await database_sync_to_async(subscription.delete)()
+    #         else:
+    #             raise

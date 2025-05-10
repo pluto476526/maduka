@@ -29,6 +29,7 @@ def get_vapid_public_key(request):
 def save_subscription(request):
     if request.method == 'POST':
         data = json.loads(request.body)
+        logger.debug(f'data register: {data}')
         PushSubscription.objects.update_or_create(
             user=request.user,
             defaults={'subscription_data': data}
@@ -39,11 +40,11 @@ def save_subscription(request):
 
 
 @csrf_exempt
+@login_required
 def upload_attachment(request):
     if request.method == 'POST' and request.FILES.getlist('file'):
         uploaded_files = request.FILES.getlist('file')
         msgID = request.POST.getlist('msgID')
-        logger.debug(f'>>>>>>>>>>>>>>>>msgid {msgID}')
         image_urls = []
         file_urls = []
         attachment_type = None
@@ -72,6 +73,7 @@ def upload_attachment(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
+@login_required
 def get_user_func(request):
     query = request.GET.get('qq', '')
     logger.debug(f"Search query: {query}")  # Debugging
