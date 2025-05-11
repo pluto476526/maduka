@@ -4,7 +4,7 @@
 <!-- ======= Header ======= -->
 <header id="header" class="fixed-top d-grid align-items-center">
   <div class="container d-flex align-items-center justify-content-between">
-    <h1 class="logo d-none d-lg-block"><a href="{% url 'home' %}">ShopSync</a></h1>
+    <h1 class="logo d-none d-lg-block"><a href="{% url 'home' %}">MaDuka</a></h1>
     <nav id="navbar" class="navbar">
       <div class="col-md-6 form-group w-100">
         <form action="">
@@ -74,11 +74,10 @@
                 <p class="card-text">{{ shops.bio|truncatechars:140|capfirst }}</p>
                 <!-- Spacer to push the button down -->
                 <div class="mt-auto">
-                  <a href="{% url 'shop_details' shops.slug %}" class="btn btn-success btn all-shops">Visit Shop</a>
+                  <a href="{% url 'shop_details' shops.slug %}" class="btn btn-success btn all-shops">View Shop Details</a>
                 </div>
               </div>
             </div>
-
           </div>
           {% endfor %}
         </div>

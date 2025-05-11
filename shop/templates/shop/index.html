@@ -19,7 +19,7 @@
                     <div class="breadcrumb__wrap">
                         <ul class="breadcrumb__list">
                             <li class="is-marked">
-                                <a href="">{{ m }}</a>
+                                <a href="#">{{ m }}</a>
                             </li>
                         </ul>
                     </div>
@@ -95,7 +95,6 @@
                     <div class="col-lg-12">
                         <div class="section__text-wrap">
                             <h1 class="section__heading u-c-secondary u-s-m-b-12">TOP TRENDING CATEGORIES</h1>
-
                             <span class="section__span u-c-silver">CHOOSE CATEGORY</span>
                         </div>
                     </div>
@@ -147,10 +146,25 @@
                                                             </a>
                                                         </li>
                                                         <li>
-                                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops">
-                                                                <i class="fas fa-envelope"></i>
+                                                            <form method="post" action="{% url 'chats' %}" id="contactSellerForm1">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="source" value="new_convo">
+                                                                <input type="hidden" name="userID" value="{{ the_shop.owner.id }}">
+                                                            </form>
+                                                            <a href="#" data-tooltip="tooltip" data-placement="top" title="Contact Seller - @{{ the_shop.owner.username }}" id="contactSellerLink1">
+                                                                <i class="far fa-envelope"></i>
                                                             </a>
+
+                                                            <script>
+                                                                document.getElementById('contactSellerLink1').addEventListener('click', function(e) {
+                                                                    e.preventDefault();
+                                                                    document.getElementById('contactSellerForm1').submit();
+                                                                });
+                                                            </script>
                                                         </li>
+
+
+
                                                     </ul>
                                                 </div>
                                             </div>
@@ -254,9 +268,21 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops">
-                                                <i class="fas fa-envelope"></i>
+                                            <form method="post" action="{% url 'chats' %}" id="contactSellerForm2">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="source" value="new_convo">
+                                                <input type="hidden" name="userID" value="{{ the_shop.owner.id }}">
+                                            </form>
+                                            <a href="#" data-tooltip="tooltip" data-placement="top" title="Contact Seller - @{{ the_shop.owner.username }}" id="contactSellerLink2">
+                                                <i class="far fa-envelope"></i>
                                             </a>
+
+                                            <script>
+                                                document.getElementById('contactSellerLink2').addEventListener('click', function(e) {
+                                                    e.preventDefault();
+                                                    document.getElementById('contactSellerForm2').submit();
+                                                });
+                                            </script>
                                         </li>
                                     </ul>
                                 </div>
@@ -346,9 +372,21 @@
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops">
-                                                    <i class="fas fa-envelope"></i>
+                                                <form method="post" action="{% url 'chats' %}" id="contactSellerForm3">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="source" value="new_convo">
+                                                    <input type="hidden" name="userID" value="{{ the_shop.owner.id }}">
+                                                </form>
+                                                <a href="#" data-tooltip="tooltip" data-placement="top" title="Contact Seller - @{{ the_shop.owner.username }}" id="contactSellerLink3">
+                                                    <i class="far fa-envelope"></i>
                                                 </a>
+
+                                                <script>
+                                                    document.getElementById('contactSellerLink3').addEventListener('click', function(e) {
+                                                        e.preventDefault();
+                                                        document.getElementById('contactSellerForm3').submit();
+                                                    });
+                                                </script>
                                             </li>
                                         </ul>
                                     </div>
@@ -439,9 +477,21 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops">
-                                                <i class="fas fa-envelope"></i>
+                                            <form method="post" action="{% url 'chats' %}" id="contactSellerForm4">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="source" value="new_convo">
+                                                <input type="hidden" name="userID" value="{{ the_shop.owner.id }}">
+                                            </form>
+                                            <a href="#" data-tooltip="tooltip" data-placement="top" title="Contact Seller - @{{ the_shop.owner.username }}" id="contactSellerLink4">
+                                                <i class="far fa-envelope"></i>
                                             </a>
+
+                                            <script>
+                                                document.getElementById('contactSellerLink4').addEventListener('click', function(e) {
+                                                    e.preventDefault();
+                                                    document.getElementById('contactSellerForm4').submit();
+                                                });
+                                            </script>
                                         </li>
                                     </ul>
                                 </div>
@@ -627,12 +677,12 @@
                                     </span>
                                     <span class="bp-mini__stat-wrap">
                                         <span class="bp-mini__author">
-                                            <a href="#">{{ p.author.username|title }}</a>
+                                            <a href="{% url 'user_profile' p.author.profile.identifier %}">{{ p.author.username|title }}</a>
                                         </span>
                                     </span>
                                     <span class="bp-mini__stat">
                                         <span class="bp-mini__comment">
-                                            <a href="blog-detail.html">
+                                            <a href="{% url 'blog_details' the_shop.slug p.blogID %}">
                                                 <i class="far fa-comments u-s-m-r-4"></i>
                                                 <span>8</span>
                                             </a>

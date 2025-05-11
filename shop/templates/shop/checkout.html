@@ -103,7 +103,7 @@
                                                     <span class="o-card__price">KES. {{ c.objects.total|intcomma }}</span>
                                                 </div>
                                             </div>
-                                            <a class="o-card__del far fa-trash-alt" href="{% url 'shop_delete' the_shop.name c.model_name c.objects.id %}"></a>
+                                            <a class="o-card__del far fa-trash-alt" href="{% url 'shop_delete' the_shop.slug c.model_name c.objects.id %}"></a>
                                         </div>
                                         {% endfor %}
                                     </div>

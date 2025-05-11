@@ -150,15 +150,23 @@
                                 </span>
                             </div>
                         </div>
+
                         <div class="u-s-m-b-15">
                             <div class="pd-detail__inline">
-                                <span class="pd-detail__click-wrap">
-                                    <i class="far fa-envelope u-s-m-r-6"></i>
-                                    <a href="signin.html">Email me When the price drops</a>
-                                    <span class="pd-detail__click-count">(20)</span>
-                                </span>
+                                <form method="post" action="{% url 'chats' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="source" value="new_convo">
+                                    <input type="hidden" name="userID" value="{{ the_shop.owner.id }}">
+                                    <span class="pd-detail__click-wrap">
+                                        <label>
+                                            <input style="display: none;" type="submit">
+                                            <i class="far fa-envelope u-s-m-r-6"></i> <strong>Contact Seller - @{{ the_shop.owner.username }}</strong>
+                                        </label>
+                                    </span>
+                                </form>
                             </div>
                         </div>
+
                         <div class="u-s-m-b-15">
                             <ul class="pd-social-list">
                                 <li>
