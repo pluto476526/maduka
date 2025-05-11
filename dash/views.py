@@ -69,6 +69,17 @@ def index(request):
         total_quantity=models.Sum('del_product__quantity'),
         sales=models.Sum(models.F('del_product__quantity') * models.F('price'))
     ).order_by('-sales')[:3]
+
+
+    top_spenders = Profile.objects.filter(
+        user__customer__shop=shop,  # Using the related_name 'customer' from Delivery model
+        user__customer__status='completed',
+        user__customer__is_deleted=False,
+        is_deleted=False
+    ).annotate(
+        total_spent_at_shop=models.Sum('user__customer__total')
+    ).distinct().order_by('-total_spent_at_shop')[:5]
+    
     
     categories = Category.objects.filter(shop=shop, is_deleted=False).count()
     completed_sales = my_deliveries.aggregate(total=models.Sum('total'))['total']
@@ -81,7 +92,6 @@ def index(request):
     current_month = n().month
     current_year = n().year
     monthly_sales = my_deliveries.filter(time_completed__year=current_year, time_completed__month=current_month).aggregate(models.Sum('total')).get('total', 0)
-    top_customers = Profile.objects.filter(shop=shop, is_deleted=False).order_by('-total_spent')[:5]
     my_profile = get_object_or_404(Profile, user=request.user)
     my_notifications = Notification.objects.filter(shop=shop, is_deleted=False)
     notifications = []
@@ -134,7 +144,7 @@ def index(request):
         'num_sessions': num_sessions,
         'avg_duration': avg_duration_secs,
         'total_sales_today': total_sales_today,
-        'top_customers': top_customers,
+        'top_customers': top_spenders,
     }
     return render(request, 'dash/index.html', context)
 
@@ -518,9 +528,13 @@ def confirmed_deliveries_view(request):
     confirmed_deliveries = all_deliveries.filter(status='confirmed')
     shipped_deliveries = all_deliveries.filter(status='shipped')
     completed_deliveries = all_deliveries.filter(status='completed')
-    role = get_object_or_404(Role, shop=shop, role_name='driver')
-    my_drivers = Profile.objects.filter(role=role)
-
+    
+    try:
+        role = get_object_or_404(Role, shop=shop, role_name='driver')
+        my_drivers = Profile.objects.filter(role=role)
+    except Exception as e:
+        role = None
+        my_drivers = []
     if request.method == 'POST':
         address = request.POST.get('address')
         source = request.POST.get('source')

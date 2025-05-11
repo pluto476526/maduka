@@ -40,7 +40,7 @@
         
         <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0" aria-labelledby="countDropdown" id="recent_chats_list">
           <a class="dropdown-item py-3">
-            <p class="mb-0 font-weight-medium float-left">You have 7 unread mails</p>
+            <p class="mb-0 font-weight-medium float-left">You have unread mails</p>
             <span class="badge badge-pill badge-primary float-right">View all</span>
           </a>
           <div class="dropdown-divider"></div>
@@ -84,7 +84,7 @@
             <i class="dropdown-item-icon mdi mdi-factory text-primary me-2"></i>
             {{ the_shop.name|title }}
           </a>
-          <a class="dropdown-item">
+          <a class="dropdown-item" href="{% url 'my_profile' %}">
             <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i>
             My Profile
           </a>
@@ -92,7 +92,7 @@
             <i class="dropdown-item-icon mdi mdi-format-align-left text-primary me-2"></i>
             Shop Profile
           </a>
-          <a class="dropdown-item">
+          <a class="dropdown-item" href="{% url 'chats' %}">
             <i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i>
             Messages
           </a>

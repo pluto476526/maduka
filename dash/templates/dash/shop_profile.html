@@ -134,50 +134,50 @@
                     <div class="row my-3">
                       <label class="col-md-4 col-lg-3 col-form-label">Shop Name</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="name" type="text" class="form-control" value="{{ my_shop.name|title }}" required>
+                        <input name="name" type="text" class="form-control" value="{{ my_shop.name }}" required>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label class="col-md-4 col-lg-3 col-form-label">About</label>
                       <div class="col-md-8 col-lg-9">
                         <textarea name="bio" class="form-control"
-                          style="height: 100px">{{ my_shop.bio|capfirst }}</textarea>
+                          style="height: 100px">{% if my_shop.bio %}{{ my_shop.bio|capfirst }}{% endif %}</textarea>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label class="col-md-4 col-lg-3 col-form-label">Location</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="location" type="text" class="form-control" value="{{ my_shop.location|title }}">
+                        <input name="location" type="text" class="form-control" {% if my_shop.location %}value="{{ my_shop.location|title }}"{% endif %}>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label class="col-md-4 col-lg-3 col-form-label">Address</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="address" type="text" class="form-control" value="{{ my_shop.address }}">
+                        <input name="address" type="text" class="form-control" {% if my_shop.address %}value="{{ my_shop.address }}"{% endif %}>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label class="col-md-4 col-lg-3 col-form-label">Email</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="email" type="email" class="form-control" value="{{ my_shop.email }}">
+                        <input name="email" type="email" class="form-control" {% if my_shop.email %}value="{{ my_shop.email }}"{% endif %}>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label class="col-md-4 col-lg-3 col-form-label">Phone</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="phone" type="text" class="form-control" value="{{ my_shop.phone }}" required>
+                        <input name="phone" type="text" class="form-control" {% if my_shop.phone %}value="{{ my_shop.phone }}"{% endif %} required>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label class="col-md-4 col-lg-3 col-form-label">X Profile</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="twitter" type="text" class="form-control" value="{{ my_shop.twitter }}">
+                        <input name="twitter" type="text" class="form-control" {% if my_shop.twitter %}value="{{ my_shop.twitter }}"{% endif %}>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label class="col-md-4 col-lg-3 col-form-label">Instagram Profile</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="instagram" type="text" class="form-control" value="{{ my_shop.instagram }}">
+                        <input name="instagram" type="text" class="form-control" {% if my_shop.instagram %}value="{{ my_shop.instagram }}"{% endif %}>
                       </div>
                     </div>
                     <input type="hidden" name="source" value="update_profile">
@@ -273,7 +273,6 @@
                     </fieldset>
 
                     <!-- Counties and Shipping Costs -->
-                    {% if counties %}
                     <fieldset class="border p-3 mb-4 bg-light">
                       <legend class="w-auto">Counties Shipped</legend>
                         <div class="mb-4">
@@ -282,6 +281,7 @@
                           <label class="form-label">Shipping Cost (KES.)</label>
                           <input class="form-control" type="number" name="shipping_cost">
                         </div>
+                      {% if counties %}
                       {% for c in counties %}
                         <div class="d-flex justify-content-between align-items-center mb-2">
                           <div>{{ c.county|title }} — <strong>KES. {{ c.price|intcomma }}</strong></div>

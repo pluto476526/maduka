@@ -37,8 +37,8 @@
                 {% for p in pending_sales %}
                 <tr>
                   <td>{{ p.order_number }}</td>
-                  <td>{{ p.unregistered_user|title }}</td>
-                  <td>KSH. {{ p.total_amount|title }}</td>
+                  <td>{{ p.unregistered_user }}</td>
+                  <td>KSH. {{ p.total|intcomma }}</td>
                   <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
                   <td class="d-flex justify-content-start" style="gap: 3px">
                     <a href="{% url 'order_details' p.order_number %}">
@@ -115,8 +115,8 @@
                 {% for s in completed_sales %}
                 <tr>
                   <td>{{ s.order_number }}</td>
-                  <td>{{ s.unregistered_user|title }}</td>
-                  <td>KSH. {{ s.total_amount|intcomma }}</td>
+                  <td>{{ s.unregistered_user }}</td>
+                  <td>KSH. {{ s.total|intcomma }}</td>
                   <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
                   <td class="d-flex justify-content-start" style="gap: 3px">
                     <a href="{% url 'order_details' s.order_number %}">
