@@ -15,7 +15,7 @@
                     <div class="breadcrumb__wrap">
                         <ul class="breadcrumb__list">
                             <li class="is-marked">
-                                <a href="wishlist.html">{{ m }}</a>
+                                <a href="#">{{ m }}</a>
                             </li>
                         </ul>
                     </div>
@@ -50,7 +50,7 @@
                             <div class="bp__thumbnail">
                                 <!--====== Image Code ======-->
                                 <a class="aspect aspect--bg-grey aspect--1366-768 u-d-block" href="blog-detail.html">
-                                    <img class="aspect__img" src="{{ p.avatar.url }}">
+                                    <img class="aspect__img" src="{{ p.avatar.url }}" style="object-fit: cover;">
                                 </a>
                                 <!--====== End - Image Code ======-->
                             </div>
@@ -58,17 +58,17 @@
                                 <div class="bp__stat">
                                     <span class="bp__stat-wrap">
                                         <span class="bp__publish-date">
-                                            <a href="blog-right-sidebar.html"><span>{{ p.timestamp }}</span></a>
+                                            <a href="#"><span>{{ p.timestamp }}</span></a>
                                         </span>
                                     </span>
                                     <span class="bp__stat-wrap">
                                         <span class="bp__author">
-                                            <a href="blog-right-sidebar.html">{{ p.author|title }}</a>
+                                            <a href="{% url 'user_profile' p.author.profile.identifier %}">{{ p.author|title }}</a>
                                         </span>
                                     </span>
                                     <span class="bp__stat-wrap">
                                         <span class="bp__comment">
-                                            <a href="blog-detail.html">
+                                            <a href="">
                                                 <i class="far fa-comments u-s-m-r-4"></i>
                                                 <span>8</span>
                                             </a>
@@ -76,12 +76,12 @@
                                     </span>
                                     <span class="bp__stat-wrap">
                                         <span class="bp__category">
-                                            <a href="blog-right-sidebar.html">{{ p.category.category|title }}</a>
+                                            <a href="#">{{ p.category.category|title }}</a>
                                         </span>
                                     </span>
                                 </div>
                                 <span class="bp__h1">
-                                    <a href="{% url 'blog_details' the_shop.name p.blogID %}">{{ p.title|title }}</a>
+                                    <a href="{% url 'blog_details' the_shop.slug p.blogID %}">{{ p.title|title }}</a>
                                 </span>
                                 <span class="bp__h2">{{ p.summary|capfirst }}</span>
                                 <div class="blog-t-w">
@@ -93,7 +93,7 @@
                                 <div class="gl-l-r">
                                     <div>
                                         <span class="bp__read-more">
-                                            <a href="{% url 'blog_details' the_shop.name p.blogID %}">READ MORE</a>
+                                            <a href="{% url 'blog_details' the_shop.slug p.blogID %}">READ MORE</a>
                                         </span>
                                     </div>
                                     <ul class="bp__social-list">
@@ -122,19 +122,19 @@
                         <!--====== Pagination ======-->
                         <ul class="blog-pg">
                             <li class="blog-pg--active">
-                                <a href="blog-right-sidebar.html">1</a>
+                                <a href="#">1</a>
                             </li>
                             <li>
-                                <a href="blog-right-sidebar.html">2</a>
+                                <a href="#">2</a>
                             </li>
                             <li>
-                                <a href="blog-right-sidebar.html">3</a>
+                                <a href="#">3</a>
                             </li>
                             <li>
-                                <a href="blog-right-sidebar.html">4</a>
+                                <a href="#">4</a>
                             </li>
                             <li>
-                                <a class="fas fa-angle-right" href="blog-right-sidebar.html"></a>
+                                <a class="fas fa-angle-right" href="#"></a>
                             </li>
                         </ul>
                         <!--====== End - Pagination ======-->

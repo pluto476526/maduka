@@ -16,7 +16,7 @@
                 <ul class="blog-w__list">
                     {% for c in categories %}
                     <li>
-                        <a href="blog-right-sidebar.html">{{ c.category|title }}</a>
+                        <a href="#">{{ c.category|title }}</a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -33,7 +33,7 @@
                                 <span>{{ r.timestamp }}</span>
                             </div>
                             <span class="b-l__h">
-                                <a href="{% url 'blog_details' the_shop.name r.blogID %}">{{ r.title|title }}</a></span>
+                                <a href="{% url 'blog_details' the_shop.slug r.blogID %}">{{ r.title|title }}</a></span>
 
                             <span class="b-l__p">{{ r.summary|title }}</span>
                         </div>
@@ -47,19 +47,19 @@
                 <span class="blog-w__h">TAGS</span>
                 <div class="blog-t-w">
 
-                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Dresses</a>
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Dresses</a>
 
-                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Shirts & Tops</a>
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Shirts & Tops</a>
 
-                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Polo Shirts</a>
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Polo Shirts</a>
 
-                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Sweaters</a>
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Sweaters</a>
 
-                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Blazers</a>
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Blazers</a>
 
-                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Vests</a>
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Vests</a>
 
-                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="blog-right-sidebar.html">Jackets</a></div>
+                    <a class="gl-tag btn--e-transparent-hover-brand-b-2" href="#">Jackets</a></div>
             </div>
         </div>
     </div>

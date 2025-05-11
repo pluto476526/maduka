@@ -1269,13 +1269,13 @@ def pending_posts_view(request):
                 if is_featured:
                     post.is_featured = is_featured
                 post.save()
-                messages.success(request, 'BlogPost #{post.blogID} edited.')
+                messages.success(request, f'BlogPost #{post.blogID} edited.')
                 return redirect('pending_posts')
 
             elif source == 'confirm_post':
                 post.status = 'confirmed'
                 post.save()
-                messages.success(request, 'BlogPost #{post.blogID} confirmed and posted.')
+                messages.success(request, f'BlogPost #{post.blogID} confirmed and posted.')
                 return redirect('pending_posts')
 
             elif source == 'delete_item':
@@ -1336,6 +1336,8 @@ def pending_posts_view(request):
                     if errors:
                         for error in errors:
                             messages.warning(request, error)
+
+                    return redirect('pending_posts')
 
                 except Exception as e:
                     messages.error(request, f"Failed to process uploaded file: {str(e)}")
