@@ -12,6 +12,7 @@ from main.models import MainHelpDesk, Notification
 from datetime import datetime, timedelta, timezone
 from io import TextIOWrapper
 import logging, csv, secrets, string
+from dash.decorators import access_required
 from dash.models import (
     Category,
     Inventory,
@@ -55,6 +56,7 @@ def percent_off(price, sale):
 
 
 @login_required
+@access_required(1)
 def index(request):
     shop = get_user_shop(request)
     my_inventory = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
@@ -122,6 +124,7 @@ def index(request):
 
     # Filter transactions for today and sum the amounts
     total_sales_today = Transaction.objects.filter(
+        shop=shop,
         timestamp__date = today, 
         is_deleted = False
     ).aggregate(total_sales = models.Sum('amount'))['total_sales'] or 0
@@ -151,6 +154,7 @@ def index(request):
 
 
 @login_required
+@access_required(2)
 def categories(request):
     shop = get_user_shop(request) 
     my_categories = Category.objects.filter(shop=shop, is_deleted=False)
@@ -202,6 +206,7 @@ def categories(request):
 
 
 @login_required
+@access_required(2)
 def inventory_view(request):
     shop = get_user_shop(request)
     products = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
@@ -357,6 +362,7 @@ def inventory_view(request):
 
 
 @login_required
+@access_required(2)
 def orders_view(request):
     shop = get_user_shop(request)
     try:
@@ -462,6 +468,7 @@ def orders_view(request):
 
 
 @login_required
+@access_required(2)
 def deliveries_view(request):
     shop = get_user_shop(request)
     requests = Delivery.objects.filter(shop=shop, status='processing', is_deleted=False, is_delivery=True)
@@ -522,6 +529,7 @@ def deliveries_view(request):
 
 @login_required
 @transaction.atomic
+@access_required(2)
 def confirmed_deliveries_view(request):
     shop = get_user_shop(request)
     all_deliveries = Delivery.objects.filter(shop=shop, is_deleted=False, is_delivery=True)
@@ -585,11 +593,13 @@ def confirmed_deliveries_view(request):
 
 
 @login_required
+@access_required(2)
 def track_order_view(request):
     return render(request, 'dash/track_order.html', {})
 
 
 @login_required
+@access_required(2)
 def order_details_view(request, order_id):
     order = get_object_or_404(Delivery, order_number=order_id)
     orders = DeliveryItem.objects.filter(delivery=order)
@@ -604,6 +614,7 @@ def order_details_view(request, order_id):
 
 
 @login_required
+@access_required(3)
 def online_sales_view(request):
     shop = get_user_shop(request)
     online_sales = Delivery.objects.filter(shop=shop, source='cart', status='completed', is_deleted=False, is_delivery=True)
@@ -614,6 +625,7 @@ def online_sales_view(request):
 
 
 @login_required
+@access_required(2)
 @transaction.atomic
 def physical_sales_view(request):
     shop = get_user_shop(request)
@@ -711,6 +723,7 @@ def physical_sales_view(request):
 
 
 @login_required
+@access_required(1)
 def main_helpdesk_view(request):
     shop = get_user_shop(request)
     if not shop:
@@ -741,6 +754,7 @@ def main_helpdesk_view(request):
 
 
 @login_required
+@access_required(2)
 def shop_helpdesk_view(request):
     shop = get_user_shop(request)
     issues = Ticket.objects.filter(shop=shop, is_deleted=False)
@@ -779,6 +793,7 @@ def shop_helpdesk_view(request):
 
 
 @login_required
+@access_required(2)
 @transaction.atomic
 def shop_profile_view(request):
     shop = get_user_shop(request)
@@ -882,6 +897,7 @@ def shop_profile_view(request):
 
 
 @login_required
+@access_required(2)
 def deals_and_promos_view(request):
     shop = get_user_shop(request)
     all_products = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
@@ -1089,6 +1105,7 @@ def deals_and_promos_view(request):
 
 
 @login_required
+@access_required(2)
 @transaction.atomic
 def staff_view(request):
     shop = get_user_shop(request)
@@ -1104,6 +1121,7 @@ def staff_view(request):
         source = request.POST.get('source')
         staffID = request.POST.get('staffID')
         avatar = request.FILES.get('avatar')
+        access_level = request.POST.get('access_level')
         confirm_delete = request.POST.get('delete_item')
 
         if staffID:
@@ -1118,7 +1136,7 @@ def staff_view(request):
                 case 'new_staff':
                     if password1 == password2:
                         user = User.objects.create_user(username=username, email=email, password=password1)
-                        Profile.objects.create(shop=shop, user=user, in_staff=True, role=role)
+                        Profile.objects.create(shop=shop, user=user, in_staff=True, role=role, access_level=access_level)
                         messages.success(request, "New staff member created.")
                     
                     else:
@@ -1128,6 +1146,7 @@ def staff_view(request):
                     if avatar:
                         profile.avatar = avatar
                     profile.role = role
+                    profile.access_level = access_level
                     profile.save()
                     user.username = username
                     user.save()
@@ -1190,6 +1209,7 @@ def delete_view(request, app_label, model_name, object_id):
 
 
 @login_required
+@access_required(3)
 def transactions_view(request):
     shop = get_user_shop(request)
     transactions = Transaction.objects.filter(shop=shop, is_deleted=False)
@@ -1200,6 +1220,7 @@ def transactions_view(request):
 
 
 @login_required
+@access_required(2)
 def blog_categories_view(request):
     shop = get_user_shop(request)
     categories = BlogCategory.objects.filter(shop=shop, is_deleted=False)
@@ -1238,6 +1259,7 @@ def blog_categories_view(request):
 
 
 @login_required
+@access_required(2)
 def pending_posts_view(request):
     shop = get_user_shop(request)
     pending_posts = BlogPost.objects.filter(shop=shop, status='pending', is_deleted=False)
@@ -1366,6 +1388,7 @@ def pending_posts_view(request):
 
 
 @login_required
+@access_required(2)
 def confirmed_posts_view(request):
     shop = get_user_shop(request)
     confirmed_posts = BlogPost.objects.filter(shop=shop, status='confirmed', is_deleted=False)
@@ -1394,6 +1417,7 @@ def confirmed_posts_view(request):
 
 
 @login_required
+@access_required(2)
 def removed_posts_view(request):
     shop = get_user_shop(request)
     deleted_posts = BlogPost.objects.filter(shop=shop, is_deleted=True)

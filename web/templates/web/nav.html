@@ -12,10 +12,13 @@
         <!--<li><a href="">Blog</a></li>-->
         <li><a class="nav-link scrollto" href="#contact">Contact Us</a></li>
         <li><a class="getstarted" href="{% url 'chats' %}" title="Chat With Friends">Konnekt</a></li>
-        {% if profile.shop %}
+        {% if profile.shop and profile.shop.owner == request.user %}
         <li><a class="getstarted border-0" href="{% url 'dash' %}" title="Your Shop Dashboard" style="background-color: #5c9f24; color: aliceblue;">{{ profile.shop }}</a></li>
         {% else %}
-        {% if request.user.is_authenticated %}
+        {% if request.user.is_authenticated and profile.shop and profile.shop.owner != request.user %}
+        <li><a class="getstarted border-0" href="{% url 'dash' %}" title="Dash" style="background-color: #5c9f24; color: aliceblue;">{{ profile.shop }} - ({{ profile.role.role_name }})</a></li>
+        {% endif %}
+        {% if request.user.is_authenticated and not profile.shop %}
         <li>
           <a class="getstarted" data-bs-toggle="modal" data-bs-target="#newShopModal" href="#">Register Shop</a>
         </li>

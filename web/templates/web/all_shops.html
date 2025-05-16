@@ -60,7 +60,7 @@
                       style="height: 4rem; width: 4rem;" alt="Avatar">
                   </div>
                   <div class="info-post ms-2">
-                    <p class="username">{{ shops.owner.username|title }}</p>
+                    <p class="username">{{ shops.owner.username }}</p>
                     <p class="date text-muted">{{ shops.timestamp|date }}</p>
                   </div>
                 </div>
@@ -69,7 +69,7 @@
                   <a href="#">{{ shops.category|title }}</a>
                 </p>
                 <h3 class="card-title">
-                  <a href="{% url 'shop' shops.slug %}">{{ shops.name|title }}</a>
+                  <a href="{% url 'shop' shops.slug %}">{{ shops.name }}</a>
                 </h3>
                 <p class="card-text">{{ shops.bio|truncatechars:140|capfirst }}</p>
                 <!-- Spacer to push the button down -->

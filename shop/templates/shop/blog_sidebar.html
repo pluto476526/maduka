@@ -5,18 +5,27 @@
                 <span class="blog-w__h">SEARCH</span>
                 <form class="blog-search-form">
                     <label for="post-search"></label>
-                    <input class="input-text input-text--primary-style" type="text" id="post-search" placeholder="Search">
+                    <input class="input-text input-text--primary-style" type="text" id="post-search" placeholder="Search" name="search">
                     <button class="btn btn--icon fas fa-search" type="submit"></button>
                 </form>
             </div>
         </div>
         <div class="u-s-m-b-60">
             <div class="blog-w">
-                <span class="blog-w__h">CATEGORIES</span>
+                <span class="blog-w__h">SORT BY CATEGORY</span>
                 <ul class="blog-w__list">
                     {% for c in categories %}
                     <li>
-                        <a href="#">{{ c.category|title }}</a>
+                        <form id="sortBlogsForm{{ c.id }}" method="get">
+                            <input type="hidden" name="category" value="{{ c.category }}">
+                            <a href="#" style="color: black;" id="sortBlogs{{ c.id }}">{{ c.category|title }}</a>
+                        </form>
+                        <script>
+                            document.getElementById('sortBlogs{{ c.id }}').addEventListener('click', function(e) {
+                                e.preventDefault();
+                                document.getElementById('sortBlogsForm{{ c.id }}').submit();
+                            });
+                        </script>
                     </li>
                     {% endfor %}
                 </ul>

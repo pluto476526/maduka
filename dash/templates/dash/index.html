@@ -3,6 +3,8 @@
 {% load custom_filters %}
 {% load humanize %}
 {% block main %}
+
+{% if request.user.profile.access_level >= 2 %}
 <div class="content-wrapper">
   <div class="row">
     <div class="col-sm-12">
@@ -278,4 +280,198 @@
   </div>
 </div>
 <!-- content-wrapper ends -->
+{% endif %}
+
+
+{% if request.user.profile.role.role_name == 'driver' %}
+<div class="content-wrapper">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="home-tab">
+        <div class="d-sm-flex align-items-center justify-content-between border-bottom">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#overview" role="tab">Pending Deliveries</a>
+            </li>
+             <li class="nav-item">
+              <a class="nav-link" id="sales-tab" data-bs-toggle="tab" href="#ssales" role="tab">History</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab">Notifications</a>
+            </li>
+          </ul>
+        </div>
+        <div class="tab-content tab-content-basic">
+          <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <div class="container p-0">
+              <div class="container p-0 mb-5">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+                  <div class="col">
+                    <div class="bg-primary text-white p-3 border-0">
+                      <p class="statistics-title">Total Completed Deliveries</p>
+                      <h3 class="rate-percentage">{{ num_sessions|default:0 }}</h3>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="bg-dark text-white p-3 border-0">
+                      <p class="statistics-title">Completed Today</p>
+                      <h3 class="rate-percentage">232</h3>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="bg-success text-white p-3 border-0">
+                      <p class="statistics-title">Completed This Week</p>
+                      <h3 class="rate-percentage">{{ inventory_value|intcomma|default:0 }}</h3>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="bg-danger text-white p-3 border-0">
+                      <p class="statistics-title">Completed This Month</p>
+                      <h3 class="rate-percentage">{{ inventory_count|intcomma|default:0 }}</h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            <div class="row">
+              <div class="col-sm-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div>
+                      <h4 class="card-title">Pending Deliveries</h4>
+                      <p class="card-description">View your shop's latest transactions.</p>
+                    </div>
+                    {% if recent_transactions %}
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Transaction ID</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Created on</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for t in recent_transactions %}
+                          <tr>
+                            <td>{{ t.transactionID }}</td>
+                            <td>KSH. {{ t.amount|intcomma }}</td>
+                            <td>{{ t.status|title }}</td>
+                            <td>{{ t.timestamp }}</td>
+                            <td>
+                              <a href="{% url 'order_details' t.order.order_number %}"><span class="badge badge-info">View</span></a>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+          <div class="tab-pane fade active" id="ssales" role="tabpanel">
+            <div class="container p-0 mb-5">
+              <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+                <div class="col">
+                  <div class="bg-primary text-white p-3 border-0">
+                    <p class="statistics-title">Total Sales</p>
+                    <h3 class="rate-percentage">{{ completed_sales|intcomma|default:0 }}</h3>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="bg-success text-white p-3 border-0">
+                    <p class="statistics-title">Physical Sales</p>
+                    <h3 class="rate-percentage">{{ physical_sales|intcomma|default:0 }}</h3>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="bg-dark text-white p-3 border-0">
+                    <p class="statistics-title">E-Comm Sales</p>
+                    <h3 class="rate-percentage">{{ ecomm_sales|intcomma|default:0 }}</h3>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="bg-danger text-white p-3 border-0">
+                    <p class="statistics-title">This Month</p>
+                    <h3 class="rate-percentage">{{ monthly_sales|intcomma|default:0 }}</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-5">
+              <div class="col-sm-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div>
+                      <h4 class="card-title">Top Customers</h4>
+                      <p class="card-description">View the customers who have spent the most money in your shop.</p>
+                    </div>
+                    {% if top_customers %}
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>User ID</th>
+                            <th>Username</th>
+                            <th>Amount Spent</th>
+                            <th>Registered on</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for t in top_customers %}
+                          <tr>
+                            <td>{{ t.identifier }}</td>
+                            <td>{{ t.user.username|title }}</td>
+                            <td>KSH. {{ t.total_spent|intcomma }}</td>
+                            <td>{{ t.timestamp }}</td>
+                            <td>
+                              <a href=""><span class="badge badge-info">View</span></a>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            </div>
+          </div>
+
+          <div class="tab-pane fade active" id="notifications" role="tabpanel">
+            <div class="container p-0 mb-5">
+                {% if notifications %}
+                {% for n in notifications %}
+                  <div class="alert {% if n.is_read %} alert-success {% else %} alert-dark {% endif %} alert-dismissible fade show p-4" role="alert">
+                    {{ n.n_type|title }}: {{ n.message|capfirst }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+                {% else %}
+                <h3>No New Notifications</h3>
+                {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- content-wrapper ends -->
+{% endif %}
+
 {% endblock %}

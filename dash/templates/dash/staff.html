@@ -36,6 +36,7 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Role</th>
+                                    <th>Access Level</th>
                                     <th>Created on</th>
                                     <th></th>
                                 </tr>
@@ -43,8 +44,9 @@
                             <tbody>
                                 {% for s in staff %}
                                 <tr>
-                                    <td>{{ s.user|title }}</td>
+                                    <td>{{ s.user }}</td>
                                     <td>{{ s.role.role_name|title }}</td>
+                                    <td>{{ s.access_level }}</td>
                                     <td>{{ s.timestamp }}</td>
                                     <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
                                     <td class="d-flex justify-content-start" style="gap: 3px;">
@@ -64,7 +66,7 @@
                                                             {% csrf_token %}
                                                             <div class="col-sm-12">
                                                                 <div class="form-floating">
-                                                                    <input type="text" name="name" class="form-control" value="{{ s.user.username|title }}" required>
+                                                                    <input type="text" name="name" class="form-control" value="{{ s.user.username }}" required>
                                                                     <label>Username</label>
                                                                 </div>
                                                             </div>
@@ -77,6 +79,16 @@
                                                                         {% endfor %}
                                                                     </datalist>
                                                                     <label>Role</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12">
+                                                                <div class="form-floating">
+                                                                    <select name="access_level" class="form-select">
+                                                                        <option value="1" {% if s.access_level == 1 %} selected {% endif %}>1 - Limited access ie. drivers dashboard</option>
+                                                                        <option value="2" {% if s.access_level == 2 %} selected {% endif %}>2 - Basic access for operational management</option>
+                                                                        <option value="3" {% if s.access_level == 3 %} selected {% endif %}>3 - Full access(superuser)</option>
+                                                                    </select>
+                                                                    <label>Access Level</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-sm-12">

@@ -824,6 +824,23 @@ def shop_blog_view(request, slug):
     posts = BlogPost.objects.filter(shop=shop, status='confirmed', is_deleted=False)
     recent_posts = posts.order_by('timestamp')[:3]
     categories = BlogCategory.objects.filter(shop=shop, is_deleted=False)
+
+    if request.method == 'GET':
+        category = request.GET.get('category')
+        query = request.GET.get('search')
+
+        if category:
+            posts = posts.filter(category__category=category) 
+
+        if query:
+            posts = posts.filter(
+                Q(author__username__icontains=query) |
+                Q(title__icontains=query) |
+                Q(category__category__icontains=query) |
+                Q(summary__icontains=query) |
+                Q(content__icontains=query)
+            )
+
     context = {
         'the_shop': shop,
         'posts': posts,
