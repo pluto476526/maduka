@@ -136,29 +136,29 @@
                       <div class="card-body">
 
                         <form class="row g-3">
-                          {% if my_profile.full_name %}
+                          {% if profile.full_name %}
                           <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                               <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" value="{{ my_profile.full_name|title }}">
+                                <input type="text" class="form-control form-control-lg" value="{{ profile.full_name|title }}">
                               </div>
                             </div>
                           </div>
                           {% endif %}
-                          {% if my_profile.phone %}
+                          {% if profile.phone %}
                           <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                               <div class="input-group">
-                                <input type="text" class="form-control form-control-lg" value="{{ my_profile.phone }}">
+                                <input type="text" class="form-control form-control-lg" value="{{ profile.phone }}">
                               </div>
                             </div>
                           </div>
                           {% endif %}
-                          {% if my_profile.bio %}
+                          {% if profile.bio %}
                           <div class="col-12">
                             <div class="form-group">
                               <div class="input-group">
-                                <textarea rows="4" class="form-control">{{ my_profile.bio|capfirst }}</textarea>
+                                <textarea rows="4" class="form-control">{{ profile.bio|capfirst }}</textarea>
                               </div>
                             </div>
                           </div>

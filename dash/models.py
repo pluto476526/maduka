@@ -16,7 +16,7 @@ class Profile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profile')
     identifier = models.CharField(max_length=10, unique=True, null=True)
     full_name = models.CharField(max_length=255, blank=True, null=True)
-    access_level = models.PositiveIntegerField(default=1) # 1-> basic access, 2-> key operations, 2-> full access
+    access_level = models.PositiveIntegerField(default=3) # 1-> basic access, 2-> key operations, 3-> full access
     bio = models.TextField(blank=True, null=True)
     avatar = models.ImageField(default='user.jpg')
     shop = models.ForeignKey('shop.Shop', on_delete=models.SET_NULL, blank=True, null=True)
