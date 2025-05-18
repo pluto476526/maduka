@@ -126,7 +126,7 @@
                                         <div class="product-o product-o--hover-on product-o--radius">
                                             <div class="product-o__wrap">
                                                 <a href="{% url 'product_details' the_shop.slug tc.product_id %}" class="aspect aspect--bg-grey aspect--square u-d-block">
-                                                    <img class="aspect__img" src="{{ tc.avatar1.url }}" alt="">
+                                                    <img class="aspect__img" src="{{ tc.avatar1.url }}" alt="" style="object-fit: cover;">
                                                 </a>
                                                 <div class="product-o__action-wrap">
                                                     <ul class="product-o__action-list">
@@ -245,7 +245,7 @@
                         <div class="product-o product-o--radius product-o--hover-off u-h-100">
                             <div class="product-o__wrap">
                                 <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.slug d.product_id">
-                                    <img class="aspect__img" src="{{ d.avatar.url }}" alt="">
+                                    <img class="aspect__img" src="{{ d.avatar.url }}" alt="" style="object-fit: cover;">
                                 </a>
                                 <div class="product-o__special-count-wrap">
                                     <div class="countdown countdown--style-special" data-countdown="{{ d.time|date:"Y/m/d/ H:i:s" }}"></div>
@@ -351,7 +351,7 @@
                             <div class="product-o product-o--hover-on">
                                 <div class="product-o__wrap">
                                     <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.slug a.product_id %}">
-                                        <img class="aspect__img" src="{{ a.avatar1.url }}" alt="">
+                                        <img class="aspect__img" src="{{ a.avatar1.url }}" alt="" style="object-fit: cover;">
                                     </a>
                                     <div class="product-o__action-wrap">
                                         <ul class="product-o__action-list">
@@ -454,7 +454,7 @@
                         <div class="product-o product-o--hover-on u-h-100">
                             <div class="product-o__wrap">
                                 <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.slug p.product_id %}">
-                                    <img class="aspect__img" src="{{ p.avatar1.url }}" alt="">
+                                    <img class="aspect__img" src="{{ p.avatar1.url }}" alt="" style="object-fit: cover;">
                                 </a>
                                 <div class="product-o__action-wrap">
                                     <ul class="product-o__action-list">
@@ -754,7 +754,7 @@
             <div class="modal-body">
                 <div class="row u-s-m-x-0">
                     <div class="col-lg-6 new-l__col-1 u-s-p-x-0">
-                        <img class="u-img-fluid u-d-block" src="{{ the_shop.avatar1.url }}" style="padding-left: 1rem;">
+                        <img class="u-img-fluid u-d-block" src="{{ the_shop.avatar1.url }}" style="padding-left: 1rem; object-fit: cover;">
                     </div>
                     <div class="col-lg-6 new-l__col-2">
                         <div class="new-l__section u-s-m-t-30">

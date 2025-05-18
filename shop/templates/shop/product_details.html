@@ -36,13 +36,13 @@
                     <div class="pd-breadcrumb u-s-m-b-30">
                         <ul class="pd-breadcrumb__list">
                             <li class="has-separator">
-                                <a href="index.hml">Home</a>
+                                <a href="#">Home</a>
                             </li>
                             <li class="has-separator">
-                                <a href="shop-side-version-2.html">{{ product.category.category|title }}</a>
+                                <a href="#">{{ product.category.category|title }}</a>
                             </li>
                             <li class="is-marked">
-                                <a href="shop-side-version-2.html">{{ product.product|title }}</a>
+                                <a href="#">{{ product.product|title }}</a>
                             </li>
                         </ul>
                     </div>
@@ -548,7 +548,7 @@
                             <div class="product-o product-o--hover-on">
                                 <div class="product-o__wrap">
                                     <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.slug r.product_id %}">
-                                        <img class="aspect__img" src="{{ r.avatar1.url }}" alt="">
+                                        <img class="aspect__img" src="{{ r.avatar1.url }}" alt="" style="object-fit: cover;">
                                     </a>
                                     <div class="product-o__action-wrap">
                                         <ul class="product-o__action-list">

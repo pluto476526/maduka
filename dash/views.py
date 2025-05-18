@@ -282,8 +282,12 @@ def inventory_view(request):
         is_featured = request.POST.get('is_featured')
         source = request.POST.get('source')
         product_id = request.POST.get('id')
-        avatar = request.FILES.get('avatar')
         csv_file = request.FILES.get('bulk_csv')
+        avatar1 = request.FILES.get('avatar1')
+        avatar2 = request.FILES.get('avatar2')
+        avatar3 = request.FILES.get('avatar3')
+        avatar4 = request.FILES.get('avatar4')
+        avatar5 = request.FILES.get('avatar5')
         confirm_delete = request.POST.get('delete_item')
 
         if product_id:
@@ -307,10 +311,25 @@ def inventory_view(request):
                 product.quantity = quantity
                 product.units = unit
                 product.price = price
+                
                 if is_featured:
                     product.is_featured = True 
-                if avatar:
-                    product.avatar = avatar
+                
+                if avatar1:
+                    product.avatar1 = avatar1
+                
+                if avatar2:
+                    product.avatar2 = avatar2
+                
+                if avatar3:
+                    product.avatar3 = avatar3
+                
+                if avatar4:
+                    product.avatar4 = avatar4
+
+                if avatar5:
+                    product.avatar5 = avatar5
+                
                 product.save()
                 messages.success(request, f"Item '{product_name}' updated.")
 

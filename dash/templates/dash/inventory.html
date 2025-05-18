@@ -119,10 +119,42 @@
                                 </div>
                               </div>
                               <div class="col-md-12">
-                                <p>{{ product.avatar1 }}</p>
+                                <p id="avatar1-name">{{ product.avatar1 }}</p>
                                 <div class="d-sm-flex align-items-center gap-3">
-                                  <label class="btn btn-sm btn-primary">Display Picture
-                                    <input type="file" name="avatar" class="d-none">
+                                  <label class="btn btn-sm btn-primary">Display Picture 1
+                                    <input type="file" name="avatar1" class="d-none" onchange="displayFileName('avatar1')">
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <p id="avatar2-name">{{ product.avatar2 }}</p>
+                                <div class="d-sm-flex align-items-center gap-3">
+                                  <label class="btn btn-sm btn-primary">Display Picture 2
+                                    <input type="file" name="avatar2" class="d-none" onchange="displayFileName('avatar2')">
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <p id="avatar3-name">{{ product.avatar3 }}</p>
+                                <div class="d-sm-flex align-items-center gap-3">
+                                  <label class="btn btn-sm btn-primary">Display Picture 3
+                                    <input type="file" name="avatar3" class="d-none" onchange="displayFileName('avatar3')">
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <p id="avatar4-name">{{ product.avatar4 }}</p>
+                                <div class="d-sm-flex align-items-center gap-3">
+                                  <label class="btn btn-sm btn-primary">Display Picture 4
+                                    <input type="file" name="avatar4" class="d-none" onchange="displayFileName('avatar4')">
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="col-md-12">
+                                <p id="avatar5-name">{{ product.avatar5 }}</p>
+                                <div class="d-sm-flex align-items-center gap-3">
+                                  <label class="btn btn-sm btn-primary">Display Picture 5
+                                    <input type="file" name="avatar5" class="d-none" onchange="displayFileName('avatar5')">
                                   </label>
                                 </div>
                               </div>
@@ -344,6 +376,13 @@
     const fileName = file?.name || "No file selected";
     document.getElementById('fileName').textContent = fileName;
   });
+
+
+  function displayFileName(inputName) {
+    var input = document.querySelector(`input[name="${inputName}"]`);
+    var fileName = input.files.length > 0 ? input.files[0].name : "No file chosen";
+    document.getElementById(`${inputName}-name`).textContent = fileName;
+  }
 </script>
 
 {% endblock %}
