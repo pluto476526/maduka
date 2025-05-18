@@ -123,12 +123,14 @@
           </ul>
         </div>
       </li>-->
+      {% if request.user.profile.access_level >= 3 %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'dash_staff' %}">
           <i class="menu-icon mdi mdi-account-multiple-outline"></i>
           <span class="menu-title">Staff</span>
         </a>
       </li>
+      {% endif %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'transactions' %}">
           <i class="menu-icon mdi mdi-numeric"></i>

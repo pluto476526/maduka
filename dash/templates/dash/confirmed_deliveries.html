@@ -153,7 +153,7 @@
                   <div class="d-sm-flex justify-content-between align-items-start">
                     <div>
                       <h4 class="card-title">Shipped Requests</h4>
-                      <p class="card-description">View and manage delivery requests that have been processed and are already in transit.</p>
+                      <p class="card-description">View and manage delivery requests that have been processed.</p>
                     </div>
                   </div>
                   <div class="table-responsive">
@@ -173,10 +173,125 @@
                         {% for o in shipped_deliveries %}
                         <tr>
                           <td>{{ o.order_number }}</td>
-                          <td>{{ o.username|title }}</td>
+                          <td>{{ o.username }}</td>
                           <td>{{ o.timestamp }}</td>
                           <td>{{ o.time_shipped }}</td>
-                          <td>KSH. {{ o.total|title }}</td>
+                          <td>KSH. {{ o.total|intcomma }}</td>
+                          <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                          <td class="d-flex justify-content-start" style="gap: 3px">
+                            <a href="{% url 'order_details' o.order_number %}">
+                              <span class="badge badge-info">View</span>
+                            </a>
+                            <button class="badge badge-dark" type="button" data-bs-toggle="modal" data-bs-target="#editDriverModal{{ o.order_number }}">Edit Driver</button>
+                            <!-- View product Modal -->
+                            <div class="modal fade" id="editDriverModal{{ o.order_number }}" tabindex="-1">
+                              <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title">Delivery Request Form</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <!-- Floating Labels Form -->
+                                    <form class="row g-3" method="post">
+                                      {% csrf_token %}
+                                      <div class="col-md-12">
+                                        <div class="form-floating">
+                                          {% if my_drivers %}
+                                          <select name="driver" class="form-select">
+                                            {% for driver in my_drivers %}
+                                            <option value="{{ driver.id }}" {% if o.driver.user == driver.user %} selected {% endif %}>{{ driver.user.username }}</option>
+                                            {% endfor %}
+                                          </select>
+                                          <label>Driver</label>
+                                          {% else %}
+                                          <p>Please add a staff member with the role (Driver).</p>
+                                          {% endif %}
+                                        </div>
+                                      </div>
+                                      <input type="hidden" name="source" value="edit_driver">
+                                      <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Assign Driver</button>
+                                      </div>
+                                    </form>
+                                    <!-- End floating Labels Form -->
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal2{{ o.id }}">Delete</button>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal2{{ o.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Please Confirm</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Floating Labels Form -->
+                                            <form class="row g-3" method="post">
+                                                {% csrf_token %}
+                                                <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                    <label class="form-check-label">Are you sure you want to cancel and delete order "{{ o.order_number }}"? This action cannot be undone.</label>
+                                                    <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                </div>
+                                                <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                                                <input type="hidden" name="source" value="delete_item">
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                </div>
+                                            </form>
+                                            <!-- End floating Labels Form -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Category Modal -->
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-sm-flex justify-content-between align-items-start">
+                    <div>
+                      <h4 class="card-title">In Progress</h4>
+                      <p class="card-description">View and manage delivery requests that are already in transit.</p>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    {% if accepted_deliveries %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Username</th>
+                          <th>Placed On</th>
+                          <th>Shipped On</th>
+                          <th>Total Amount</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for o in accepted_deliveries %}
+                        <tr>
+                          <td>{{ o.order_number }}</td>
+                          <td>{{ o.username }}</td>
+                          <td>{{ o.timestamp }}</td>
+                          <td>{{ o.time_shipped }}</td>
+                          <td>KSH. {{ o.total|intcomma }}</td>
                           <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
                           <td class="d-flex justify-content-start" style="gap: 3px">
                             <a href="{% url 'order_details' o.order_number %}">
@@ -186,8 +301,123 @@
                               {% csrf_token %}
                               <input type="hidden" name="order_number" value="{{ o.order_number }}">
                               <input type="hidden" name="source" value="complete_order">
-                              <button class="badge badge-info" type="submit">Complete</button>
+                              <button class="badge badge-primary" type="submit">Complete</button>
                             </form>
+                            <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal3{{ o.id }}">Delete</button>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal3{{ o.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Please Confirm</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Floating Labels Form -->
+                                            <form class="row g-3" method="post">
+                                                {% csrf_token %}
+                                                <div class="col-sm-12 d-flex align-items-center gap-3">
+                                                    <label class="form-check-label">Are you sure you want to cancel and delete order "{{ o.order_number }}"? This action cannot be undone.</label>
+                                                    <input type="checkbox" name="delete_item" class="form-check" value="True" required>
+                                                </div>
+                                                <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                                                <input type="hidden" name="source" value="delete_item">
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                                                </div>
+                                            </form>
+                                            <!-- End floating Labels Form -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Category Modal -->
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-sm-flex justify-content-between align-items-start">
+                    <div>
+                      <h4 class="card-title">Declined Deliveries</h4>
+                      <p class="card-description">View and manage delivery requests that have been declined by the driver. You can edit the driver to complete the delivery.</p>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    {% if declined_deliveries %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Username</th>
+                          <th>Placed On</th>
+                          <th>Shipped On</th>
+                          <th>Total Amount</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for o in declined_deliveries %}
+                        <tr>
+                          <td>{{ o.order_number }}</td>
+                          <td>{{ o.username }}</td>
+                          <td>{{ o.timestamp }}</td>
+                          <td>{{ o.time_shipped }}</td>
+                          <td>KSH. {{ o.total|intcomma }}</td>
+                          <!-- <td class="text-success"> 98.05% <i class="ti-arrow-up"></i></td> -->
+                          <td class="d-flex justify-content-start" style="gap: 3px">
+                            <a href="{% url 'order_details' o.order_number %}">
+                              <span class="badge badge-info">View</span>
+                            </a>
+                            <button class="badge badge-dark" type="button" data-bs-toggle="modal" data-bs-target="#editDriverModal{{ o.order_number }}">Edit Driver</button>
+                            <!-- View product Modal -->
+                            <div class="modal fade" id="editDriverModal{{ o.order_number }}" tabindex="-1">
+                              <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title">Delivery Request Form</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <!-- Floating Labels Form -->
+                                    <form class="row g-3" method="post">
+                                      {% csrf_token %}
+                                      <div class="col-md-12">
+                                        <div class="form-floating">
+                                          {% if my_drivers %}
+                                          <select name="driver" class="form-select">
+                                            {% for driver in my_drivers %}
+                                            <option value="{{ driver.id }}" {% if o.driver.user == driver.user %} selected {% endif %}>{{ driver.user.username }}</option>
+                                            {% endfor %}
+                                          </select>
+                                          <label>Driver</label>
+                                          {% else %}
+                                          <p>Please add a staff member with the role (Driver).</p>
+                                          {% endif %}
+                                        </div>
+                                      </div>
+                                      <input type="hidden" name="source" value="edit_driver">
+                                      <input type="hidden" name="order_number" value="{{ o.order_number }}">
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Assign Driver</button>
+                                      </div>
+                                    </form>
+                                    <!-- End floating Labels Form -->
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                             <button class="badge badge-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal2{{ o.id }}">Delete</button>
                             <!-- Delete Modal -->
                             <div class="modal fade" id="deleteModal2{{ o.id }}" tabindex="-1">

@@ -55,7 +55,13 @@
                         <p><strong>Street:</strong> {{ order.address.street|title }}</p>
                         <br>
                         {% if order.driver %}
-                        <p><strong>Driver:</strong> {{ order.driver.user|title }}</p>
+                        <h5 class="card-title">Driver:</h5>
+                        <p>{{ order.driver.user|title }}</p>
+                        {% endif %}
+                        <br>
+                        {% if order.note %}
+                        <h5 class="card-title">Delivery Note</h5>
+                        <p>{{ order.note|capfirst }}</p>
                         {% endif %}
                     </div>
                     {% endif %}

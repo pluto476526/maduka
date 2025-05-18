@@ -170,7 +170,7 @@ class Delivery(models.Model):
     source = models.CharField(max_length=10, default='dash') # dash, cart
     is_deleted = models.BooleanField(default=False)
     is_delivery = models.BooleanField(default=True)
-    status = models.CharField(max_length=20, default='processing') # processing, confirmed, shipped, completed, cancelled
+    status = models.CharField(max_length=20, default='processing') # processing, confirmed, shipped, accepted_by_driver, declined_by_driver, completed, cancelled
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):

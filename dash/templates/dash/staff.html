@@ -205,6 +205,17 @@
                         <label>Role</label>
                         </div>
                     </div>
+                    <div class="col-sm-12">
+                        <div class="form-floating">
+                            <select name="access_level" class="form-select">
+                                <option>-------------------------------------------------</option>
+                                <option value="1">1 - Limited access ie. drivers dashboard</option>
+                                <option value="2">2 - Basic access for operational management</option>
+                                <option value="3">3 - Full access(superuser)</option>
+                            </select>
+                            <label>Access Level</label>
+                        </div>
+                    </div>
                     <input type="hidden" name="source" value="new_staff">
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Close</button>

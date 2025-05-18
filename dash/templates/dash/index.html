@@ -294,7 +294,7 @@
               <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#overview" role="tab">Pending Deliveries</a>
             </li>
              <li class="nav-item">
-              <a class="nav-link" id="sales-tab" data-bs-toggle="tab" href="#ssales" role="tab">History</a>
+              <a class="nav-link" id="sales-tab" data-bs-toggle="tab" href="#history" role="tab">My History</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab">Notifications</a>
@@ -309,25 +309,25 @@
                   <div class="col">
                     <div class="bg-primary text-white p-3 border-0">
                       <p class="statistics-title">Total Completed Deliveries</p>
-                      <h3 class="rate-percentage">{{ num_sessions|default:0 }}</h3>
+                      <h3 class="rate-percentage">{{ total_completed|default:0 }}</h3>
                     </div>
                   </div>
                   <div class="col">
                     <div class="bg-dark text-white p-3 border-0">
                       <p class="statistics-title">Completed Today</p>
-                      <h3 class="rate-percentage">232</h3>
+                      <h3 class="rate-percentage">{{ completed_today|default:0 }}</h3>
                     </div>
                   </div>
                   <div class="col">
                     <div class="bg-success text-white p-3 border-0">
                       <p class="statistics-title">Completed This Week</p>
-                      <h3 class="rate-percentage">{{ inventory_value|intcomma|default:0 }}</h3>
+                      <h3 class="rate-percentage">{{ completed_this_week|default:0 }}</h3>
                     </div>
                   </div>
                   <div class="col">
                     <div class="bg-danger text-white p-3 border-0">
                       <p class="statistics-title">Completed This Month</p>
-                      <h3 class="rate-percentage">{{ inventory_count|intcomma|default:0 }}</h3>
+                      <h3 class="rate-percentage">{{ completed_this_month|default:0 }}</h3>
                     </div>
                   </div>
                 </div>
@@ -341,27 +341,80 @@
                       <h4 class="card-title">Pending Deliveries</h4>
                       <p class="card-description">View your shop's latest transactions.</p>
                     </div>
-                    {% if recent_transactions %}
+                    {% if d_deliveries %}
                     <div class="table-responsive">
                       <table class="table table-hover">
                         <thead>
                           <tr>
-                            <th>Transaction ID</th>
-                            <th>Total Amount</th>
-                            <th>Status</th>
-                            <th>Created on</th>
+                            <th>Order ID</th>
+                            <th>Assigned on</th>
+                            <th>County</th>
                             <th></th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for t in recent_transactions %}
+                          {% for d in d_deliveries %}
                           <tr>
-                            <td>{{ t.transactionID }}</td>
-                            <td>KSH. {{ t.amount|intcomma }}</td>
-                            <td>{{ t.status|title }}</td>
-                            <td>{{ t.timestamp }}</td>
-                            <td>
-                              <a href="{% url 'order_details' t.order.order_number %}"><span class="badge badge-info">View</span></a>
+                            <td>{{ d.order_number }}</td>
+                            <td>{{ d.time_shipped }}</td>
+                            <td>{{ d.county.county|title }}</td>
+                            <td class="d-flex justify-content-start" style="gap: 3px;">
+                              <a href="{% url 'order_details' d.order_number %}"><span class="badge badge-info">View</span></a>
+                              <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="orderID" value="{{ d.order_number }}">
+                                <input type="hidden" name="source" value="accept_delivery">
+                                <button type="submit" class="badge badge-primary">Accept</button>
+                              </form>
+                              <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="orderID" value="{{ d.order_number }}">
+                                <input type="hidden" name="source" value="decline_delivery">
+                                <button type="submit" class="badge badge-danger">Decline</button>
+                              </form>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div>
+                      <h4 class="card-title">Accepted Deliveries</h4>
+                      <p class="card-description">Deliveries in progress.</p>
+                    </div>
+                    {% if a_deliveries %}
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Order ID</th>
+                            <th>Assigned on</th>
+                            <th>County</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for a in a_deliveries %}
+                          <tr>
+                            <td>{{ a.order_number }}</td>
+                            <td>{{ a.time_shipped }}</td>
+                            <td>{{ a.county.county|title }}</td>
+                            <td class="d-flex justify-content-start" style="gap: 3px;">
+                              <a href="{% url 'order_details' a.order_number %}"><span class="badge badge-info">View</span></a>
+                              <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="orderID" value="{{ a.order_number }}">
+                                <input type="hidden" name="source" value="complete_delivery">
+                                <button type="submit" class="badge badge-danger">Complete</button>
+                              </form>
                             </td>
                           </tr>
                           {% endfor %}
@@ -377,64 +430,37 @@
           </div>
         </div>
 
-          <div class="tab-pane fade active" id="ssales" role="tabpanel">
+          <div class="tab-pane fade active" id="history" role="tabpanel">
             <div class="container p-0 mb-5">
-              <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
-                <div class="col">
-                  <div class="bg-primary text-white p-3 border-0">
-                    <p class="statistics-title">Total Sales</p>
-                    <h3 class="rate-percentage">{{ completed_sales|intcomma|default:0 }}</h3>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="bg-success text-white p-3 border-0">
-                    <p class="statistics-title">Physical Sales</p>
-                    <h3 class="rate-percentage">{{ physical_sales|intcomma|default:0 }}</h3>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="bg-dark text-white p-3 border-0">
-                    <p class="statistics-title">E-Comm Sales</p>
-                    <h3 class="rate-percentage">{{ ecomm_sales|intcomma|default:0 }}</h3>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="bg-danger text-white p-3 border-0">
-                    <p class="statistics-title">This Month</p>
-                    <h3 class="rate-percentage">{{ monthly_sales|intcomma|default:0 }}</h3>
-                  </div>
-                </div>
-              </div>
-
               <div class="row mt-5">
               <div class="col-sm-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
                     <div>
-                      <h4 class="card-title">Top Customers</h4>
-                      <p class="card-description">View the customers who have spent the most money in your shop.</p>
+                      <h4 class="card-title">Completed Deliveries</h4>
+                      <p class="card-description">View all deliveries completed for this shop.</p>
                     </div>
-                    {% if top_customers %}
+                    {% if c_deliveries %}
                     <div class="table-responsive">
                       <table class="table table-hover">
                         <thead>
                           <tr>
-                            <th>User ID</th>
-                            <th>Username</th>
-                            <th>Amount Spent</th>
-                            <th>Registered on</th>
+                            <th>Order ID</th>
+                            <th>Assigned on</th>
+                            <th>Completed on</th>
+                            <th>County</th>
                             <th></th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for t in top_customers %}
+                          {% for c in c_deliveries %}
                           <tr>
-                            <td>{{ t.identifier }}</td>
-                            <td>{{ t.user.username|title }}</td>
-                            <td>KSH. {{ t.total_spent|intcomma }}</td>
-                            <td>{{ t.timestamp }}</td>
-                            <td>
-                              <a href=""><span class="badge badge-info">View</span></a>
+                            <td>{{ c.order_number }}</td>
+                            <td>{{ c.time_shipped }}</td>
+                            <td>{{ c.time_completed }}</td>
+                            <td>{{ c.county.county|title }}</td>
+                            <td class="d-flex justify-content-start" style="gap: 3px;">
+                              <a href="{% url 'order_details' c.order_number %}"><span class="badge badge-info">View</span></a>
                             </td>
                           </tr>
                           {% endfor %}

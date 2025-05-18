@@ -33,6 +33,14 @@ from dash.models import (
 # Logger setup
 logger = logging.getLogger(__name__)
 
+
+def get_current_week_range():
+    today = datetime.now().date()
+    start = today - timedelta(days=today.weekday())  # Monday
+    end = start + timedelta(days=6)                  # Sunday
+    return start, end
+
+
 def get_user_shop(request):
     """Retrieve the shop associated with the current user's profile."""
     try:
@@ -59,11 +67,27 @@ def percent_off(price, sale):
 @access_required(1)
 def index(request):
     shop = get_user_shop(request)
+    today = n().date()
+    current_month = n().month
+    current_year = n().year
+
+    # Inventory
     my_inventory = Inventory.objects.filter(shop=shop, status='available', is_deleted=False)
-    my_deliveries = Delivery.objects.filter(shop=shop, status='completed', is_deleted=False)
-    inventory_value = my_inventory.aggregate(total=models.Sum(models.F('price') * models.F('quantity')))['total']
+    inventory_value = my_inventory.aggregate(
+        total=models.Sum(models.F('price') * models.F('quantity'))
+    )['total']
     inventory_count = my_inventory.aggregate(total=models.Sum('quantity'))['total']
 
+    # Deliveries and Sales
+    my_deliveries = Delivery.objects.filter(shop=shop, status='completed', is_deleted=False)
+    completed_sales = my_deliveries.aggregate(total=models.Sum('total'))['total']
+    physical_sales = my_deliveries.filter(source='dash').aggregate(total=models.Sum('total'))['total']
+    ecomm_sales = my_deliveries.filter(source='cart').aggregate(total=models.Sum('total'))['total']
+    monthly_sales = my_deliveries.filter(
+        time_completed__year=current_year, time_completed__month=current_month
+    ).aggregate(total=models.Sum('total'))['total']
+
+    # Popular Products
     popular_products = Inventory.objects.filter(
         del_product__delivery__shop=shop,
         del_product__delivery__status='completed'
@@ -72,64 +96,91 @@ def index(request):
         sales=models.Sum(models.F('del_product__quantity') * models.F('price'))
     ).order_by('-sales')[:3]
 
-
+    # Top Customers
     top_spenders = Profile.objects.filter(
-        user__customer__shop=shop,  # Using the related_name 'customer' from Delivery model
+        user__customer__shop=shop,
         user__customer__status='completed',
         user__customer__is_deleted=False,
         is_deleted=False
     ).annotate(
         total_spent_at_shop=models.Sum('user__customer__total')
     ).distinct().order_by('-total_spent_at_shop')[:5]
-    
-    
+
+    # Miscellaneous Stats
     categories = Category.objects.filter(shop=shop, is_deleted=False).count()
-    completed_sales = my_deliveries.aggregate(total=models.Sum('total'))['total']
-    physical_sales = my_deliveries.filter(source='dash').aggregate(total=models.Sum('total'))['total']
-    ecomm_sales = my_deliveries.filter(source='cart').aggregate(total=models.Sum('total'))['total']
     pending_tickets = Ticket.objects.filter(shop=shop, status='pending', is_deleted=False).count()
     team_members = Profile.objects.filter(shop=shop, in_staff=True, is_deleted=False).count()
     recent_transactions = Transaction.objects.filter(shop=shop, is_deleted=False)[:10]
     counties_shipped = CountyShipped.objects.filter(shop=shop, is_deleted=False).count()
-    current_month = n().month
-    current_year = n().year
-    monthly_sales = my_deliveries.filter(time_completed__year=current_year, time_completed__month=current_month).aggregate(models.Sum('total')).get('total', 0)
+    total_sales_today = Transaction.objects.filter(
+        shop=shop, timestamp__date=today, is_deleted=False
+    ).aggregate(total_sales=models.Sum('amount'))['total_sales'] or 0
+
+    # Session Data
+    sessions = HomePageSession.objects.filter(shop=shop)
+    avg_duration = sessions.filter(exit_time__isnull=False).aggregate(
+        avg_duration=models.Avg(
+            models.ExpressionWrapper(
+                models.F('exit_time') - models.F('entry_time'),
+                output_field=models.DurationField()
+            )
+        )
+    )['avg_duration']
+    avg_duration_secs = avg_duration.total_seconds() if avg_duration else 0
+
+    # Notifications
     my_profile = get_object_or_404(Profile, user=request.user)
     my_notifications = Notification.objects.filter(shop=shop, is_deleted=False)
     notifications = []
+
     if my_profile.is_admin == 'True':
-        admin_notifications = my_notifications.filter(target='admin')
-        other_notifications = my_notifications.filter(target='everyone')
-        notitications.append(admin_notifications)
-        notifications.append(other_notifications)
-    elif my_profile.is_admin == 'False':
-       notifications = my_notifications.filter(target='admin')
-    
-    sessions = HomePageSession.objects.filter(shop=shop)
-    num_sessions = sessions.count()
-    duration = sessions.filter(exit_time__isnull=False)
-    average_duration = duration.aggregate(
-        avg_duration = models.Avg(
-            models.ExpressionWrapper(
-                models.F('exit_time') - models.F('entry_time'),
-                output_field = models.DurationField()
-            )
-        )
-    )
-    avg_duration_secs = average_duration['avg_duration'].total_seconds() if average_duration['avg_duration'] else 0
+        notifications += list(my_notifications.filter(target='admin'))
+        notifications += list(my_notifications.filter(target='everyone'))
+    else:
+        notifications = list(my_notifications.filter(target='admin'))
 
+    # Driver Stats
+    driver_deliveries = Delivery.objects.filter(shop=shop, driver=request.user.profile)
+    d_deliveries = driver_deliveries.filter(status='shipped')
+    a_deliveries = driver_deliveries.filter(status='accepted_by_driver')
+    c_deliveries = driver_deliveries.filter(status='completed')
 
-    # Get today's date (start of the day)
-    today = n().date()
+    d_total_completed = c_deliveries.count()
+    d_completed_today = c_deliveries.filter(time_completed__date=today).count()
 
-    # Filter transactions for today and sum the amounts
-    total_sales_today = Transaction.objects.filter(
-        shop=shop,
-        timestamp__date = today, 
-        is_deleted = False
-    ).aggregate(total_sales = models.Sum('amount'))['total_sales'] or 0
+    start_week, end_week = get_current_week_range()
+    d_completed_week = c_deliveries.filter(time_completed__date__range=(start_week, end_week)).count()
 
+    start_of_month = today.replace(day=1)
+    next_month = (start_of_month.replace(month=today.month + 1) if today.month < 12
+                  else start_of_month.replace(year=today.year + 1, month=1))
+    end_of_month = next_month - timedelta(days=1)
 
+    d_completed_month = c_deliveries.filter(
+        time_completed__date__range=(start_of_month, end_of_month)
+    ).count()
+
+    # POST: Driver actions
+    if request.method == 'POST':
+        orderID = request.POST.get('orderID')
+        source = request.POST.get('source')
+        delivery = driver_deliveries.filter(order_number=orderID).first()
+
+        if delivery and source:
+            if source == 'accept_delivery':
+                delivery.status = 'accepted_by_driver'
+                messages.success(request, f'Order #{orderID} in progress.')
+            elif source == 'decline_delivery':
+                delivery.status = 'declined_by_driver'
+                messages.success(request, f'Order #{orderID} declined.')
+            elif source == 'complete_delivery':
+                delivery.status = 'completed'
+                delivery.time_completed = datetime.now()
+                messages.success(request, f'Order #{orderID} completed.')
+            delivery.save()
+            return redirect('dash')
+
+    # Context
     context = {
         'inventory_value': inventory_value,
         'inventory_count': inventory_count,
@@ -144,10 +195,17 @@ def index(request):
         'recent_transactions': recent_transactions,
         'popular_products': popular_products,
         'notifications': notifications,
-        'num_sessions': num_sessions,
+        'num_sessions': sessions.count(),
         'avg_duration': avg_duration_secs,
         'total_sales_today': total_sales_today,
         'top_customers': top_spenders,
+        'd_deliveries': d_deliveries,
+        'a_deliveries': a_deliveries,
+        'c_deliveries': c_deliveries,
+        'total_completed': d_total_completed,
+        'completed_today': d_completed_today,
+        'completed_this_week': d_completed_week,
+        'completed_this_month': d_completed_month,
     }
     return render(request, 'dash/index.html', context)
 
@@ -535,6 +593,8 @@ def confirmed_deliveries_view(request):
     all_deliveries = Delivery.objects.filter(shop=shop, is_deleted=False, is_delivery=True)
     confirmed_deliveries = all_deliveries.filter(status='confirmed')
     shipped_deliveries = all_deliveries.filter(status='shipped')
+    accepted_deliveries = all_deliveries.filter(status='accepted_by_driver')
+    declined_deliveries = all_deliveries.filter(status='declined_by_driver')
     completed_deliveries = all_deliveries.filter(status='completed')
     
     try:
@@ -556,15 +616,23 @@ def confirmed_deliveries_view(request):
 
                 if order_no:
                     order = get_object_or_404(Delivery, order_number=order_no)
-                
-                if source == 'assign_driver':
+               
+                if driver_id:
                     driver = get_object_or_404(Profile, id=driver_id)
+
+                if source == 'assign_driver':
                     order.status = 'shipped'
                     order.time_shipped = datetime.now()
                     order.driver = driver
                     order.admin = request.user
                     order.save()
                     messages.success(request, f"Delivery #{order_no} assigned to {driver.user.username}.")
+                
+                elif source == 'edit_driver':
+                    order.time_shipped = datetime.now()
+                    order.driver = driver
+                    order.save()
+                    messages.success(request, f'Delivery #{order_no} assigned to {driver.user.username}.')
                 
                 elif source == 'complete_order':
                     order.status = 'completed'
@@ -586,6 +654,8 @@ def confirmed_deliveries_view(request):
     context = {
         'confirmed_deliveries': confirmed_deliveries,
         'shipped_deliveries': shipped_deliveries,
+        'accepted_deliveries': accepted_deliveries,
+        'declined_deliveries': declined_deliveries,
         'completed_deliveries': completed_deliveries,
         'my_drivers': my_drivers,
     }
@@ -599,7 +669,7 @@ def track_order_view(request):
 
 
 @login_required
-@access_required(2)
+@access_required(1)
 def order_details_view(request, order_id):
     order = get_object_or_404(Delivery, order_number=order_id)
     orders = DeliveryItem.objects.filter(delivery=order)
