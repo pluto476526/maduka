@@ -31,7 +31,14 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="mb-0 text-primary">Profile Details</h4>
             <div>
-              <a href="" title="" class="btn btn-dark">Send Message</a>
+              <!--<a href="" title="" class="btn btn-dark">Send Message</a>-->
+
+              <form method="post" action="{% url 'chats' %}">
+                {% csrf_token %}
+                <input type="hidden" name="source" value="new_convo">
+                <input type="hidden" name="userID" value="{{ profile.user.id }}">
+                <button class="btn btn-dark" type="submit">Text {{ profile.user.username }}</button>
+              </form>
             </div>
           </div>
           <div class="card border-0 text-center pt-3 mb-4">
@@ -40,7 +47,7 @@
                 <img src="{{ profile.avatar.url }}" alt="avatar" style="height: 100%; width: 100%; object-fit: cover;">
               </div>
               <div class="card-user-detail mt-4">
-                <h5>{{ profile.user.username|title }}</h5>
+                <h5>{{ profile.user.username }}</h5>
                 <span class="text-muted"><a href="" class="__cf_email__">{{ profile.user.email }}</a></span>
                 {% if profile.phone %}
                 <p>{{ profile.phone }}</p>
@@ -85,7 +92,7 @@
               <div class="col-12">
                 <div class="media">
                   <div class="avatar sm">
-                    <a href="{% url 'chats' %}" title="" class="link">
+                    <a href="{% url 'chats' %}" title="Home" class="link">
                       <i class="zmdi zmdi-arrow-left zmdi-hc-lg"></i>
                     </a>
                   </div>
@@ -93,7 +100,7 @@
                     <div class="d-flex align-items-center mb-1">
                       <h6 class="fw-bold text-truncate mb-0 me-auto">Status</h6>
                     </div>
-                    <div class="text-truncate">Last active on: 01 January 2021</div>
+                    <div class="text-truncate">Verified</div>
                   </div>
                 </div>
               </div>

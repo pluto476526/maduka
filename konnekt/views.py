@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.contrib.auth import authenticate, update_session_auth_hash
 from dash.models import Profile
 from konnekt.models import Conversation, ConversationItem, Note, Task, Contact, ConversationReadStatus, MessageImage, PushSubscription
 import logging
@@ -198,6 +199,9 @@ def my_profile_view(request):
         twitter = request.POST.get('twitter', '')
         avatar = request.FILES.get('avatar', '')
         bio = request.POST.get('bio', '')
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
         source = request.POST.get('source')
 
         with transaction.atomic():
@@ -219,6 +223,27 @@ def my_profile_view(request):
                         profile.avatar = avatar
                     profile.save()
                     messages.success(request, 'Profile details updated.')
+
+                case 'change_password':        
+                    user = request.user
+
+                    if not user.check_password(current_password):
+                        messages.error(request, 'Current password is incorrect.')
+                        return redirect('my_profile')
+
+                    if new_password != confirm_password:
+                        messages.error(request, 'New passwords do not match.')
+                        return redirect('my_profile')
+
+                    if len(new_password) < 8:
+                        messages.error(request, 'New password must be at least 8 characters long.')
+                        return redirect('my_profile')
+
+                    user.set_password(new_password)
+                    user.save()
+                    update_session_auth_hash(request, user)  # Keep user logged in
+                    messages.success(request, 'Your password has been successfully changed.')
+
 
         return redirect('my_profile')
 
