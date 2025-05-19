@@ -133,11 +133,11 @@ def index(request):
     my_notifications = Notification.objects.filter(shop=shop, is_deleted=False)
     notifications = []
 
-    if my_profile.is_admin == 'True':
+    if my_profile.access_level >= 2:
         notifications += list(my_notifications.filter(target='admin'))
         notifications += list(my_notifications.filter(target='everyone'))
     else:
-        notifications = list(my_notifications.filter(target='admin'))
+        notifications = list(my_notifications.filter(target='everyone'))
 
     # Driver Stats
     driver_deliveries = Delivery.objects.filter(shop=shop, driver=request.user.profile)
@@ -170,11 +170,14 @@ def index(request):
             if source == 'accept_delivery':
                 delivery.status = 'accepted_by_driver'
                 messages.success(request, f'Order #{orderID} in progress.')
+                Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'delivery enroute. Driver "{request.user.username}".', target='admin')
             elif source == 'decline_delivery':
                 delivery.status = 'declined_by_driver'
                 messages.success(request, f'Order #{orderID} declined.')
+                Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'Job declined by "{request.user.username}".', target='admin')
             elif source == 'complete_delivery':
                 delivery.status = 'completed'
+                Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'Job "#{delivery.order_number}" completed by "{request.user.username}".', target='admin')
                 delivery.time_completed = datetime.now()
                 messages.success(request, f'Order #{orderID} completed.')
             delivery.save()

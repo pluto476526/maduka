@@ -355,6 +355,7 @@ def cart_view(request, slug):
 
     if request.method == 'POST':
         cart_ids = request.POST.getlist('cart_pid[]')
+        logger.debug(cart_ids)
         quantities = request.POST.getlist('quantity[]')
         note = request.POST.get('note')
         source = request.POST.get('source')
@@ -373,15 +374,23 @@ def cart_view(request, slug):
             messages.success(request, 'Delivery note updated.')
             return redirect('cart', slug=the_shop.slug)
 
+
         elif source == 'edit_quantity':
-            # Bulk update cart items
-            for cart, quantity in zip(cart_ids, quantities):
+            for cart_id, quantity in zip(cart_ids, quantities):
                 try:
-                    quantity = max(1, min(int(quantity), 100))
-                    product = get_object_or_404(Inventory, product_id=cart)
+                    # Sanitize and constrain quantity
+                    quantity = max(1, min(int(quantity.strip()), 100))
+                    
+                    # Get the product from inventory
+                    product = get_object_or_404(Inventory, product_id=cart_id)
+
+                    # Retrieve the specific cart item for this product
                     cart_item = cart_items.get(product=product)
+
+                    # Update quantity
                     cart_item.quantity = quantity
                     cart_item.save()
+
                 except (Cart.DoesNotExist, ValueError):
                     messages.error(request, "Invalid cart update request.")
 
@@ -394,7 +403,6 @@ def cart_view(request, slug):
                 my_cart.save()
                 messages.success(request, 'Please fill the details below to complete checkout.')
                 Notification.objects.create(shop=the_shop, origin=request.user, n_type='alert', message=f'Cart checked out by "{request.user.username}".', target='admin')
-
                 return redirect('checkout', slug=the_shop.slug)
             else:
                 messages.error(request, 'Please select your county and calculate shipping costs.')

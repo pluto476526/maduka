@@ -43,7 +43,7 @@
     {% if messages %}
     {% for m in messages %}
     <!--====== Messages Section ======-->
-    <div class="u-s-p-y-12">
+    <div>
         <!--====== Section Content ======-->
         <div class="section__content">
             <div class="container">
@@ -97,7 +97,7 @@
                                         <td>
                                             <div class="table-p__box">
                                                 <div class="table-p__img-wrap">
-                                                    <img class="u-img-fluid" style="height: 100%;" src="{{ c.objects.product.avatar1.url }}" alt="">
+                                                    <img class="u-img-fluid" style="height: 100%; object-fit: cover;" src="{{ c.objects.product.avatar1.url }}" alt="">
                                                 </div>
                                                 <div class="table-p__info">
                                                     <span class="table-p__name">
@@ -138,7 +138,6 @@
                                         </td>
                                     </tr>
                                     <input type="hidden" name="source" value="edit_quantity">
-                                    <input type="hidden" name="cart_pid[]" value="{{ c.objects.product.product_id }}">
                                     <!--====== End - Row ======-->
                                     {% endfor %}
                                 </tbody>
@@ -195,9 +194,14 @@
                                         <br><br>
                                     </tr>
                                     <input type="hidden" name="source" value="edit_quantity">
-                                    <input type="hidden" name="cart_pid[]" value="{{ c.objects.product.product_id }}">
                                     <!--====== End - Row ======-->
                                     {% endfor %}
+
+                                    {% for c in cart_items %}
+                                        <!-- Only once per product -->
+                                        <input type="hidden" name="cart_pid[]" value="{{ c.objects.product.product_id }}">
+                                    {% endfor %}
+
                                 </tbody>
                             </table>
                         </div>
