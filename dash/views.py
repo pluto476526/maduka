@@ -280,7 +280,7 @@ def inventory_view(request):
         category_name = request.POST.get('category', '').strip().lower()
         description = request.POST.get('description')
         quantity = request.POST.get('quantity')
-        units = request.POST.get('units', '').strip().lower()
+        units = request.POST.get('units')
         price = request.POST.get('price')
         is_featured = request.POST.get('is_featured')
         source = request.POST.get('source')
@@ -305,7 +305,7 @@ def inventory_view(request):
                 product = get_object_or_404(Inventory, id=product_id)
             
             if units:
-                unit, _ = Unit.objects.get_or_create(shop=shop, units=units)
+                unit, _ = Unit.objects.get_or_create(shop=shop, id=units)
             
             if source == 'edit_product':
                 product.product = product_name
@@ -317,6 +317,8 @@ def inventory_view(request):
                 
                 if is_featured:
                     product.is_featured = True 
+                else:
+                    product.is_featured = False
                 
                 if avatar1:
                     product.avatar1 = avatar1
@@ -348,7 +350,7 @@ def inventory_view(request):
                     units = unit,
                     price = price,
                     is_featured = is_featured,
-                    **({"avatar": avatar} if avatar else {}),
+                    **({"avatar1": avatar1} if avatar1 else {}),
                 )
                 messages.success(request, f"Item '{product_name}' added to your inventory.")
             
