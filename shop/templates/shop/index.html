@@ -40,9 +40,9 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="slider-content slider-content--animation">
-                                <span class="content-span-1 u-c-white">Shop With Ease</span>
-                                <span class="content-span-2 u-c-white">{{ the_shop.title1|title|truncatechars:100 }}</span>
-                                <!--<span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>-->
+                                <!--<span class="content-span-1 u-c-white"></span>-->
+                                <span class="content-span-2 u-c-white">Hello from {{ the_shop.name }}...</span>
+                                <span class="content-span-3 u-c-white">{{ the_shop.title1|title|truncatechars:100 }}</span>
                                 <a class="shop-now-link btn--e-brand" href="{% url 'products' the_shop.slug %}">SHOP NOW</a>
                             </div>
                         </div>
@@ -55,9 +55,9 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="slider-content slider-content--animation">
-                                <span class="content-span-1 u-c-white">Find Top Brands</span>
-                                <span class="content-span-2 u-c-white">{{ the_shop.title2|title|truncatechars:100 }}</span>
-                                <!--<span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>-->
+                                <!--<span class="content-span-1 u-c-white"></span>-->
+                                <span class="content-span-2 u-c-white">Big welcome from your friends at {{ the_shop.name }}!</span>
+                                <span class="content-span-3 u-c-white">{{ the_shop.title2|title|truncatechars:100 }}</span>
                                 <a class="shop-now-link btn--e-brand" href="{% url 'products' the_shop.slug %}">SHOP NOW</a>
                             </div>
                         </div>
@@ -70,9 +70,9 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="slider-content slider-content--animation">
-                                <span class="content-span-1 u-c-white">Multiple Sales and Discounts</span>
-                                <span class="content-span-2 u-c-white">{{ the_shop.title3|title|truncatechars:100 }}</span>
-                                <!--<span class="content-span-3 u-c-white">Find electronics on best prices, Also Discover most selling products of electronics</span>-->
+                                <!--<span class="content-span-1 u-c-white"></span>-->
+                                <span class="content-span-2 u-c-white">{{ the_shop.name }} is happy to have you.</span>
+                                <span class="content-span-3 u-c-white">{{ the_shop.title3|title|truncatechars:100 }}</span>
                                 <a class="shop-now-link btn--e-brand" href="{% url 'products' the_shop.slug %}">SHOP NOW</a>
                             </div>
                         </div>
@@ -244,11 +244,11 @@
                     <div class="col-lg-6 col-md-6 u-s-m-b-30">
                         <div class="product-o product-o--radius product-o--hover-off u-h-100">
                             <div class="product-o__wrap">
-                                <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.slug d.product_id">
+                                <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'product_details' the_shop.slug d.product_id %}">
                                     <img class="aspect__img" src="{{ d.avatar.url }}" alt="" style="object-fit: cover;">
                                 </a>
                                 <div class="product-o__special-count-wrap">
-                                    <div class="countdown countdown--style-special" data-countdown="{{ d.time|date:"Y/m/d/ H:i:s" }}"></div>
+                                    <div class="countdown countdown--style-special" data-countdown="{{ d.time|date:'Y/m/d/ H:i:s' }}"></div>
                                 </div>
                                 <div class="product-o__action-wrap">
                                     <ul class="product-o__action-list">
@@ -289,10 +289,10 @@
                             </div>
 
                             <span class="product-o__category">
-                                <a href="shop-side-version-2.html">{{ d.category|title }}</a>
+                                <a href="{% url 'products' the_shop.slug %}">{{ d.category|title }}</a>
                             </span>
                             <span class="product-o__name">
-                                <a href="product-detail.html">{{ d.product.product|title }}</a>
+                                <a href="{% url 'product_details' the_shop.slug d.product_id %}">{{ d.product.product|title }}</a>
                             </span>
                             <div class="product-o__rating gl-rating-style">
                                 {% with rating=d.avg_rating|default:0 %}
@@ -390,7 +390,7 @@
                                     </div>
                                 </div>
                                 <span class="product-o__category">
-                                    <a href="shop-side-version-2.html">{{ a.category.category|title }}</a>
+                                    <a href="{% url 'products' the_shop.slug %}">{{ a.category.category|title }}</a>
                                 </span>
                                 <span class="product-o__name">
                                     <a href="{% url 'product_details' the_shop.slug a.product_id %}">{{ a.product|title }}</a>
@@ -493,7 +493,7 @@
                                 </div>
                             </div>
                             <span class="product-o__category">
-                                <a href="shop-side-version-2.html">{{ p.category.category|title }}</a>
+                                <a href="{% url 'products' the_shop.slug %}">{{ p.category.category|title }}</a>
                             </span>
                             <span class="product-o__name">
                                 <a href="{% url 'product_details' the_shop.slug p.product_id %}">{{ p.product|title }}</a>
@@ -553,7 +553,7 @@
                 <div class="row">
                    {% for f in f_categories %}
                     <div class="col-lg-4 col-md-4 col-sm-6 u-s-m-b-30">
-                        <a class="promotion" href="shop-side-version-2.html">
+                        <a class="promotion" href="{% url 'products' the_shop.slug %}">
                             <div class="aspect aspect--bg-grey aspect--square">
                                 <img class="aspect__img promotion__img"
                                     src="{{ f.avatar.url }}" alt=""
