@@ -70,9 +70,9 @@
                                     <div class="shop-w__intro-wrap">
                                         <h1 class="shop-w__h">PRICE</h1>
 
-                                        <span class="fas fa-minus shop-w__toggle" data-target="#s-price" data-toggle="collapse"></span>
+                                        <span class="fas fa-minus collapse shop-w__toggle" data-target="#s-price" data-toggle="collapse"></span>
                                     </div>
-                                    <div class="shop-w__wrap collapse show" id="s-price">
+                                    <div class="shop-w__wrap collapse" id="s-price">
                                         <form class="shop-w__form-p">
                                             <div class="shop-w__form-p-wrap">
                                                 <div>
@@ -109,19 +109,19 @@
                                     <div class="tool-style__form-wrap">
                                         <div class="u-s-m-b-8">
                                             <select class="select-box select-box--transparent-b-2" name="show" onchange="this.form.submit()">
-                                                <option value="8" {% if request.GET.show == '8' %} selected {% endif %}>Show: 8</option>
-                                                <option value="12" {% if request.GET.show == '12' %} selected {% endif %}>Show: 12</option>
-                                                <option value="16" {% if request.GET.show == '16' %} selected {% endif %}>Show: 16</option>
-                                                <option value="28" {% if request.GET.show == '28' %} selected {% endif %}>Show: 28</option>
+                                                <option value="8" {% if show_count == 8 %} selected {% endif %}>Show: 8</option>
+                                                <option value="12" {% if show_count == 12 %} selected {% endif %}>Show: 12</option>
+                                                <option value="16" {% if show_count == 16 %} selected {% endif %}>Show: 16</option>
+                                                <option value="28" {% if show_count == 28 %} selected {% endif %}>Show: 28</option>
                                             </select>
                                         </div>
                                         <div class="u-s-m-b-8">
                                             <select class="select-box select-box--transparent-b-2" name="sort_by" onchange="this.form.submit()">
-                                                <option value="newest" {% if request.GET.sort_by == 'newest' %} selected {% endif %}>Sort By: Newest Items</option>
-                                                <option value="best_sellers" {% if request.GET.sort_by == 'best_sellers' %} selected {% endif %}>Sort By: Best Selling</option>
-                                                <option value="top_rated" {% if request.GET.sort_by == 'top_rated' %} selected {% endif %}>Sort By: Best Rating</option>
-                                                <option value="lowest_price" {% if request.GET.sort_by == 'lowest_price' %} selected {% endif %}>Sort By: Lowest Price</option>
-                                                <option value="highest_price" {% if request.GET.sort_by == 'highest_price' %} selected {% endif %}>Sort By: Highest Price</option>
+                                                <option value="newest" {% if sort_by == 'newest' %} selected {% endif %}>Sort By: Newest Items</option>
+                                                <option value="best_sellers" {% if sort_by == 'best_sellers' %} selected {% endif %}>Sort By: Best Selling</option>
+                                                <option value="top_rated" {% if sort_by == 'top_rated' %} selected {% endif %}>Sort By: Best Rating</option>
+                                                <option value="lowest_price" {% if sort_by == 'lowest_price' %} selected {% endif %}>Sort By: Lowest Price</option>
+                                                <option value="highest_price" {% if sort_by == 'highest_price' %} selected {% endif %}>Sort By: Highest Price</option>
                                             </select>
                                         </div>
                                     </div>
