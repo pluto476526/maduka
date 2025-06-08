@@ -1,3 +1,5 @@
+# /konnekt/models.py
+
 from django.db import models
 from django.utils.translation import gettext_lazy as lazy
 import secrets, string

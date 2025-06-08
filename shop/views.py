@@ -355,7 +355,6 @@ def cart_view(request, slug):
 
     if request.method == 'POST':
         cart_ids = request.POST.getlist('cart_pid[]')
-        logger.debug(cart_ids)
         quantities = request.POST.getlist('quantity[]')
         note = request.POST.get('note')
         source = request.POST.get('source')

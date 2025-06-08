@@ -1,3 +1,5 @@
+# /konnekt/consumers.py
+
 import json
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
